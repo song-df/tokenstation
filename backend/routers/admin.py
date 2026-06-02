@@ -1,0 +1,381 @@
+from datetime import datetime
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, func, desc
+from pydantic import BaseModel
+from database import get_db
+from models import User, Channel, ModelConfig, TopUp, RequestLog, UserRole, Referral, GuideContent, Message
+from auth import get_admin_user, hash_password, generate_api_key
+
+router = APIRouter(prefix="/admin", tags=["admin"])
+
+
+class ChannelIn(BaseModel):
+    name: str
+    provider: str
+    base_url: str = ""
+    api_key: str = ""
+    models: str = ""
+    priority: int = 0
+
+
+class ModelIn(BaseModel):
+    model_name: str
+    display_name: str = ""
+    provider: str = ""
+    input_price: float = 0.0
+    output_price: float = 0.0
+    max_tokens: int = 4096
+
+
+class UserIn(BaseModel):
+    username: str
+    display_name: str = ""
+    email: str = ""
+    password: str
+
+
+class TopUpIn(BaseModel):
+    user_id: int
+    amount: int
+    payment_amount: float = 0.0
+    remark: str = ""
+
+
+@router.get("/channels")
+async def list_channels(db=Depends(get_db), _=Depends(get_admin_user)):
+    r = await db.execute(select(Channel).order_by(desc(Channel.priority)))
+    return r.scalars().all()
+
+
+@router.post("/channels")
+async def create_channel(data: ChannelIn, db=Depends(get_db), _=Depends(get_admin_user)):
+    ch = Channel(**data.model_dump())
+    db.add(ch)
+    await db.commit()
+    await db.refresh(ch)
+    return ch
+
+
+@router.put("/channels/{cid}")
+async def update_channel(cid: int, data: ChannelIn, db=Depends(get_db), _=Depends(get_admin_user)):
+    r = await db.execute(select(Channel).where(Channel.id == cid))
+    ch = r.scalar_one_or_none()
+    if not ch:
+        raise HTTPException(404, "Channel not found")
+    for k, v in data.model_dump().items():
+        setattr(ch, k, v)
+    await db.commit()
+    await db.refresh(ch)
+    return ch
+
+
+@router.delete("/channels/{cid}")
+async def delete_channel(cid: int, db=Depends(get_db), _=Depends(get_admin_user)):
+    r = await db.execute(select(Channel).where(Channel.id == cid))
+    ch = r.scalar_one_or_none()
+    if not ch:
+        raise HTTPException(404, "Channel not found")
+    await db.delete(ch)
+    await db.commit()
+    return {"ok": True}
+
+
+@router.get("/models")
+async def list_models(db=Depends(get_db), _=Depends(get_admin_user)):
+    r = await db.execute(select(ModelConfig).order_by(ModelConfig.model_name))
+    return r.scalars().all()
+
+
+@router.post("/models")
+async def create_model(data: ModelIn, db=Depends(get_db), _=Depends(get_admin_user)):
+    ex = await db.execute(select(ModelConfig).where(ModelConfig.model_name == data.model_name))
+    if ex.scalar_one_or_none():
+        raise HTTPException(400, "Model exists")
+    mc = ModelConfig(**data.model_dump())
+    db.add(mc)
+    await db.commit()
+    await db.refresh(mc)
+    return mc
+
+
+@router.put("/models/{mid}")
+async def update_model(mid: int, data: ModelIn, db=Depends(get_db), _=Depends(get_admin_user)):
+    r = await db.execute(select(ModelConfig).where(ModelConfig.id == mid))
+    mc = r.scalar_one_or_none()
+    if not mc:
+        raise HTTPException(404, "Model not found")
+    for k, v in data.model_dump().items():
+        setattr(mc, k, v)
+    await db.commit()
+    await db.refresh(mc)
+    return mc
+
+
+@router.delete("/models/{mid}")
+async def delete_model(mid: int, db=Depends(get_db), _=Depends(get_admin_user)):
+    r = await db.execute(select(ModelConfig).where(ModelConfig.id == mid))
+    mc = r.scalar_one_or_none()
+    if not mc:
+        raise HTTPException(404, "Model not found")
+    await db.delete(mc)
+    await db.commit()
+    return {"ok": True}
+
+
+@router.get("/users")
+async def list_users(db=Depends(get_db), _=Depends(get_admin_user)):
+    r = await db.execute(select(User).order_by(desc(User.created_at)))
+    users = r.scalars().all()
+    # Add total cash for each user
+    result = []
+    for u in users:
+        tr = await db.execute(select(func.sum(TopUp.payment_amount)).where(TopUp.user_id == u.id))
+        total_cash = tr.scalar() or 0.0
+        u.total_cash = round(total_cash, 2)
+        result.append(u)
+    return result
+
+
+@router.post("/users")
+async def create_user(data: UserIn, db=Depends(get_db), _=Depends(get_admin_user)):
+    ex = await db.execute(select(User).where(User.username == data.username))
+    if ex.scalar_one_or_none():
+        raise HTTPException(400, "Username exists")
+    u = User(
+        username=data.username, display_name=data.display_name,
+        email=data.email, hashed_password=hash_password(data.password),
+        role=UserRole.student, quota=0, api_key=generate_api_key(),
+    )
+    db.add(u)
+    await db.commit()
+    await db.refresh(u)
+    return u
+
+
+@router.put("/users/{uid}/toggle")
+async def toggle_user(uid: int, db=Depends(get_db), _=Depends(get_admin_user)):
+    r = await db.execute(select(User).where(User.id == uid))
+    u = r.scalar_one_or_none()
+    if not u:
+        raise HTTPException(404, "User not found")
+    u.is_active = not u.is_active
+    await db.commit()
+    await db.refresh(u)
+    return u
+
+
+@router.post("/users/{uid}/reset-key")
+async def reset_key(uid: int, db=Depends(get_db), _=Depends(get_admin_user)):
+    r = await db.execute(select(User).where(User.id == uid))
+    u = r.scalar_one_or_none()
+    if not u:
+        raise HTTPException(404, "User not found")
+    u.api_key = generate_api_key()
+    await db.commit()
+    await db.refresh(u)
+    return u
+
+
+@router.get("/topups")
+async def list_topups(db=Depends(get_db), _=Depends(get_admin_user)):
+    r = await db.execute(
+        select(TopUp, User.username)
+        .join(User, TopUp.user_id == User.id)
+        .order_by(desc(TopUp.created_at))
+    )
+    rows = []
+    for tp, un in r:
+        tp._username = un
+        rows.append(tp)
+    return rows
+
+
+@router.post("/topups")
+async def create_topup(data: TopUpIn, db=Depends(get_db), _=Depends(get_admin_user)):
+    r = await db.execute(select(User).where(User.id == data.user_id))
+    u = r.scalar_one_or_none()
+    if not u:
+        raise HTTPException(404, "User not found")
+    tp = TopUp(
+        user_id=data.user_id, amount=data.amount,
+        payment_amount=data.payment_amount, remark=data.remark,
+    )
+    db.add(tp)
+    u.quota += data.amount
+    await db.commit()
+    await db.refresh(tp)
+    return tp
+
+
+@router.get("/stats")
+async def get_stats(db=Depends(get_db), _=Depends(get_admin_user)):
+    uc = await db.execute(select(func.count()).select_from(User))
+    cc = await db.execute(select(func.count()).select_from(Channel))
+    mc = await db.execute(select(func.count()).select_from(ModelConfig))
+    tq = await db.execute(select(func.sum(User.quota)))
+    tu = await db.execute(select(func.sum(RequestLog.cost)))
+    tr = await db.execute(
+        select(func.count()).select_from(RequestLog)
+        .where(func.date(RequestLog.created_at) == func.date("now"))
+    )
+    return {
+        "user_count": uc.scalar() or 0,
+        "channel_count": cc.scalar() or 0,
+        "model_count": mc.scalar() or 0,
+        "total_quota": tq.scalar() or 0,
+        "total_used": round(tu.scalar() or 0, 2),
+        "today_requests": tr.scalar() or 0,
+    }
+
+
+
+@router.get("/referrals")
+async def list_referrals(
+    db: AsyncSession = Depends(get_db),
+    _=Depends(get_admin_user),
+):
+    """List referral relationships with user info."""
+    r = await db.execute(
+        select(Referral, User.username, User.display_name)
+        .join(User, Referral.referrer_id == User.id)
+        .order_by(desc(Referral.created_at))
+    )
+    referrals = []
+    for ref, uname, dname in r:
+        ref._referrer_name = dname or uname
+        # Get referred user info
+        rr = await db.execute(select(User).where(User.id == ref.referred_id))
+        referred = rr.scalar_one_or_none()
+        ref._referred_name = (referred.display_name or referred.username) if referred else str(ref.referred_id)
+        referrals.append(ref)
+    return referrals
+
+
+@router.get("/referrals/stats")
+async def referral_stats(
+    db: AsyncSession = Depends(get_db),
+    _=Depends(get_admin_user),
+):
+    """Referral statistics."""
+    total = await db.execute(select(func.count()).select_from(Referral))
+    # Users who have referrals
+    active_refs = await db.execute(
+        select(func.count(func.distinct(Referral.referrer_id))).select_from(Referral)
+    )
+    return {
+        "total_referrals": total.scalar() or 0,
+        "active_referrers": active_refs.scalar() or 0,
+    }
+
+
+
+@router.get("/guide/sections")
+async def get_guide_sections(
+    db: AsyncSession = Depends(get_db),
+    _=Depends(get_admin_user),
+):
+    r = await db.execute(select(GuideContent).order_by(GuideContent.id))
+    sections = r.scalars().all()
+    if not sections:
+        # Seed default sections
+        defaults = [
+            ("intro", "欢迎使用", "智联学习云AI服务 - 20+ AI模型一站接入"),
+            ("claude", "Claude Code 接入", "配置方法说明..."),
+            ("openai", "OpenAI 兼容接口", "使用说明..."),
+            ("models", "可用模型", "模型列表..."),
+            ("pricing", "定价说明", "10元=1000T粒..."),
+        ]
+        for key, title, content in defaults:
+            db.add(GuideContent(section_key=key, title=title, content=content))
+        await db.commit()
+        r = await db.execute(select(GuideContent).order_by(GuideContent.id))
+        sections = r.scalars().all()
+    return sections
+
+
+@router.post("/guide/sections")
+async def save_guide_sections(
+    data: list,
+    db: AsyncSession = Depends(get_db),
+    _=Depends(get_admin_user),
+):
+    for item in data:
+        r = await db.execute(select(GuideContent).where(GuideContent.section_key == item["section_key"]))
+        s = r.scalar_one_or_none()
+        if s:
+            s.title = item.get("title", "")
+            s.content = item.get("content", "")
+    await db.commit()
+    return {"ok": True}
+
+
+
+@router.get("/messages")
+async def list_messages(
+    db: AsyncSession = Depends(get_db),
+    _=Depends(get_admin_user),
+):
+    r = await db.execute(
+        select(Message, User.username, User.display_name)
+        .join(User, Message.user_id == User.id)
+        .order_by(desc(Message.created_at)).limit(200)
+    )
+    items = []
+    for m, uname, dname in r:
+        items.append({
+            "id": m.id, "user_id": m.user_id, "username": uname,
+            "display_name": dname or uname,
+            "content": m.content, "reply": m.reply,
+            "is_read": m.is_read,
+            "created_at": m.created_at.isoformat() if m.created_at else None,
+            "replied_at": m.replied_at.isoformat() if m.replied_at else None,
+        })
+    return items
+
+
+@router.post("/messages/{msg_id}/reply")
+async def reply_message(
+    msg_id: int, data: dict,
+    db: AsyncSession = Depends(get_db),
+    _=Depends(get_admin_user),
+):
+    r = await db.execute(select(Message).where(Message.id == msg_id))
+    m = r.scalar_one_or_none()
+    if not m:
+        raise HTTPException(404, "留言不存在")
+    m.reply = data.get("reply", "").strip()
+    m.is_read = True
+    m.replied_at = datetime.now()
+    await db.commit()
+    return {"ok": True}
+
+
+@router.get("/messages/unread-count")
+async def unread_count(
+    db: AsyncSession = Depends(get_db),
+    _=Depends(get_admin_user),
+):
+    r = await db.execute(select(func.count()).select_from(Message).where(Message.is_read == False))
+    return {"count": r.scalar() or 0}
+
+
+@router.get("/logs")
+async def list_logs(
+    page: int = Query(1, ge=1), page_size: int = Query(50, ge=1, le=200),
+    db=Depends(get_db), _=Depends(get_admin_user),
+):
+    off = (page - 1) * page_size
+    t = await db.execute(select(func.count()).select_from(RequestLog))
+    total = t.scalar() or 0
+    r = await db.execute(
+        select(RequestLog, User.username)
+        .join(User, RequestLog.user_id == User.id)
+        .order_by(desc(RequestLog.created_at))
+        .offset(off).limit(page_size)
+    )
+    rows = []
+    for log, un in r:
+        log._username = un
+        rows.append(log)
+    return {"total": total, "items": rows}
