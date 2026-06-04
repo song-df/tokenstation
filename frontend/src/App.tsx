@@ -3,10 +3,11 @@ import { useState, useEffect } from 'react'
 import { ThemeProvider } from './lib/theme'
 import { api, setToken } from './lib/api'
 import Layout from './components/Layout'
-import StudentLayout from './components/StudentLayout'
+import UserLayout from './components/UserLayout'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import QuickGuide from './pages/QuickGuide'
+import LandingPage from './pages/LandingPage'
 import Dashboard from './pages/Dashboard'
 import StudentDashboard from './pages/StudentDashboard'
 import StudentProfile from './pages/StudentProfile'
@@ -45,9 +46,11 @@ function AppInner({ user, loading, setUser }: { user: any; loading: boolean; set
   if (loading) return <div className="flex items-center justify-center h-screen text-gray-400">加载中...</div>
   if (!user) return (
     <Routes>
+      <Route path="/" element={<LandingPage />} />
       <Route path="/guide" element={<QuickGuide />} />
       <Route path="/register" element={<Register />} />
-      <Route path="*" element={<Login onLogin={setUser} />} />
+      <Route path="/login" element={<Login onLogin={setUser} />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
 
@@ -74,7 +77,7 @@ function AppInner({ user, loading, setUser }: { user: any; loading: boolean; set
 
   // Student view
   return (
-    <StudentLayout user={user}>
+    <UserLayout user={user}>
       <Routes>
         <Route path="/" element={<StudentDashboard />} />
         <Route path="/profile" element={<StudentProfile />} />
@@ -82,7 +85,7 @@ function AppInner({ user, loading, setUser }: { user: any; loading: boolean; set
         <Route path="/guide" element={<QuickGuide />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </StudentLayout>
+    </UserLayout>
   )
 }
 
