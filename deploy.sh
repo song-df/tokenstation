@@ -47,6 +47,7 @@ echo "[2/2] 上传..."
 $SSH_CMD "${REMOTE_USER}@${HOST}" "rm -rf ${REMOTE_DIR}/assets/*"
 $SCP_CMD "$SOURCE_DIR/index.html" "${REMOTE_USER}@${HOST}:${REMOTE_DIR}/index.html"
 $SCP_CMD "$SOURCE_DIR/favicon.svg" "${REMOTE_USER}@${HOST}:${REMOTE_DIR}/favicon.svg"
+$SCP_CMD "$SOURCE_DIR/og-image.png" "${REMOTE_USER}@${HOST}:${REMOTE_DIR}/og-image.png"
 $SCP_CMD "$SOURCE_DIR/assets/"* "${REMOTE_USER}@${HOST}:${REMOTE_DIR}/assets/"
 
 echo ""
