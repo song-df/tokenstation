@@ -29,6 +29,9 @@ async def lifespan(app: FastAPI):
             session.add(admin_user)
             await session.commit()
     yield
+    # Close the shared upstream HTTP client's connection pool on shutdown.
+    from services.relay import aclose_client
+    await aclose_client()
 
 
 app = FastAPI(title="智联学习云AI服务", version="1.0.0", lifespan=lifespan)

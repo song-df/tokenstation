@@ -79,11 +79,11 @@ export ANTHROPIC_SMALL_FAST_MODEL=claude-haiku-4-5`
           </div>
           <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
             <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-emerald-400 bg-clip-text text-transparent">
-              一句话接入 16 款大模型
+              国内直连 16 款 AI 模型
             </span>
           </h1>
           <p className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-            国内直连 · 免翻墙免信用卡 · Claude Code / Cursor / Codex 即开即用<br />
+            免翻墙免信用卡 · Claude Code / Cursor / Codex 即开即用<br />
             <span className="text-gray-500 text-base">兑换码秒充到账，10元起充</span>
           </p>
           <div className="flex items-center justify-center gap-4">

@@ -8,6 +8,31 @@ from sqlalchemy import select
 from models import Channel, ModelConfig, RequestLog
 
 
+# ── Shared HTTP client ──
+# One keep-alive connection pool (+ HTTP/2) reused across all requests, so we
+# don't redo a TCP+TLS handshake to the upstream on every call. connect=5s lets
+# a stuck upstream fail fast; read=180s covers long generations.
+
+_limits = httpx.Limits(
+    max_connections=100,
+    max_keepalive_connections=20,
+    keepalive_expiry=30.0,
+)
+_timeout = httpx.Timeout(connect=5.0, read=180.0, write=10.0, pool=5.0)
+_client = httpx.AsyncClient(limits=_limits, timeout=_timeout, http2=True)
+
+
+async def aclose_client() -> None:
+    """Close the shared client; call on app shutdown."""
+    await _client.aclose()
+
+
+def _apply_openrouter_routing(channel: Channel, body: dict) -> None:
+    """Ask OpenRouter to prefer the lowest-latency backend provider."""
+    if "openrouter" in (channel.base_url or "").lower():
+        body.setdefault("provider", {"sort": "latency"})
+
+
 # ── Model name mapping (native Anthropic -> OpenRouter) ──
 
 _MODEL_MAP = {
@@ -73,13 +98,13 @@ async def relay_openai(
     model_config: ModelConfig, user_id: int,
 ) -> tuple[dict, float]:
     body["model"] = _map_model(body.get("model", ""))
+    _apply_openrouter_routing(channel, body)
     url = f"{channel.base_url.rstrip('/')}/chat/completions"
     headers = {
         "Authorization": f"Bearer {channel.api_key}",
         "Content-Type": "application/json",
     }
-    async with httpx.AsyncClient(timeout=120.0) as client:
-        response = await client.post(url, json=body, headers=headers)
+    response = await _client.post(url, json=body, headers=headers)
     try:
         data = response.json()
     except Exception:
@@ -88,7 +113,6 @@ async def relay_openai(
     pt = usage.get("prompt_tokens", 0)
     ct = usage.get("completion_tokens", 0)
     cost = calculate_cost(model_config, pt, ct)
-    err_msg = _check_response_error(data, response.status_code)
     err_msg = _check_response_error(data, response.status_code)
     success = response.status_code == 200 and not err_msg
     log = RequestLog(
@@ -109,6 +133,7 @@ async def relay_openai_stream(
     model_config: ModelConfig, user_id: int,
 ) -> AsyncGenerator[str, None]:
     body["model"] = _map_model(body.get("model", ""))
+    _apply_openrouter_routing(channel, body)
     url = f"{channel.base_url.rstrip('/')}/chat/completions"
     headers = {
         "Authorization": f"Bearer {channel.api_key}",
@@ -118,25 +143,24 @@ async def relay_openai_stream(
     pt = 0
     ct = 0
     final_model = body.get("model", "")
-    async with httpx.AsyncClient(timeout=180.0) as client:
-        async with client.stream("POST", url, json=body, headers=headers) as resp:
-            async for line in resp.aiter_lines():
-                if not line:
-                    continue
-                if line.startswith("data: "):
-                    ds = line[6:]
-                    if ds == "[DONE]":
-                        yield "data: [DONE]\n\n"
-                        break
-                    try:
-                        chunk = json.loads(ds)
-                        u = chunk.get("usage")
-                        if u:
-                            pt = u.get("prompt_tokens", 0)
-                            ct = u.get("completion_tokens", 0)
-                        yield f"data: {ds}\n\n"
-                    except json.JSONDecodeError:
-                        yield f"data: {ds}\n\n"
+    async with _client.stream("POST", url, json=body, headers=headers) as resp:
+        async for line in resp.aiter_lines():
+            if not line:
+                continue
+            if line.startswith("data: "):
+                ds = line[6:]
+                if ds == "[DONE]":
+                    yield "data: [DONE]\n\n"
+                    break
+                try:
+                    chunk = json.loads(ds)
+                    u = chunk.get("usage")
+                    if u:
+                        pt = u.get("prompt_tokens", 0)
+                        ct = u.get("completion_tokens", 0)
+                    yield f"data: {ds}\n\n"
+                except json.JSONDecodeError:
+                    yield f"data: {ds}\n\n"
     cost = calculate_cost(model_config, pt, ct)
     log = RequestLog(
         user_id=user_id, model=final_model,
@@ -214,8 +238,7 @@ async def relay_anthropic(
         "anthropic-version": "2023-06-01",
         "Content-Type": "application/json",
     }
-    async with httpx.AsyncClient(timeout=120.0) as client:
-        response = await client.post(url, json=anthropic_body, headers=headers)
+    response = await _client.post(url, json=anthropic_body, headers=headers)
     try:
         ant_data = response.json()
     except Exception:
@@ -256,41 +279,40 @@ async def relay_anthropic_stream(
     pt = 0
     ct = 0
     accumulated_text = ""
-    async with httpx.AsyncClient(timeout=180.0) as client:
-        async with client.stream("POST", url, json=anthropic_body, headers=headers) as resp:
-            async for line in resp.aiter_lines():
-                if not line:
+    async with _client.stream("POST", url, json=anthropic_body, headers=headers) as resp:
+        async for line in resp.aiter_lines():
+            if not line:
+                continue
+            if line.startswith("data: "):
+                ds = line[6:]
+                try:
+                    event = json.loads(ds)
+                    etype = event.get("type", "")
+                except json.JSONDecodeError:
                     continue
-                if line.startswith("data: "):
-                    ds = line[6:]
-                    try:
-                        event = json.loads(ds)
-                        etype = event.get("type", "")
-                    except json.JSONDecodeError:
-                        continue
-                    if etype == "content_block_delta":
-                        delta = event.get("delta", {})
-                        text = delta.get("text", "")
-                        accumulated_text += text
-                        chunk = {
-                            "id": rid, "object": "chat.completion.chunk",
-                            "model": model_name,
-                            "choices": [{"index": 0, "delta": {"content": text}, "finish_reason": None}],
-                        }
-                        yield f"data: {json.dumps(chunk)}\n\n"
-                    elif etype == "message_delta":
-                        usage = event.get("usage", {})
-                        pt = usage.get("input_tokens", 0)
-                        ct = usage.get("output_tokens", 0)
-                    elif etype == "message_stop":
-                        # Send final chunk with finish_reason
-                        chunk = {
-                            "id": rid, "object": "chat.completion.chunk",
-                            "model": model_name,
-                            "choices": [{"index": 0, "delta": {}, "finish_reason": "stop"}],
-                        }
-                        yield f"data: {json.dumps(chunk)}\n\n"
-                        yield "data: [DONE]\n\n"
+                if etype == "content_block_delta":
+                    delta = event.get("delta", {})
+                    text = delta.get("text", "")
+                    accumulated_text += text
+                    chunk = {
+                        "id": rid, "object": "chat.completion.chunk",
+                        "model": model_name,
+                        "choices": [{"index": 0, "delta": {"content": text}, "finish_reason": None}],
+                    }
+                    yield f"data: {json.dumps(chunk)}\n\n"
+                elif etype == "message_delta":
+                    usage = event.get("usage", {})
+                    pt = usage.get("input_tokens", 0)
+                    ct = usage.get("output_tokens", 0)
+                elif etype == "message_stop":
+                    # Send final chunk with finish_reason
+                    chunk = {
+                        "id": rid, "object": "chat.completion.chunk",
+                        "model": model_name,
+                        "choices": [{"index": 0, "delta": {}, "finish_reason": "stop"}],
+                    }
+                    yield f"data: {json.dumps(chunk)}\n\n"
+                    yield "data: [DONE]\n\n"
     cost = calculate_cost(model_config, pt, ct)
     log = RequestLog(
         user_id=user_id, model=model_name,
@@ -316,8 +338,7 @@ async def relay_anthropic_passthrough(
         "anthropic-version": "2023-06-01",
         "Content-Type": "application/json",
     }
-    async with httpx.AsyncClient(timeout=120.0) as client:
-        response = await client.post(url, json=body, headers=headers)
+    response = await _client.post(url, json=body, headers=headers)
     try:
         data = response.json()
     except Exception:
@@ -327,11 +348,12 @@ async def relay_anthropic_passthrough(
     pt = usage.get("input_tokens", 0)
     ct = usage.get("output_tokens", 0)
     cost = calculate_cost(model_config, pt, ct)
+    err_msg = "" if success else data.get("error", {}).get("message", str(data))
     log = RequestLog(
         user_id=user_id, model=body.get("model", ""),
         prompt_tokens=pt, completion_tokens=ct,
         cost=cost, success=success,
-        error_message="" if success else data.get("error", {}).get("message", str(data)),
+        error_message=err_msg,
     )
     db.add(log)
     await db.flush()
@@ -359,38 +381,37 @@ async def relay_anthropic_passthrough_stream(
 
     # Buffer: we need to intercept usage from message_start/message_delta events
     # but still pass them through to the client
-    async with httpx.AsyncClient(timeout=180.0) as client:
-        async with client.stream("POST", url, json=body, headers=headers) as resp:
-            current_event = None
-            async for line in resp.aiter_lines():
-                if line == "":
-                    if current_event is not None:
-                        yield f"event: {current_event}\n"
-                        current_event = None
-                    yield "\n"
-                    continue
-                if line.startswith("event: "):
-                    current_event = line[7:]
-                    yield line + "\n"
-                    continue
-                if line.startswith("data: "):
-                    ds = line[6:]
-                    try:
-                        event_data = json.loads(ds)
-                        etype = event_data.get("type", "")
-                        if etype == "message_start":
-                            u = event_data.get("message", {}).get("usage", {})
-                            pt = u.get("input_tokens", 0)
-                        elif etype == "message_delta":
-                            u = event_data.get("usage", {})
-                            ct_out = u.get("output_tokens", 0)
-                            if ct_out > ct:
-                                ct = ct_out
-                    except json.JSONDecodeError:
-                        pass
-                    yield line + "\n"
-                    continue
+    async with _client.stream("POST", url, json=body, headers=headers) as resp:
+        current_event = None
+        async for line in resp.aiter_lines():
+            if line == "":
+                if current_event is not None:
+                    yield f"event: {current_event}\n"
+                    current_event = None
+                yield "\n"
+                continue
+            if line.startswith("event: "):
+                current_event = line[7:]
                 yield line + "\n"
+                continue
+            if line.startswith("data: "):
+                ds = line[6:]
+                try:
+                    event_data = json.loads(ds)
+                    etype = event_data.get("type", "")
+                    if etype == "message_start":
+                        u = event_data.get("message", {}).get("usage", {})
+                        pt = u.get("input_tokens", 0)
+                    elif etype == "message_delta":
+                        u = event_data.get("usage", {})
+                        ct_out = u.get("output_tokens", 0)
+                        if ct_out > ct:
+                            ct = ct_out
+                except json.JSONDecodeError:
+                    pass
+                yield line + "\n"
+                continue
+            yield line + "\n"
 
     cost = calculate_cost(model_config, pt, ct)
     log = RequestLog(
@@ -469,13 +490,13 @@ async def relay_anthropic_via_openai(
     """Bridge: receive Anthropic request, translate to OpenAI, forward, translate back."""
     body["model"] = _map_model(body.get("model", ""))
     oa_body = _anthropic_to_openai_body(body)
+    _apply_openrouter_routing(channel, oa_body)
     url = f"{channel.base_url.rstrip('/')}/chat/completions"
     headers = {
         "Authorization": f"Bearer {channel.api_key}",
         "Content-Type": "application/json",
     }
-    async with httpx.AsyncClient(timeout=120.0) as client:
-        response = await client.post(url, json=oa_body, headers=headers)
+    response = await _client.post(url, json=oa_body, headers=headers)
     try:
         oa_data = response.json()
     except Exception:
@@ -505,6 +526,7 @@ async def relay_anthropic_via_openai_stream(
     """Bridge: receive Anthropic streaming request, translate to OpenAI SSE, proxy SSE, convert to Anthropic SSE."""
     body["model"] = _map_model(body.get("model", ""))
     oa_body = _anthropic_to_openai_body(body)
+    _apply_openrouter_routing(channel, oa_body)
     oa_body["stream"] = True
     url = f"{channel.base_url.rstrip('/')}/chat/completions"
     headers = {
@@ -521,33 +543,32 @@ async def relay_anthropic_via_openai_stream(
     yield f"event: message_start\ndata: {json.dumps({'type': 'message_start', 'message': {'id': rid, 'type': 'message', 'role': 'assistant', 'model': model_name, 'content': [], 'usage': {'input_tokens': 0}}})}\n\n"
     yield f"event: content_block_start\ndata: {json.dumps({'type': 'content_block_start', 'index': 0, 'content_block': {'type': 'text', 'text': ''}})}\n\n"
 
-    async with httpx.AsyncClient(timeout=180.0) as client:
-        async with client.stream("POST", url, json=oa_body, headers=headers) as resp:
-            async for line in resp.aiter_lines():
-                if not line:
-                    continue
-                if line.startswith("data: "):
-                    ds = line[6:]
-                    if ds == "[DONE]":
-                        break
-                    try:
-                        chunk = json.loads(ds)
-                        u = chunk.get("usage")
-                        if u:
-                            pt = u.get("prompt_tokens", 0)
-                            ct = u.get("completion_tokens", 0)
-                        delta = chunk.get("choices", [{}])[0].get("delta", {})
-                        text = delta.get("content", "")
-                        if text:
-                            accumulated_text += text
-                            delta_event = json.dumps({
-                                "type": "content_block_delta",
-                                "index": 0,
-                                "delta": {"type": "text_delta", "text": text},
-                            })
-                            yield f"event: content_block_delta\ndata: {delta_event}\n\n"
-                    except json.JSONDecodeError:
-                        pass
+    async with _client.stream("POST", url, json=oa_body, headers=headers) as resp:
+        async for line in resp.aiter_lines():
+            if not line:
+                continue
+            if line.startswith("data: "):
+                ds = line[6:]
+                if ds == "[DONE]":
+                    break
+                try:
+                    chunk = json.loads(ds)
+                    u = chunk.get("usage")
+                    if u:
+                        pt = u.get("prompt_tokens", 0)
+                        ct = u.get("completion_tokens", 0)
+                    delta = chunk.get("choices", [{}])[0].get("delta", {})
+                    text = delta.get("content", "")
+                    if text:
+                        accumulated_text += text
+                        delta_event = json.dumps({
+                            "type": "content_block_delta",
+                            "index": 0,
+                            "delta": {"type": "text_delta", "text": text},
+                        })
+                        yield f"event: content_block_delta\ndata: {delta_event}\n\n"
+                except json.JSONDecodeError:
+                    pass
 
     yield f"event: content_block_stop\ndata: {json.dumps({'type': 'content_block_stop', 'index': 0})}\n\n"
     yield f"event: message_delta\ndata: {json.dumps({'type': 'message_delta', 'delta': {'stop_reason': 'end_turn'}, 'usage': {'input_tokens': pt, 'output_tokens': ct}})}\n\n"

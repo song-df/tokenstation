@@ -44,7 +44,7 @@ export default function QuickGuide() {
             Claude Code 零门槛上手
           </h1>
           <p className="text-lg text-gray-400 max-w-2xl mx-auto">
-            20+ 主流AI模型一站平价接入 · 兑换码秒充到账 · 7×24 在线响应
+            16 款精选大模型 · 官方原生模型ID · 兑换码秒充到账 · 7×24 在线响应
           </p>
         </section>
 
@@ -61,11 +61,19 @@ export default function QuickGuide() {
           <h2 className="flex items-center gap-3 text-2xl font-bold">
             <Terminal size={24} className="text-orange-400" /> Claude Code 接入（推荐）
           </h2>
-          <p className="text-gray-400">复制以下命令到终端执行，30秒完成配置：</p>
-          <CodeBlock id="cc1" lang="终端" code={`# 一键配置（替换 sk-xxx 为你的 API Key）
-claude --set-env ANTHROPIC_BASE_URL=https://ai.aiotedu.cc/api
-claude --set-env ANTHROPIC_API_KEY=sk-你的APIKey`} />
-          <p className="text-gray-400">配置完成后，终端输入 <code className="px-2 py-0.5 rounded bg-gray-800 text-orange-400 font-mono text-sm">claude</code> 即可使用。</p>
+          <p className="text-gray-400">第 1 步：安装 Claude Code（已装可跳过）：</p>
+          <CodeBlock id="cc0" lang="终端" code={`npm install -g @anthropic-ai/claude-code`} />
+          <p className="text-gray-400">第 2 步：把下面 4 行<b className="text-orange-300">一起</b>复制到终端执行（把 <code className="px-1.5 py-0.5 rounded bg-gray-800 text-orange-400 font-mono text-xs">sk-你的APIKey</code> 换成你的 Key）：</p>
+          <CodeBlock id="cc1" lang="终端 (macOS / Linux)" code={`export ANTHROPIC_BASE_URL=https://ai.aiotedu.cc/api
+export ANTHROPIC_AUTH_TOKEN=sk-你的APIKey
+export ANTHROPIC_MODEL=claude-opus-4-8
+export ANTHROPIC_SMALL_FAST_MODEL=claude-haiku-4-5`} />
+          <p className="text-gray-400">第 3 步：在你的项目目录输入 <code className="px-2 py-0.5 rounded bg-gray-800 text-orange-400 font-mono text-sm">claude</code> 即可开始使用。</p>
+          <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-sm text-amber-200/90 space-y-1.5">
+            <p>⚠️ <b>必须设置 <code className="font-mono">ANTHROPIC_MODEL</code></b>：本站不使用 Claude 官方默认模型名，不设会报“模型不存在”。可选 <code className="font-mono">claude-opus-4-8</code> / <code className="font-mono">claude-sonnet-4-6</code> / <code className="font-mono">claude-haiku-4-5</code>。</p>
+            <p>💡 <code className="font-mono">ANTHROPIC_SMALL_FAST_MODEL</code> 是后台小任务用的便宜模型，设为 <code className="font-mono">claude-haiku-4-5</code> 更省 T粒。</p>
+            <p>🪟 Windows（PowerShell）：把每行写成 <code className="font-mono">$env:ANTHROPIC_BASE_URL="https://ai.aiotedu.cc/api"</code> 这种形式。</p>
+          </div>
         </section>
 
         <section className="space-y-6">
@@ -85,35 +93,42 @@ export OPENAI_API_KEY=sk-你的APIKey`} />
           <h2 className="flex items-center gap-3 text-2xl font-bold">
             <Cpu size={24} className="text-purple-400" /> 可用模型
           </h2>
+          <p className="text-gray-400 text-sm">标签按<b className="text-gray-200">输出价</b>分档：<span className="text-red-400">非常贵</span> · <span className="text-orange-400">贵</span> · <span className="text-yellow-400">中等</span> · <span className="text-green-400">低价</span>。下方价格为 T粒/千 tokens（输入 / 输出）。</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {[
-              ['Claude Sonnet 4.6', 'claude-sonnet-4-20250514', '3.24 T粒/千'],
-              ['Claude Opus 4.8', 'anthropic/claude-opus-4.8', '5.4 T粒/千'],
-              ['Claude Opus 4.7', 'claude-opus-4-20250514', '5.4 T粒/千'],
-              ['Claude Haiku 4.5', 'claude-haiku-4-20250514', '1.08 T粒/千'],
-              ['GPT-5.2', 'openai/gpt-5.2', '1.89 T粒/千'],
-              ['GPT-5.1', 'openai/gpt-5.1', '1.35 T粒/千'],
-              ['GPT-4.1', 'openai/gpt-4.1', '2.16 T粒/千'],
-              ['o3', 'openai/o3', '2.16 T粒/千'],
-              ['o4-mini', 'openai/o4-mini', '1.19 T粒/千'],
-              ['Gemini 2.5 Pro', 'google/gemini-2.5-pro', '1.35 T粒/千'],
-              ['Gemini 2.5 Flash', 'google/gemini-2.5-flash', '0.32 T粒/千'],
-              ['Qwen3.7 Max', 'qwen/qwen3.7-max', '1.35 T粒/千'],
-              ['DeepSeek V4 Flash', 'deepseek-v4-flash', '0.13 T粒/千'],
-              ['DeepSeek V4 Pro', 'deepseek-ai/DeepSeek-V4-Pro', '1.87 T粒/千'],
-              ['DeepSeek R1', 'deepseek-ai/DeepSeek-R1', '3.74 T粒/千'],
-              ['DeepSeek V3', 'deepseek-ai/DeepSeek-V3', '1.87 T粒/千'],
-              ['Llama-4 Maverick', 'meta-llama/llama-4-maverick', '0.16 T粒/千'],
-              ['Mistral Large', 'mistralai/mistral-large', '2.16 T粒/千'],
-              ['Command R7B', 'cohere/command-r7b-12-2024', '0.04 T粒/千'],].map(([name, id, price]) => (
-              <div key={id} className="p-3 rounded-lg bg-gray-900 border border-gray-800 flex justify-between items-center">
-                <div>
-                  <div className="text-sm text-gray-200">{name}</div>
+            {([
+              ['Claude Opus 4.8', 'claude-opus-4-8', '5.4 / 27'],
+              ['Claude Sonnet 4.6', 'claude-sonnet-4-6', '3.24 / 16.2'],
+              ['Claude Haiku 4.5', 'claude-haiku-4-5', '1.08 / 5.4'],
+              ['GPT-5.5', 'gpt-5.5', '5.4 / 32.4'],
+              ['GPT-5.5 Pro', 'gpt-5.5-pro', '32.4 / 194.4'],
+              ['GPT-5.3 Codex', 'gpt-5.3-codex', '1.89 / 15.12'],
+              ['Gemini 3.5 Flash', 'gemini-3.5-flash', '1.62 / 9.72'],
+              ['Gemini 3.1 Pro', 'gemini-3.1-pro', '2.16 / 12.96'],
+              ['Step 3.7 Flash', 'step-3.7-flash', '0.216 / 1.242'],
+              ['Qwen 3.7 Max', 'qwen3.7-max', '1.35 / 4.05'],
+              ['DeepSeek V4 Pro', 'deepseek-v4-pro', '0.45 / 0.9'],
+              ['DeepSeek V4 Flash', 'deepseek-v4-flash', '0.15 / 0.3'],
+              ['GLM-5.1', 'glm-5.1', '0.9 / 3.6'],
+              ['Kimi K2.6', 'kimi-k2.6', '0.975 / 4.05'],
+              ['MiniMax M2.5', 'minimax-m2.5', '0.315 / 1.26'],
+              ['Qwen3.5-397B', 'qwen3.5-397b-a17b', '0.18 / 1.08'],
+            ] as [string, string, string][]).map(([name, id, price]) => {
+              const out = parseFloat(price.split('/')[1])
+              const tier = out >= 100 ? ['非常贵','bg-red-500/15 text-red-400 border-red-500/30']
+                : out >= 15 ? ['贵','bg-orange-500/15 text-orange-400 border-orange-500/30']
+                : out >= 4 ? ['中等','bg-yellow-500/15 text-yellow-400 border-yellow-500/30']
+                : ['低价','bg-green-500/15 text-green-400 border-green-500/30']
+              return (
+              <div key={id} className="p-3 rounded-lg bg-gray-900 border border-gray-800 flex justify-between items-center gap-2">
+                <div className="min-w-0">
+                  <div className="text-sm text-gray-200 flex items-center gap-2">{name}
+                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium border ${tier[1]}`}>{tier[0]}</span>
+                  </div>
                   <code className="text-xs text-gray-500 font-mono">{id}</code>
                 </div>
-                <span className="text-xs text-gray-400">{price}T粒 输入价</span>
-              </div>
-            ))}
+                <span className="text-xs text-gray-400 whitespace-nowrap">{price} T粒/千</span>
+              </div>)
+            })}
           </div>
         </section>
 
