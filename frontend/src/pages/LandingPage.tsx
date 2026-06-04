@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Zap, Terminal, Globe, Shield, ChevronRight, ArrowRight, Copy, Check, Star } from 'lucide-react'
+import { Zap, Terminal, Globe, Shield, ChevronRight, ArrowRight, Copy, Check, Star, Rocket } from 'lucide-react'
 
 const models = [
   { name: 'Claude Opus 4.8', id: 'claude-opus-4-8', tier: '贵', tierCls: 'bg-orange-500/15 text-orange-400 border-orange-500/30' },
@@ -24,8 +24,9 @@ const features = [
   { icon: Globe, title: '16款精选大模型', desc: 'Claude、GPT、Gemini、DeepSeek 等一线模型一站接入，无需分别注册多个平台。' },
   { icon: Zap, title: '官方直连 · 极速响应', desc: '全链路延迟优于市场中位，与官方直连速度相当，告别代理超时与掉线。' },
   { icon: Shield, title: '免翻墙 · 免信用卡', desc: '国内网络直接访问，兑换码充值即可使用，无需境外支付手段。' },
-]
+  { icon: Rocket, title: '新模型第一时间上线', desc: 'Anthropic、OpenAI、Google 等厂商发布新模型后，本站第一时间接入，无需等待。' },
 
+]
 const steps = [
   { step: '01', title: '注册账号', desc: '30秒完成注册，立即获得免费体验额度。' },
   { step: '02', title: '获取 API Key', desc: '在个人主页一键复制 API Key 和接口地址。' },
@@ -121,7 +122,7 @@ export ANTHROPIC_SMALL_FAST_MODEL=claude-haiku-4-5`
             <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">为什么选择 T粒加油站</h2>
             <p className="text-gray-500 max-w-xl mx-auto">不用再为跨境外支付发愁，不用忍受代理延迟——一个账号，16款模型开箱即用。</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {features.map(f => (
               <div key={f.title} className="p-6 rounded-xl bg-gray-900 border border-gray-800 hover:border-gray-700 transition-colors">
                 <f.icon size={24} className="text-blue-400 mb-4" />
