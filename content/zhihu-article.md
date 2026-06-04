@@ -22,9 +22,9 @@
 翻译成人话：你用什么模型当然有差别，但**能不能稳定连上、不掉线、不超时**，比模型之间的细微差距重要得多。
 
 
-## 我的解决方案：一个国内直连的 API 网关
+## 我的解决方案
 
-基于这个思路，我自己搭了一个 AI API 网关——**T粒加油站**（ai.aiotedu.cc）。它的逻辑很简单：在国内服务器上帮你转发 API 请求到 Anthropic、OpenAI、Google、DeepSeek 的官方接口。
+基于这个思路，我搭了一个 AI API 网关——**T粒加油站**。逻辑很简单：国内服务器转发 API 请求到 Anthropic、OpenAI、Google、DeepSeek 的官方接口。
 
 **接入 Claude Code，三行命令：**
 
@@ -39,7 +39,7 @@ export ANTHROPIC_SMALL_FAST_MODEL=claude-haiku-4-5
 
 然后在你项目目录 `claude` 就进去了。
 
-**不只是 Claude Code。** 同一个 Key 还能接 Cursor（OpenAI 兼容接口）、Codex CLI、Aider。你的 workflow 可以是：Claude Code 写主力，Cursor 做细节补全，Codex 跑自动化——一个 Key 全通。
+**不只是 Claude Code。** 同一个 Key 还能接 Cursor（OpenAI 兼容接口，Base URL 填 `/api/v1`）、Codex CLI、Aider。你的 workflow 可以是：Claude Code 写主力，Cursor 做细节补全，Codex 跑自动化——一个 Key 全通。
 
 
 ## 和官方直连对比
@@ -52,7 +52,7 @@ export ANTHROPIC_SMALL_FAST_MODEL=claude-haiku-4-5
 | 速度 | ~2s（经代理） | ~1.7s（实测） |
 | 价格 | 官方价 | 官方×1.38 |
 
-多出来的 38% 覆盖了线路成本和支付服务。按 Sonnet 算，写一次代码约 0.08 T粒，10 块钱能用大概一万次。注册送免费额度，首兑再送 50 T粒。
+多出来的 38% 覆盖了线路成本和支付服务。按 Sonnet 算，写一次代码约 0.08 T粒，10 块钱能用大概一万次。
 
 
 ## 回到那个热榜话题
@@ -65,9 +65,9 @@ export ANTHROPIC_SMALL_FAST_MODEL=claude-haiku-4-5
 
 ---
 
-🔗 https://ai.aiotedu.cc/
+*利益相关：本文提到的 T粒加油站为作者自建项目。*
 
-**附录：Claude Code 永久配置**
+**附录：Claude Code 永久配置（写入后无需每次 export）**
 
 `~/.claude/settings.json`：
 ```json
@@ -91,4 +91,14 @@ name = "aiotedu"
 base_url = "https://ai.aiotedu.cc/api/v1"
 wire_api = "chat"
 env_key = "AIOTEDU_API_KEY"
+```
+
+---
+
+## 📌 发布时评论区第一条（粘贴此内容）
+
+```
+注册地址：https://ai.aiotedu.cc/
+注册即送免费额度，首兑再额外送 50 T粒。可以先试再决定充不充。
+如有使用问题欢迎留言，看到会回。
 ```
