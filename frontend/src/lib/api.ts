@@ -25,7 +25,29 @@ const MODEL_OUTPUT_PRICE: Record<string, number> = {
   'glm-5.1':               3.6,     // 9.0 × 4.0 / 10
   'kimi-k2.6':             4.05,    // 9.75 × 4.1538 / 10
   'minimax-m2.5':          1.26,    // 3.15 × 4.0 / 10
+  'minimax-m3':            1.8,     // 4.5 × 4.0 / 10
   'qwen3.5-397b-a17b':     1.08,    // 1.8 × 6.0 / 10
+};
+
+// 模型供应商映射
+const MODEL_PROVIDER: Record<string, string> = {
+  'deepseek-v4-pro':      'DeepSeek',
+  'deepseek-v4-flash':    'DeepSeek',
+  'claude-opus-4-8':      'Anthropic',
+  'claude-sonnet-4-6':    'Anthropic',
+  'claude-haiku-4-5':     'Anthropic',
+  'gpt-5.5':              'OpenAI',
+  'gpt-5.5-pro':          'OpenAI',
+  'gpt-5.3-codex':        'OpenAI',
+  'gemini-3.5-flash':     'Google',
+  'gemini-3.1-pro':       'Google',
+  'step-3.7-flash':       'StepFun',
+  'qwen3.7-max':          'Qwen',
+  'glm-5.1':              'Zhipu',
+  'kimi-k2.6':            'Moonshot',
+  'minimax-m2.5':         'MiniMax',
+  'minimax-m3':           'MiniMax',
+  'qwen3.5-397b-a17b':    'Qwen',
 };
 
 // 兼容旧调用:仍把登录态存 localStorage,但存的是用户 id(用于 New-Api-User 头),
@@ -124,7 +146,7 @@ export const api = {
   getStudentModels: async () => {
     const list: string[] = await request('/user/models');
     return (list || []).map((name) => ({
-      model_name: name, display_name: '', provider: name.includes('/') ? name.split('/')[0] : '',
+      model_name: name, display_name: '', provider: MODEL_PROVIDER[name] || '',
       input_price: 0, output_price: MODEL_OUTPUT_PRICE[name] ?? 0, max_tokens: 0,
     }));
   },
