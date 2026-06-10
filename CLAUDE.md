@@ -34,7 +34,7 @@ npm run lint     # eslint
 
 There is **no test suite**. The DB (`backend/data.db`, SQLite) is created and seeded on
 startup by the `lifespan` hook in `main.py`, which also creates a default admin
-(`admin` / `change-me`) if none exists. Schema changes are applied via
+(credentials in `config.py`) if none exists. Schema changes are applied via
 `Base.metadata.create_all` only — there are no migrations, so adding columns to existing
 tables requires deleting `data.db` or altering it manually.
 
@@ -102,6 +102,6 @@ persisted in `localStorage` under `token`. Pages live in `src/pages/`. UI copy i
 ## Config & secrets
 
 `backend/config.py` (`Settings`, env-overridable via `backend/.env`) holds `database_url`,
-`secret_key` (JWT signing — currently `"see-config-example"`), `default_quota`, and
+`secret_key` (JWT signing — see `config.example.py` for defaults), `default_quota`, and
 `system_api_secret`. CORS is wide open (`allow_origins=["*"]`) in `main.py`. These are
 production-relevant defaults; treat them accordingly when deploying.

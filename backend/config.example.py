@@ -12,6 +12,9 @@ class Settings(BaseSettings):
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 1440
     default_quota: int = 500000
+    # Default admin password — only used when creating the initial admin user.
+    # Change this immediately after first login.
+    default_admin_password: str = "change-me-admin-password"
     # Shared secret for the external redeem-code API (/api/redeem external endpoint).
     system_api_secret: str = "change-me-system-api-secret"
 

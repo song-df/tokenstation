@@ -21,7 +21,7 @@ async def lifespan(app: FastAPI):
             admin_user = User(
                 username="admin",
                 display_name="Administrator",
-                hashed_password=hash_password("admin123"),
+                hashed_password=hash_password(settings.default_admin_password),
                 role=UserRole.admin,
                 quota=999999999,
                 api_key=generate_api_key(),

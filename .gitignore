@@ -23,6 +23,11 @@ Thumbs.db
 # Env / secrets (use the *.example reference files instead)
 .env
 backend/config.py
+deploy.sh
+
+# SQLite temp files
+*.db-shm
+*.db-wal
 
 # Vite dep cache
 .vite/
