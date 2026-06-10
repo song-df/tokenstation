@@ -13,9 +13,9 @@ interface ModelInfo {
 
 // 按输出价(T粒/千)划分价格档位标签
 function priceTier(outputPrice: number) {
-  if (outputPrice >= 100) return { label: '非常贵', cls: 'bg-red-500/15 text-red-400 border border-red-500/30' }
-  if (outputPrice >= 15)  return { label: '贵',     cls: 'bg-orange-500/15 text-orange-400 border border-orange-500/30' }
-  if (outputPrice >= 4)   return { label: '中等',   cls: 'bg-yellow-500/15 text-yellow-400 border border-yellow-500/30' }
+  if (outputPrice >= 30) return { label: '非常贵', cls: 'bg-red-500/15 text-red-400 border border-red-500/30' }
+  if (outputPrice >= 10)  return { label: '贵',     cls: 'bg-orange-500/15 text-orange-400 border border-orange-500/30' }
+  if (outputPrice >= 3)   return { label: '中等',   cls: 'bg-yellow-500/15 text-yellow-400 border border-yellow-500/30' }
   return { label: '低价', cls: 'bg-green-500/15 text-green-400 border border-green-500/30' }
 }
 
@@ -32,38 +32,35 @@ export default function StudentDashboard() {
   const [showClaudeCode, setShowClaudeCode] = useState(false)
   const [showCcSwitch, setShowCcSwitch] = useState(false)
   const [showMoonbridge, setShowMoonbridge] = useState(false)
-  const [tasks, setTasks] = useState<any>(null)
   const [redeemCode, setRedeemCode] = useState('')
   const [redeemMsg, setRedeemMsg] = useState('')
   const [redeeming, setRedeeming] = useState(false)
-  const [copiedRef, setCopiedRef] = useState(false)
 
   useEffect(() => {
     api.getStudentProfile().then(setProfile)
     api.getStudentModels().then(setModels)
     api.getStudentLogs(1, 10).then(setLogs)
     api.getStudentTopups(1, 10).then(setTopups)
-    api.getTasks().then(setTasks)
   }, [])
 
   const copyKey = () => { if (profile?.api_key) { navigator.clipboard.writeText(profile.api_key); setCopied(true); setTimeout(() => setCopied(false), 2000) } }
-  const copyCurl = () => { navigator.clipboard.writeText("curl "+window.location.origin+"/api/v1/chat/completions \\\n  -H \"Authorization: Bearer "+(profile?.api_key||'')+"\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"model\":\"deepseek-v4-flash\",\"messages\":[{\"role\":\"user\",\"content\":\"hello\"}]}'") }
-  const copyClaudeCodeConfig = () => { navigator.clipboard.writeText(JSON.stringify({ env: { ANTHROPIC_BASE_URL: window.location.origin+"/api", ANTHROPIC_AUTH_TOKEN: (profile?.api_key||''), ANTHROPIC_MODEL: "claude-opus-4-8", ANTHROPIC_SMALL_FAST_MODEL: "claude-haiku-4-5" } }, null, 2)); setCopiedCc(true); setTimeout(() => setCopiedCc(false), 2000) }
-  const copyEnvVars = () => { navigator.clipboard.writeText("export ANTHROPIC_BASE_URL="+window.location.origin+"/api\nexport ANTHROPIC_AUTH_TOKEN="+(profile?.api_key||'')+"\nexport ANTHROPIC_MODEL=claude-opus-4-8\nexport ANTHROPIC_SMALL_FAST_MODEL=claude-haiku-4-5"); setCopiedEnv(true); setTimeout(() => setCopiedEnv(false), 2000) }
-  const copyCodexConfig = () => { navigator.clipboard.writeText("# ~/.codex/config.toml\nmodel = \"deepseek-v4-pro\"\nmodel_provider = \"aiotedu\"\n\n[model_providers.aiotedu]\nname = \"aiotedu\"\nbase_url = \""+window.location.origin+"/api/v1\"\nwire_api = \"chat\"\nenv_key = \"AIOTEDU_API_KEY\""); setCopiedCodex(true); setTimeout(() => setCopiedCodex(false), 2000) }
-  const copyCcsVals = () => { navigator.clipboard.writeText("Base URL: "+window.location.origin+"/api\nAPI Key: "+(profile?.api_key||'')+"\n模型: claude-opus-4-8"); setCopiedCcs(true); setTimeout(() => setCopiedCcs(false), 2000) }
+  const copyCurl = () => { navigator.clipboard.writeText("curl "+window.location.origin+"/v1/chat/completions \\\n  -H \"Authorization: Bearer "+(profile?.api_key||'')+"\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"model\":\"deepseek-v4-flash\",\"messages\":[{\"role\":\"user\",\"content\":\"hello\"}]}'") }
+  const copyClaudeCodeConfig = () => { navigator.clipboard.writeText(JSON.stringify({ env: { ANTHROPIC_BASE_URL: window.location.origin+"", ANTHROPIC_AUTH_TOKEN: (profile?.api_key||''), ANTHROPIC_MODEL: "claude-opus-4-8", ANTHROPIC_SMALL_FAST_MODEL: "claude-haiku-4-5" } }, null, 2)); setCopiedCc(true); setTimeout(() => setCopiedCc(false), 2000) }
+  const copyEnvVars = () => { navigator.clipboard.writeText("export ANTHROPIC_BASE_URL="+window.location.origin+"\nexport ANTHROPIC_AUTH_TOKEN="+(profile?.api_key||'')+"\nexport ANTHROPIC_MODEL=claude-opus-4-8\nexport ANTHROPIC_SMALL_FAST_MODEL=claude-haiku-4-5"); setCopiedEnv(true); setTimeout(() => setCopiedEnv(false), 2000) }
+  const copyCodexConfig = () => { navigator.clipboard.writeText("# ~/.codex/config.toml\nmodel = \"deepseek-v4-pro\"\nmodel_provider = \"aiotedu\"\n\n[model_providers.aiotedu]\nname = \"aiotedu\"\nbase_url = \""+window.location.origin+"/v1\"\nwire_api = \"chat\"\nenv_key = \"AIOTEDU_API_KEY\""); setCopiedCodex(true); setTimeout(() => setCopiedCodex(false), 2000) }
+  const copyCcsVals = () => { navigator.clipboard.writeText("Base URL: "+window.location.origin+"\nAPI Key: "+(profile?.api_key||'')+"\n模型: claude-opus-4-8"); setCopiedCcs(true); setTimeout(() => setCopiedCcs(false), 2000) }
 
   const doRedeem = async () => {
     if (!redeemCode.trim()) return
     setRedeeming(true); setRedeemMsg('')
-    try { const res: any = await api.useRedeemCode(redeemCode.trim()); setRedeemMsg('兑换成功!+' + res.amount.toLocaleString() + ' T粒'); setRedeemCode(''); api.getStudentProfile().then(setProfile); api.getTasks().then(setTasks) }
+    try { const res: any = await api.useRedeemCode(redeemCode.trim()); setRedeemMsg('兑换成功!+' + res.amount.toLocaleString() + ' T粒'); setRedeemCode(''); api.getStudentProfile().then(setProfile) }
     catch (e: any) { setRedeemMsg(e.message) }
     finally { setRedeeming(false) }
   }
 
   if (!profile) return <div className="text-center text-gray-500 py-12">加载中...</div>
 
-  const curlexample = "curl "+window.location.origin+"/api/v1/chat/completions \\\n  -H \"Authorization: Bearer "+(profile.api_key||'').slice(0,16)+"...\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"model\":\"deepseek-v4-flash\",\"messages\":[{\"role\":\"user\",\"content\":\"hello\"}]}'"
+  const curlexample = "curl "+window.location.origin+"/v1/chat/completions \\\n  -H \"Authorization: Bearer "+(profile.api_key||'').slice(0,16)+"...\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"model\":\"deepseek-v4-flash\",\"messages\":[{\"role\":\"user\",\"content\":\"hello\"}]}'"
   const hasClaude = models.some(m => m.provider === 'anthropic')
 
   return (<div className="space-y-6">
@@ -80,41 +77,13 @@ export default function StudentDashboard() {
         <button onClick={doRedeem} disabled={redeeming || !redeemCode.trim()} className="px-4 py-2 rounded-lg bg-yellow-600 hover:bg-yellow-500 text-white text-sm disabled:opacity-50 transition-colors">{redeeming ? '兑换中' : '兑换'}</button>
       </div>
       {redeemMsg && <p className={'text-xs mt-2 ' + (redeemMsg.includes('成功') ? 'text-green-400' : 'text-red-400')}>{redeemMsg}</p>}
-      <a href="https://m.tb.cn/h.R72ZONy?tk=UoTLgah5wvd" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-1 mt-3 py-1.5 rounded-lg bg-orange-600/20 hover:bg-orange-600/30 border border-orange-600/30 text-orange-400 text-xs transition-colors"><ShoppingCart size={12} /> 购买兑换券</a>
-    </div>
-
-    <div className="p-4 rounded-xl bg-gray-900 border border-gray-800">
-      <div className="flex items-center gap-2 text-gray-400 text-sm mb-3">任务中心</div>
-      <div className="space-y-2">
-        {tasks?.tasks?.map((t: any) => (
-          <div key={t.key} className="flex items-center justify-between p-2 rounded-lg bg-gray-800/50">
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-200">{t.title}</span>
-                <span className="text-xs px-1.5 py-0.5 rounded bg-yellow-600/20 text-yellow-400">+{t.reward} T粒</span>
-              </div>
-              <p className="text-xs text-gray-500 mt-0.5">{t.description}</p>
-            </div>
-            {t.is_commission ? (
-              copiedRef ? <span className="text-xs text-green-400 px-3 py-1">已复制</span> :
-              <button onClick={() => { navigator.clipboard.writeText(window.location.origin + '/register?ref=' + (profile?.referral_code || '')); setCopiedRef(true); setTimeout(() => setCopiedRef(false), 2000) }} className="px-3 py-1 rounded-lg bg-pink-600/20 hover:bg-pink-600/30 text-pink-400 text-xs border border-pink-600/30">复制分享链接</button>
-            ) : t.key === 'verify_email' ? (
-              t.completed ? <span className="text-xs text-green-400">已完成</span> :
-              <button onClick={async () => { try { await api.verifyEmail(profile.email || ''); api.getStudentProfile().then(setProfile); api.getTasks().then(setTasks) } catch(e: any) { alert(e.message) } }} className="px-3 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs">验证</button>
-            ) : t.completed ? (
-              <span className="text-xs text-green-400">已完成</span>
-            ) : (
-              <span className="text-xs text-gray-500">{t.count !== undefined ? '已' + t.count + '次' : '-'}</span>
-            )}
-          </div>
-        ))}
-      </div>
+      <a href="https://m.tb.cn/h.RQVy0zQ?tk=HGMRg25TZjz" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-1 mt-3 py-1.5 rounded-lg bg-orange-600/20 hover:bg-orange-600/30 border border-orange-600/30 text-orange-400 text-xs transition-colors"><ShoppingCart size={12} /> 购买兑换券</a>
     </div>
 
     <div id="api-config" className="scroll-mt-20 rounded-xl bg-gray-900 border border-gray-800 p-6">
       <h2 className="flex items-center gap-2 text-lg font-semibold text-white mb-4"><Key size={18} className="text-blue-400" /> API 配置</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div><label className="text-xs text-gray-500 mb-1 block">接口地址</label><code className="block px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-gray-200 text-sm font-mono break-all">{window.location.origin}/api</code></div>
+        <div><label className="text-xs text-gray-500 mb-1 block">接口地址</label><code className="block px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-gray-200 text-sm font-mono break-all">{window.location.origin}/v1</code></div>
         <div><label className="text-xs text-gray-500 mb-1 block">API Key</label><div className="flex items-center gap-2"><code className="flex-1 px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-gray-200 text-sm font-mono truncate">{profile.api_key}</code><button onClick={copyKey} className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-green-400 transition-colors shrink-0">{copied?<Check size={16} className="text-green-400"/>:<Copy size={16}/>}</button></div></div>
       </div>
       <div className="mt-4 p-3 rounded-lg bg-gray-800/50 border border-gray-700"><div className="flex items-center justify-between mb-2"><span className="text-xs text-gray-400">curl 快速测试</span><button onClick={copyCurl} className="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300"><Copy size={12}/> 复制命令</button></div><pre className="text-xs text-gray-300 overflow-x-auto"><code>{curlexample}</code></pre></div>
@@ -126,8 +95,8 @@ export default function StudentDashboard() {
         {hasClaude && (<div className="py-3"><button onClick={()=>setShowClaudeCode(!showClaudeCode)} className="flex items-center justify-between w-full text-left py-1"><h3 className="flex items-center gap-2 text-sm font-medium text-gray-300"><Terminal size={14} className="text-orange-400"/> Claude Code 接入</h3>{showClaudeCode?<ChevronUp size={14} className="text-gray-500"/>:<ChevronDown size={14} className="text-gray-500"/>}</button>
           {showClaudeCode && (<div className="mt-3 space-y-2 text-sm text-gray-400">
             <p className="text-xs">① 安装（已装可跳过）：<code className="px-1 rounded bg-gray-800 text-gray-300">npm install -g @anthropic-ai/claude-code</code></p>
-            <div><div className="flex items-center justify-between mb-1"><label className="text-xs text-gray-500">② 方式A · 环境变量（复制到终端执行）</label><button onClick={copyEnvVars} className="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300">{copiedEnv?<Check size={12} className="text-green-400"/>:<Copy size={12}/>}{copiedEnv?'已复制':'复制'}</button></div><pre className="text-xs text-gray-300 bg-gray-800/50 rounded-lg p-2 overflow-x-auto"><code>export ANTHROPIC_BASE_URL={window.location.origin}/api{"\n"}export ANTHROPIC_AUTH_TOKEN={(profile.api_key||'').slice(0,12)}...{"\n"}export ANTHROPIC_MODEL=claude-opus-4-8{"\n"}export ANTHROPIC_SMALL_FAST_MODEL=claude-haiku-4-5</code></pre></div>
-            <div><div className="flex items-center justify-between mb-1"><label className="text-xs text-gray-500">② 方式B · 永久配置 ~/.claude/settings.json</label><button onClick={copyClaudeCodeConfig} className="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300">{copiedCc?<Check size={12} className="text-green-400"/>:<Copy size={12}/>}{copiedCc?'已复制':'复制'}</button></div><pre className="text-xs text-gray-300 bg-gray-800/50 rounded-lg p-2 overflow-x-auto"><code>{`{ "env": { "ANTHROPIC_BASE_URL": "${window.location.origin}/api", "ANTHROPIC_AUTH_TOKEN": "sk-...", "ANTHROPIC_MODEL": "claude-opus-4-8", "ANTHROPIC_SMALL_FAST_MODEL": "claude-haiku-4-5" } }`}</code></pre></div>
+            <div><div className="flex items-center justify-between mb-1"><label className="text-xs text-gray-500">② 方式A · 环境变量（复制到终端执行）</label><button onClick={copyEnvVars} className="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300">{copiedEnv?<Check size={12} className="text-green-400"/>:<Copy size={12}/>}{copiedEnv?'已复制':'复制'}</button></div><pre className="text-xs text-gray-300 bg-gray-800/50 rounded-lg p-2 overflow-x-auto"><code>export ANTHROPIC_BASE_URL={window.location.origin}{"\n"}export ANTHROPIC_AUTH_TOKEN={(profile.api_key||'').slice(0,12)}...{"\n"}export ANTHROPIC_MODEL=claude-opus-4-8{"\n"}export ANTHROPIC_SMALL_FAST_MODEL=claude-haiku-4-5</code></pre></div>
+            <div><div className="flex items-center justify-between mb-1"><label className="text-xs text-gray-500">② 方式B · 永久配置 ~/.claude/settings.json</label><button onClick={copyClaudeCodeConfig} className="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300">{copiedCc?<Check size={12} className="text-green-400"/>:<Copy size={12}/>}{copiedCc?'已复制':'复制'}</button></div><pre className="text-xs text-gray-300 bg-gray-800/50 rounded-lg p-2 overflow-x-auto"><code>{`{ "env": { "ANTHROPIC_BASE_URL": "${window.location.origin}", "ANTHROPIC_AUTH_TOKEN": "sk-...", "ANTHROPIC_MODEL": "claude-opus-4-8", "ANTHROPIC_SMALL_FAST_MODEL": "claude-haiku-4-5" } }`}</code></pre></div>
             <p className="text-xs text-amber-300/90">③ 项目目录运行 <code className="px-1 rounded bg-gray-800">claude</code> 即可。⚠️ 必须设 ANTHROPIC_MODEL（可选 claude-opus-4-8 / claude-sonnet-4-6 / claude-haiku-4-5），否则报“模型不存在”。</p>
           </div>)}
         </div>)}
@@ -139,7 +108,7 @@ model_provider = "aiotedu"
 
 [model_providers.aiotedu]
 name = "aiotedu"
-base_url = "${window.location.origin}/api/v1"
+base_url = "${window.location.origin}/v1"
 wire_api = "chat"
 env_key = "AIOTEDU_API_KEY"`}</code></pre></div>
             <p className="text-xs text-amber-300/90">③ 运行 <code className="px-1 rounded bg-gray-800">codex</code> 即可。可把 model 换成任意可用模型 ID（见上方「可用模型」）。</p>
@@ -149,7 +118,7 @@ env_key = "AIOTEDU_API_KEY"`}</code></pre></div>
           {showCcSwitch && (<div className="mt-3 space-y-2 text-sm text-gray-400">
             <p className="text-xs">① 安装：macOS <code className="px-1 rounded bg-gray-800">brew install --cask cc-switch</code>；Windows 到 <a href="https://github.com/farion1231/cc-switch/releases" target="_blank" rel="noreferrer" className="text-blue-400 underline">GitHub Releases</a> 下载。</p>
             <p className="text-xs">② 打开 CC Switch（菜单栏/托盘图标）→ 右上角 <b className="text-gray-200">+</b> 添加供应商 → 工具选 <b className="text-gray-200">Claude Code</b>（或 Codex）→ 手动填写下方信息。</p>
-            <div><div className="flex items-center justify-between mb-1"><label className="text-xs text-gray-500">③ 填写内容</label><button onClick={copyCcsVals} className="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300">{copiedCcs?<Check size={12} className="text-green-400"/>:<Copy size={12}/>}{copiedCcs?'已复制':'复制'}</button></div><pre className="text-xs text-gray-300 bg-gray-800/50 rounded-lg p-2 overflow-x-auto"><code>Base URL: {window.location.origin}/api{"\n"}API Key: {(profile?.api_key||'').slice(0,12)}...{"\n"}模型: claude-opus-4-8</code></pre></div>
+            <div><div className="flex items-center justify-between mb-1"><label className="text-xs text-gray-500">③ 填写内容</label><button onClick={copyCcsVals} className="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300">{copiedCcs?<Check size={12} className="text-green-400"/>:<Copy size={12}/>}{copiedCcs?'已复制':'复制'}</button></div><pre className="text-xs text-gray-300 bg-gray-800/50 rounded-lg p-2 overflow-x-auto"><code>Base URL: {window.location.origin}{"\n"}API Key: {(profile?.api_key||'').slice(0,12)}...{"\n"}模型: claude-opus-4-8</code></pre></div>
             <p className="text-xs text-amber-300/90">④ 点「启用」即写入对应工具配置，Claude Code 支持热切换免重启。</p>
           </div>)}
         </div>

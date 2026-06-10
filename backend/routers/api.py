@@ -8,7 +8,7 @@ from models import User, ModelConfig, RequestLog
 from auth import get_current_user
 from database import get_db
 from services.relay import (
-    find_channel, find_model_config,
+    find_channel, find_model_config, normalize_model_name,
     relay_chat_completion, relay_chat_completion_stream,
     relay_anthropic_passthrough, relay_anthropic_passthrough_stream,
     relay_anthropic_via_openai, relay_anthropic_via_openai_stream,
@@ -47,7 +47,8 @@ async def chat_completions(
     db: AsyncSession = Depends(get_db),
 ):
     body = await request.json()
-    model_name = body.get("model", "")
+    model_name = normalize_model_name(body.get("model", ""))
+    body["model"] = model_name  # Normalize for downstream relay
     stream = body.get("stream", False)
 
     if not model_name:
@@ -112,7 +113,8 @@ async def anthropic_messages(
     body = await request.json()
     import logging
     logging.getLogger("uvicorn").info(f"Messages body: {json.dumps(body, ensure_ascii=False)[:500]}")
-    model_name = body.get("model", "")
+    model_name = normalize_model_name(body.get("model", ""))
+    body["model"] = model_name  # Normalize for downstream relay
     stream = body.get("stream", False)
 
     if not model_name:

@@ -53,7 +53,7 @@ export default function QuickGuide() {
             <Key size={24} className="text-blue-400" /> 获取 API Key
           </h2>
           <p className="text-gray-400">
-            注册账号后在个人主页即可查看 API Key。接口地址统一为 <code className="px-2 py-0.5 rounded bg-gray-800 text-blue-400 font-mono text-sm">https://ai.aiotedu.cc/api/v1</code>
+            注册账号后在个人主页即可查看 API Key。Anthropic 原生接口地址：<code className="px-2 py-0.5 rounded bg-gray-800 text-blue-400 font-mono text-sm">https://ai.aiotedu.cc</code>　·　OpenAI 兼容接口地址：<code className="px-2 py-0.5 rounded bg-gray-800 text-blue-400 font-mono text-sm">https://ai.aiotedu.cc/v1</code>
           </p>
         </section>
 
@@ -64,7 +64,7 @@ export default function QuickGuide() {
           <p className="text-gray-400">第 1 步：安装 Claude Code（已装可跳过）：</p>
           <CodeBlock id="cc0" lang="终端" code={`npm install -g @anthropic-ai/claude-code`} />
           <p className="text-gray-400">第 2 步：把下面 4 行<b className="text-orange-300">一起</b>复制到终端执行（把 <code className="px-1.5 py-0.5 rounded bg-gray-800 text-orange-400 font-mono text-xs">sk-你的APIKey</code> 换成你的 Key）：</p>
-          <CodeBlock id="cc1" lang="终端 (macOS / Linux)" code={`export ANTHROPIC_BASE_URL=https://ai.aiotedu.cc/api
+          <CodeBlock id="cc1" lang="终端 (macOS / Linux)" code={`export ANTHROPIC_BASE_URL=https://ai.aiotedu.cc
 export ANTHROPIC_AUTH_TOKEN=sk-你的APIKey
 export ANTHROPIC_MODEL=claude-opus-4-8
 export ANTHROPIC_SMALL_FAST_MODEL=claude-haiku-4-5`} />
@@ -72,7 +72,7 @@ export ANTHROPIC_SMALL_FAST_MODEL=claude-haiku-4-5`} />
           <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-sm text-amber-200/90 space-y-1.5">
             <p>⚠️ <b>必须设置 <code className="font-mono">ANTHROPIC_MODEL</code></b>：本站不使用 Claude 官方默认模型名，不设会报“模型不存在”。可选 <code className="font-mono">claude-opus-4-8</code> / <code className="font-mono">claude-sonnet-4-6</code> / <code className="font-mono">claude-haiku-4-5</code>。</p>
             <p>💡 <code className="font-mono">ANTHROPIC_SMALL_FAST_MODEL</code> 是后台小任务用的便宜模型，设为 <code className="font-mono">claude-haiku-4-5</code> 更省 T粒。</p>
-            <p>🪟 Windows（PowerShell）：把每行写成 <code className="font-mono">$env:ANTHROPIC_BASE_URL="https://ai.aiotedu.cc/api"</code> 这种形式。</p>
+            <p>🪟 Windows（PowerShell）：把每行写成 <code className="font-mono">$env:ANTHROPIC_BASE_URL="https://ai.aiotedu.cc"</code> 这种形式。</p>
           </div>
         </section>
 
@@ -81,9 +81,9 @@ export ANTHROPIC_SMALL_FAST_MODEL=claude-haiku-4-5`} />
             <Globe size={24} className="text-green-400" /> OpenAI 兼容接口
           </h2>
           <p className="text-gray-400">所有模型均支持 OpenAI 兼容格式，可直接接入 Cursor、Continue、Aider 等工具：</p>
-          <CodeBlock id="op1" lang="环境变量" code={`export OPENAI_BASE_URL=https://ai.aiotedu.cc/api/v1
+          <CodeBlock id="op1" lang="环境变量" code={`export OPENAI_BASE_URL=https://ai.aiotedu.cc/v1
 export OPENAI_API_KEY=sk-你的APIKey`} />
-          <CodeBlock id="op2" lang="curl 测试" code={`curl https://ai.aiotedu.cc/api/v1/chat/completions \
+          <CodeBlock id="op2" lang="curl 测试" code={`curl https://ai.aiotedu.cc/v1/chat/completions \
   -H "Authorization: Bearer sk-你的APIKey" \
   -H "Content-Type: application/json" \
   -d '{"model":"deepseek-v4-flash","messages":[{"role":"user","content":"你好"}]}'`} />

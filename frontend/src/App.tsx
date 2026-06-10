@@ -2,24 +2,18 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { ThemeProvider } from './lib/theme'
 import { api, setToken } from './lib/api'
-import Layout from './components/Layout'
 import UserLayout from './components/UserLayout'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import QuickGuide from './pages/QuickGuide'
 import LandingPage from './pages/LandingPage'
-import Dashboard from './pages/Dashboard'
 import StudentDashboard from './pages/StudentDashboard'
 import StudentProfile from './pages/StudentProfile'
 import ApiKeysPage from './pages/ApiKeysPage'
-import Channels from './pages/Channels'
-import Models from './pages/Models'
-import Users from './pages/Users'
-import Logs from './pages/Logs'
-import RedeemCodes from './pages/RedeemCodes'
-import AutoGen from './pages/AutoGen'
-import GuideEditor from './pages/GuideEditor'
-import AdminMessages from './pages/AdminMessages'
+
+// 管理后台已迁移到 new-api 自带控制台(https://nai.aiotedu.cc)。
+// 学生端保留本前端;管理员登录后引导至该后台,不再使用旧 admin 页面。
+const ADMIN_CONSOLE_URL = 'https://admin-nai.aiotedu.cc'
 
 export default function App() {
   const [user, setUser] = useState<any>(null)
@@ -54,24 +48,16 @@ function AppInner({ user, loading, setUser }: { user: any; loading: boolean; set
     </Routes>
   )
 
-  // Admin view
+  // Admin view:管理后台已迁移到 new-api 自带控制台,引导跳转。
   if (user.role === 'admin') {
     return (
-      <Layout user={user}>
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/channels" element={<Channels />} />
-          <Route path="/models" element={<Models />} />
-          <Route path="/users" element={<Users />} />
-          <Route path="/logs" element={<Logs />} />
-          <Route path="/redeem" element={<RedeemCodes />} />
-          <Route path="/autogen" element={<AutoGen />} />
-          <Route path="/guide-edit" element={<GuideEditor />} />
-          <Route path="/messages" element={<AdminMessages />} />
-          <Route path="/guide" element={<QuickGuide />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Layout>
+      <div className="flex flex-col items-center justify-center h-screen gap-4 text-gray-300">
+        <p className="text-lg">管理后台已迁移至新版控制台</p>
+        <a href={ADMIN_CONSOLE_URL} className="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white">
+          前往管理后台 →
+        </a>
+        <button onClick={() => { setToken(null); setUser(null) }} className="text-sm text-gray-500 hover:text-gray-300">退出登录</button>
+      </div>
     )
   }
 

@@ -1,6 +1,5 @@
 import { useNavigate, Link, useLocation } from 'react-router-dom'
 import ThemeToggle from './ThemeToggle'
-import FloatingMessage from './FloatingMessage'
 import { setToken } from '../lib/api'
 import { LogOut, LayoutDashboard, Key, BookOpen, User, Coins, Ticket, Cpu, Clock, Wallet, Settings } from 'lucide-react'
 
@@ -82,7 +81,6 @@ export default function UserLayout({ user, children }: { user: any; children: Re
       {/* 主内容 */}
       <main className="flex-1 min-w-0 px-6 py-8">
         <div className="max-w-5xl mx-auto">{children}</div>
-        <FloatingMessage />
       </main>
     </div>
   )

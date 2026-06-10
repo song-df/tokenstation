@@ -8,7 +8,9 @@ export default function StudentProfile() {
   const [profile, setProfile] = useState<any>(null)
   const [displayName, setDisplayName] = useState('')
   const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [msg, setMsg] = useState('')
   const [msgType, setMsgType] = useState<'success' | 'error'>('success')
   const [saving, setSaving] = useState(false)
@@ -29,7 +31,23 @@ export default function StudentProfile() {
   const saveProfile = async (e: FormEvent) => {
     e.preventDefault(); setMsg(''); setSaving(true)
     try {
-      await api.updateProfile({ display_name: displayName, email, password: password || undefined })
+      // 密码修改的前端校验
+      if (newPassword || currentPassword) {
+        if (!currentPassword) throw new Error('请输入当前密码')
+        if (!newPassword) throw new Error('请输入新密码')
+        if (newPassword.length < 6) throw new Error('新密码至少需要 6 个字符')
+        if (newPassword !== confirmPassword) throw new Error('两次输入的新密码不一致')
+      }
+      await api.updateProfile({
+        display_name: displayName,
+        email,
+        original_password: currentPassword || undefined,
+        password: newPassword || undefined,
+      })
+      // 密码修改成功后清空所有密码字段
+      setCurrentPassword('')
+      setNewPassword('')
+      setConfirmPassword('')
       setMsg('保存成功'); setMsgType('success')
     } catch (e: any) { setMsg(e.message); setMsgType('error') }
     finally { setSaving(false) }
@@ -88,8 +106,16 @@ export default function StudentProfile() {
             <input className={inputClass} type="email" value={email} onChange={e => setEmail(e.target.value)} />
           </div>
           <div>
-            <label className="flex items-center gap-1 text-xs text-gray-500 mb-1"><Lock size={12} /> 新密码（留空不修改）</label>
-            <input className={inputClass} type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="留空则不修改密码" />
+            <label className="flex items-center gap-1 text-xs text-gray-500 mb-1"><Lock size={12} /> 当前密码</label>
+            <input className={inputClass} type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} placeholder="修改密码时必填" />
+          </div>
+          <div>
+            <label className="flex items-center gap-1 text-xs text-gray-500 mb-1"><Lock size={12} /> 新密码</label>
+            <input className={inputClass} type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="留空则不修改密码" />
+          </div>
+          <div>
+            <label className="flex items-center gap-1 text-xs text-gray-500 mb-1"><Lock size={12} /> 确认新密码</label>
+            <input className={inputClass} type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="请再次输入新密码" />
           </div>
         </div>
         <button type="submit" disabled={saving} className="px-6 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm transition-colors disabled:opacity-50">

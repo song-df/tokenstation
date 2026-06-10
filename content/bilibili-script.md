@@ -60,7 +60,7 @@
 >
 > 【逐行高亮显示命令】
 > ```
-> export ANTHROPIC_BASE_URL=https://ai.aiotedu.cc/api
+> export ANTHROPIC_BASE_URL=https://ai.aiotedu.cc
 > export ANTHROPIC_AUTH_TOKEN=sk-你的Key
 > export ANTHROPIC_MODEL=claude-opus-4-8
 > ```
@@ -105,7 +105,7 @@
 
 > 「除了 Claude Code，同一个 Key 还能接其他工具——」
 >
-> 「Cursor 和 Continue：把 OpenAI Base URL 设成 ai.aiotedu.cc/api/v1，Key 填你的 API Key 就行。」
+> 「Cursor 和 Continue：把 OpenAI Base URL 设成 ai.aiotedu.cc/v1，Key 填你的 API Key 就行。」
 >
 > 「Codex CLI：写到 ~/.codex/config.toml 里，格式评论区有。」
 >
@@ -135,7 +135,7 @@
 📋 Claude Code 永久配置（~/.claude/settings.json）：
 {
   "env": {
-    "ANTHROPIC_BASE_URL": "https://ai.aiotedu.cc/api",
+    "ANTHROPIC_BASE_URL": "https://ai.aiotedu.cc",
     "ANTHROPIC_AUTH_TOKEN": "sk-你的APIKey",
     "ANTHROPIC_MODEL": "claude-opus-4-8",
     "ANTHROPIC_SMALL_FAST_MODEL": "claude-haiku-4-5"
@@ -148,7 +148,7 @@ model_provider = "aiotedu"
 
 [model_providers.aiotedu]
 name = "aiotedu"
-base_url = "https://ai.aiotedu.cc/api/v1"
+base_url = "https://ai.aiotedu.cc/v1"
 wire_api = "chat"
 env_key = "AIOTEDU_API_KEY"
 

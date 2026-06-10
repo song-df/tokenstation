@@ -1,5 +1,6 @@
 from __future__ import annotations
 import json
+import re
 import httpx
 import uuid
 from typing import AsyncGenerator
@@ -46,6 +47,19 @@ _MODEL_MAP = {
 
 def _map_model(name: str) -> str:
     return _MODEL_MAP.get(name, name)
+
+
+# ── Model name normalization ──
+# Agent tools often append context-window size (e.g. claude-opus-4-8[1M]).
+# Strip it so lookups and mappings work correctly.
+
+_CTX_SUFFIX_RE = re.compile(r'\[(\d+[kKmM])\]$')
+
+
+def normalize_model_name(name: str) -> str:
+    """Strip trailing context-window annotation like [1M] or [200k] from model name."""
+    return _CTX_SUFFIX_RE.sub('', name)
+
 
 
 def _check_response_error(data: dict, response_status: int) -> str:

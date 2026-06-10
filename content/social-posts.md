@@ -17,7 +17,7 @@
 
 **接入方式：**
 ```
-export ANTHROPIC_BASE_URL=https://ai.aiotedu.cc/api
+export ANTHROPIC_BASE_URL=https://ai.aiotedu.cc
 export ANTHROPIC_AUTH_TOKEN=sk-你的Key
 export ANTHROPIC_MODEL=claude-opus-4-8
 ```
@@ -73,7 +73,7 @@ Anthropic 的 API 国内直连不了，每次都要挂代理。代理慢了 Clau
 
 国内直连，三行命令接入：
 ```
-export ANTHROPIC_BASE_URL=https://ai.aiotedu.cc/api
+export ANTHROPIC_BASE_URL=https://ai.aiotedu.cc
 export ANTHROPIC_AUTH_TOKEN=sk-你的Key
 export ANTHROPIC_MODEL=claude-opus-4-8
 ```

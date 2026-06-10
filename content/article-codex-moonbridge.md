@@ -95,7 +95,7 @@ wire_api = "responses"
 **Claude Code** 说的是 Anthropic Messages 协议，**T粒加油站原生支持，直连无需任何桥：**
 
 ```
-Base URL: https://ai.aiotedu.cc/api
+Base URL: https://ai.aiotedu.cc
 API Key: 你的 Key
 模型: claude-opus-4-8
 ```
@@ -105,7 +105,7 @@ API Key: 你的 Key
 **Cursor / Aider / Continue** 说的是 Chat Completions，同样直连：
 
 ```
-Base URL: https://ai.aiotedu.cc/api/v1
+Base URL: https://ai.aiotedu.cc/v1
 API Key: 你的 Key
 ```
 

@@ -29,7 +29,7 @@
 **接入 Claude Code，三行命令：**
 
 ```bash
-export ANTHROPIC_BASE_URL=https://ai.aiotedu.cc/api
+export ANTHROPIC_BASE_URL=https://ai.aiotedu.cc
 export ANTHROPIC_AUTH_TOKEN=sk-你的APIKey
 export ANTHROPIC_MODEL=claude-opus-4-8
 export ANTHROPIC_SMALL_FAST_MODEL=claude-haiku-4-5
@@ -73,7 +73,7 @@ export ANTHROPIC_SMALL_FAST_MODEL=claude-haiku-4-5
 ```json
 {
   "env": {
-    "ANTHROPIC_BASE_URL": "https://ai.aiotedu.cc/api",
+    "ANTHROPIC_BASE_URL": "https://ai.aiotedu.cc",
     "ANTHROPIC_AUTH_TOKEN": "sk-你的APIKey",
     "ANTHROPIC_MODEL": "claude-opus-4-8",
     "ANTHROPIC_SMALL_FAST_MODEL": "claude-haiku-4-5"
@@ -88,7 +88,7 @@ model_provider = "aiotedu"
 
 [model_providers.aiotedu]
 name = "aiotedu"
-base_url = "https://ai.aiotedu.cc/api/v1"
+base_url = "https://ai.aiotedu.cc/v1"
 wire_api = "chat"
 env_key = "AIOTEDU_API_KEY"
 ```
