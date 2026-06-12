@@ -31,3 +31,5 @@ deploy.sh
 
 # Vite dep cache
 .vite/
+*.zip
+*.tar.gz

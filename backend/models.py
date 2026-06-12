@@ -102,6 +102,8 @@ class RedeemCode(Base):
     batch_id = Column(String(32), default="")
     created_at = Column(DateTime, default=datetime.now)
     reserved_at = Column(DateTime, nullable=True)
+    is_shipped = Column(Boolean, default=False)
+    shipped_at = Column(DateTime, nullable=True)
 
 
 

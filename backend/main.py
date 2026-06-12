@@ -15,6 +15,15 @@ from routers import admin, api, student, auth_public, redeem, autogen, keys
 async def lifespan(app: FastAPI):
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        # Schema patches for existing DBs (SQLite doesn't auto-migrate)
+        for stmt in [
+            "ALTER TABLE redeem_codes ADD COLUMN is_shipped BOOLEAN DEFAULT FALSE",
+            "ALTER TABLE redeem_codes ADD COLUMN shipped_at DATETIME",
+        ]:
+            try:
+                await conn.run_sync(lambda c, s=stmt: c.exec_driver_sql(s))
+            except Exception:
+                pass  # column already exists
     async with async_session() as session:
         r = await session.execute(select(User).where(User.role == UserRole.admin))
         if not r.scalar_one_or_none():

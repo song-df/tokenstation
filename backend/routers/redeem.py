@@ -125,9 +125,10 @@ async def get_codes_external(
     amount = data.get("amount", 0)
     limit = data.get("limit", 0)
 
-    # Only return codes that have never been reserved
+    # Only return codes that have never been reserved or shipped
     q = select(RedeemCode).where(
         RedeemCode.is_used == False,
+        RedeemCode.is_shipped == False,
         RedeemCode.reserved_at == None
     )
     if batch_id:
@@ -155,6 +156,57 @@ async def get_codes_external(
     }
 
 
+@router.post("/external/allocate")
+async def allocate_code(
+    data: dict,
+    db: AsyncSession = Depends(get_db),
+):
+    """External API: allocate ONE unused+unshipped code of a specific amount.
+    Marks it as shipped so it won't be allocated again.
+    POST JSON: { "system_secret": "...", "amount": 1000 }
+    Returns: { "code": "...", "amount": 1000 } or 404 if none available.
+    """
+    from config import settings
+    secret = data.get("system_secret", "")
+    if not secret or secret != settings.system_api_secret:
+        raise HTTPException(403, "Invalid system secret")
+
+    amount = data.get("amount", 0)
+    if not amount or amount <= 0:
+        raise HTTPException(400, "Invalid amount")
+
+    # Find one available code: not used, not shipped, not reserved
+    r = await db.execute(
+        select(RedeemCode)
+        .where(
+            RedeemCode.amount == amount,
+            RedeemCode.is_used == False,
+            RedeemCode.is_shipped == False,
+            RedeemCode.reserved_at == None,
+        )
+        .order_by(RedeemCode.created_at)
+        .limit(1)
+    )
+    code = r.scalar_one_or_none()
+    if not code:
+        raise HTTPException(404, f"No available codes for amount {amount}")
+
+    # Mark as shipped
+    code.is_shipped = True
+    code.shipped_at = datetime.now()
+    await db.commit()
+
+    # Trigger auto-gen check
+    await check_and_autogen(db, amount)
+
+    return {
+        "code": code.code,
+        "amount": code.amount,
+        "batch_id": code.batch_id,
+        "created_at": code.created_at.isoformat(),
+    }
+
+
 # ── Student: use a code ──
 
 @router.post("/use")
@@ -176,7 +228,9 @@ async def use_code(
     rc.is_used = True
     rc.used_by = user.id
     rc.used_at = datetime.now()
-    rc.reserved_at = None  # clear reservation
+    rc.reserved_at = None   # clear reservation
+    rc.is_shipped = False   # clear shipped flag
+    rc.shipped_at = None
 
     # Add tokens to user
     user.quota += amount
