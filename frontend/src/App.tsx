@@ -7,6 +7,7 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import QuickGuide from './pages/QuickGuide'
 import CodexGuide from './pages/CodexGuide'
+import ClaudeCodeGuide from './pages/ClaudeCodeGuide'
 import LandingPage from './pages/LandingPage'
 import StudentDashboard from './pages/StudentDashboard'
 import StudentProfile from './pages/StudentProfile'
@@ -44,6 +45,7 @@ function AppInner({ user, loading, setUser }: { user: any; loading: boolean; set
       <Route path="/" element={<LandingPage />} />
       <Route path="/guide" element={<QuickGuide />} />
       <Route path="/guide/codex" element={<CodexGuide />} />
+      <Route path="/guide/claude-code" element={<ClaudeCodeGuide />} />
       <Route path="/register" element={<Register />} />
       <Route path="/login" element={<Login onLogin={setUser} />} />
       <Route path="*" element={<Navigate to="/" replace />} />
@@ -72,6 +74,7 @@ function AppInner({ user, loading, setUser }: { user: any; loading: boolean; set
         <Route path="/keys" element={<ApiKeysPage />} />
         <Route path="/guide" element={<QuickGuide />} />
         <Route path="/guide/codex" element={<CodexGuide />} />
+        <Route path="/guide/claude-code" element={<ClaudeCodeGuide />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </UserLayout>

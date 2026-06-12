@@ -63,6 +63,12 @@ export function getToken() { return token; }
 
 function quotaToTli(q: number): number { return (q || 0) / QUOTA_PER_TLI; }
 
+// 确保 key 以 sk- 开头（兼容 new-api 有时存 sk- 有时不存的情况）
+function ensureSkPrefix(key: string): string {
+  const raw = String(key || '');
+  return 'sk-' + (raw.startsWith('sk-') ? raw.slice(3) : raw);
+}
+
 async function request(path: string, options: RequestInit = {}) {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -88,11 +94,21 @@ async function buildProfile() {
   try {
     const toks = await request('/token/?p=1&size=50');
     const items = (toks && toks.items) ? toks.items : (Array.isArray(toks) ? toks : []);
-    const active = items.filter((t: any) => t.status === 1);
+    let active = items.filter((t: any) => t.status === 1);
+    // 新用户如果没有 token，自动创建一个
+    if (active.length === 0) {
+      await request('/token/', {
+        method: 'POST',
+        body: JSON.stringify({ name: 'legacy', unlimited_quota: true, expired_time: -1, group: 'default', model_limits_enabled: false }),
+      });
+      const toks2 = await request('/token/?p=1&size=50');
+      const items2 = (toks2 && toks2.items) ? toks2.items : (Array.isArray(toks2) ? toks2 : []);
+      active = items2.filter((t: any) => t.status === 1);
+    }
     const primary = active.find((t: any) => t.name === 'legacy') || active[0];
     if (primary) {
       const r = await request(`/token/${primary.id}/key`, { method: 'POST' });
-      apiKey = 'sk-' + (r.key || r.data?.key || '');
+      apiKey = ensureSkPrefix(r.key || r.data?.key || '');
     }
   } catch { /* 没有 key 时留空 */ }
   return {
@@ -185,7 +201,7 @@ export const api = {
   // 取某把 key 的明文(供"复制"按钮调用)
   getKeyPlain: async (id: number) => {
     const r = await request(`/token/${id}/key`, { method: 'POST' });
-    return 'sk-' + (r.key || r.data?.key || '');
+    return ensureSkPrefix(r.key || r.data?.key || '');
   },
   createKey: async (name: string) => {
     // new-api 创建接口不返回明文 key,需创建后再单独取明文(同 buildProfile 的做法)
@@ -203,7 +219,7 @@ export const api = {
     }
     if (!id) return { name, key: '' };
     const r = await request(`/token/${id}/key`, { method: 'POST' });
-    return { id, name, key: 'sk-' + (r.key || r.data?.key || '') };
+    return { id, name, key: ensureSkPrefix(r.key || r.data?.key || '') };
   },
   toggleKey: async (id: number) => {
     // new-api 没有 toggle;读当前状态后 PUT 反转

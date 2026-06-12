@@ -79,7 +79,7 @@ export default function StudentDashboard() {
         <button onClick={doRedeem} disabled={redeeming || !redeemCode.trim()} className="px-4 py-2 rounded-lg bg-yellow-600 hover:bg-yellow-500 text-white text-sm disabled:opacity-50 transition-colors">{redeeming ? '兑换中' : '兑换'}</button>
       </div>
       {redeemMsg && <p className={'text-xs mt-2 ' + (redeemMsg.includes('成功') ? 'text-green-400' : 'text-red-400')}>{redeemMsg}</p>}
-      <a href="https://m.tb.cn/h.RQVy0zQ?tk=HGMRg25TZjz" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-1 mt-3 py-1.5 rounded-lg bg-orange-600/20 hover:bg-orange-600/30 border border-orange-600/30 text-orange-400 text-xs transition-colors"><ShoppingCart size={12} /> 购买兑换券</a>
+      <a href="https://m.tb.cn/h.Rm8GLH2?tk=PJP1g39rTWz" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-1 mt-3 py-1.5 rounded-lg bg-orange-600/20 hover:bg-orange-600/30 border border-orange-600/30 text-orange-400 text-xs transition-colors"><ShoppingCart size={12} /> 购买兑换券</a>
     </div>
 
     <div id="api-config" className="scroll-mt-20 rounded-xl bg-gray-900 border border-gray-800 p-6">

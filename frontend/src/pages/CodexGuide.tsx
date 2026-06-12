@@ -80,10 +80,67 @@ defaults:
 trace:
   enabled: false
 
+models:
+  deepseek-v4-pro:
+    context_window: 1000000
+    max_output_tokens: 384000
+    display_name: "DeepSeek V4 Pro"
+    description: "DeepSeek V4 with selectable reasoning effort."
+    default_reasoning_level: "high"
+    supported_reasoning_levels:
+      - effort: "high"
+        description: "High reasoning effort"
+      - effort: "xhigh"
+        description: "Extra high reasoning effort"
+    supports_reasoning_summaries: true
+    default_reasoning_summary: "auto"
+    web_search:
+      support: "auto"
+    extensions:
+      deepseek_v4:
+        enabled: true
+  deepseek-v4-flash:
+    context_window: 1000000
+    max_output_tokens: 384000
+    display_name: "DeepSeek V4 Flash"
+    description: "DeepSeek V4 Flash with selectable reasoning effort."
+    default_reasoning_level: "high"
+    supported_reasoning_levels:
+      - effort: "high"
+        description: "High reasoning effort"
+      - effort: "xhigh"
+        description: "Extra high reasoning effort"
+    supports_reasoning_summaries: true
+    default_reasoning_summary: "auto"
+    web_search:
+      support: "auto"
+    extensions:
+      deepseek_v4:
+        enabled: true
+  claude-sonnet-4-6:
+    context_window: 200000
+    max_output_tokens: 64000
+    display_name: "Claude Sonnet 4"
+    description: "Frontier model for everyday coding."
+    default_reasoning_level: "medium"
+    supported_reasoning_levels:
+      - effort: "low"
+        description: "Fast responses with lighter reasoning"
+      - effort: "medium"
+        description: "Balances speed and reasoning depth"
+      - effort: "high"
+        description: "Greater reasoning depth for complex problems"
+      - effort: "xhigh"
+        description: "Extra high reasoning depth"
+    input_modalities:
+      - "text"
+      - "image"
+    supports_image_detail_original: true
+
 providers:
   default:
-    base_url = "${origin}"
-    api_key = "sk-你的APIKey"
+    base_url: "${origin}"
+    api_key: "sk-你的APIKey"
     version: "2023-06-01"
     user_agent: "moonbridge/1.0"
     web_search:
@@ -226,7 +283,7 @@ mkdir D:\\workspace
 cd D:\\workspace
 
 # 克隆 Moon Bridge
-git clone https://github.com/anthropics/moon-bridge.git
+git clone https://github.com/ZhiYi-R/moon-bridge.git
 cd moon-bridge`} />
 
           <h3 className="text-lg font-semibold text-white flex items-center gap-2">
@@ -238,8 +295,71 @@ cd moon-bridge`} />
           </p>
           <CodeBlock id="mb1" lang="config.yml" code={moonbridgeConfig} />
 
+          <div className="p-4 rounded-xl bg-purple-500/10 border border-purple-500/30 text-sm space-y-3">
+            <p className="text-purple-200 font-medium">📋 如何添加其他模型</p>
+            <p className="text-gray-400">配置中默认使用 <code className="font-mono">deepseek-v4-pro</code>，如果要添加其他模型（如 Claude、GPT 等），需要改<b>三个地方</b>：</p>
+            <ol className="list-decimal list-inside text-gray-400 space-y-2 ml-2">
+              <li>
+                <b className="text-white">models 节</b>：复制现有模型块，修改模型名和参数。例如添加 Claude Opus：
+                <CodeBlock id="mb-add-model" lang="yaml (追加到 models: 下)" code={`  claude-opus-4-8:
+    context_window: 200000
+    max_output_tokens: 64000
+    display_name: "Claude Opus 4.8"
+    description: "Most capable Claude model."
+    default_reasoning_level: "high"
+    supported_reasoning_levels:
+      - effort: "medium"
+        description: "Balanced reasoning"
+      - effort: "high"
+        description: "Deep reasoning"
+    input_modalities:
+      - "text"
+      - "image"`} />
+              </li>
+              <li>
+                <b className="text-white">providers.default.offers 节</b>：为新模型添加定价条目：
+                <CodeBlock id="mb-add-offer" lang="yaml (追加到 offers: 下)" code={`      - model: claude-opus-4-8
+        pricing:
+          input_price: 3
+          output_price: 15
+          cache_write_price: 3.75
+          cache_read_price: 0.30`} />
+              </li>
+              <li>
+                <b className="text-white">routes.moonbridge.model</b>：如果要切换默认模型，修改此行即可。例如改为 Claude Opus：
+                <CodeBlock id="mb-route" lang="yaml" code={`routes:
+  moonbridge:
+    model: claude-opus-4-8
+    provider: default`} />
+              </li>
+            </ol>
+            <p className="text-gray-500 text-xs">T粒加油站支持的模型 ID 及价格见<a href="/guide" className="text-blue-400 hover:text-blue-300 underline">使用说明</a>。修改配置后重启 Moon Bridge 生效。</p>
+          </div>
+
           <h3 className="text-lg font-semibold text-white flex items-center gap-2">
             <span className="w-6 h-6 rounded-full bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 text-xs">4</span>
+            启动前准备
+          </h3>
+
+          <p className="text-gray-300 font-medium mt-4">① 创建 data 目录（SQLite 数据库需要）</p>
+          <CodeBlock id="mb-prep1" lang="PowerShell" code={`cd D:\\workspace\\moon-bridge
+mkdir data`} />
+
+          <p className="text-gray-300 font-medium mt-4">② 检查端口是否被占用</p>
+          <CodeBlock id="mb-prep2" lang="PowerShell" code={`# 查看 38440 端口是否已被占用
+netstat -ano | findstr :38440`} />
+          <p className="text-gray-400 text-sm">
+            如果输出为空 → 端口空闲，可以启动。<br />
+            如果有输出 → 端口被占用（上次没关干净），记下最后一列的 <b>PID</b>，执行 <code className="px-1.5 py-0.5 rounded bg-gray-800 text-red-400 font-mono text-xs">taskkill /PID 进程号 /F</code> 结束旧进程。
+          </p>
+
+          <p className="text-gray-300 font-medium mt-4">③ 替换 API Key</p>
+          <p className="text-gray-400 text-sm">
+            确认 <code className="font-mono">config.yml</code> 中 <code className="px-1.5 py-0.5 rounded bg-gray-800 text-orange-400 font-mono text-xs">api_key: "sk-你的APIKey"</code> 已替换为你的真实 Key。在<a href="/" className="text-blue-400 hover:text-blue-300 underline">个人主页</a>可查看。
+          </p>
+
+          <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+            <span className="w-6 h-6 rounded-full bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 text-xs">5</span>
             启动 Moon Bridge
           </h3>
           <CodeBlock id="mb2" lang="PowerShell" code={`cd D:\\workspace\\moon-bridge
@@ -247,6 +367,60 @@ go run ./cmd/moonbridge -config config.yml`} />
           <p className="text-gray-400 text-sm">看到 <code className="px-1.5 py-0.5 rounded bg-gray-800 text-green-400 font-mono text-xs">Moon Bridge 监听于 127.0.0.1:38440</code> 就说明启动成功。</p>
           <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/30 text-sm text-blue-200/90">
             <p><b>保持此窗口运行</b>，后续步骤需要 Moon Bridge 在后台持续监听。</p>
+          </div>
+
+          <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-sm text-amber-200/90 space-y-2">
+            <p className="flex items-center gap-2 font-medium">⚠️ 启动报错排查</p>
+            <ul className="list-disc list-inside space-y-1 ml-1">
+              <li><b>unable to open database file</b> → 没创建 <code className="font-mono">data</code> 目录，执行上面第①步。</li>
+              <li><b>bind: address already in use</b> → 端口被占用，执行上面第②步。</li>
+              <li><b>Invalid token / 401</b> → <code className="font-mono">api_key</code> 还是占位符没改，执行上面第③步。</li>
+            </ul>
+          </div>
+
+          <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+            <span className="w-6 h-6 rounded-full bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 text-xs">6</span>
+            让 Moon Bridge 驻留后台（不绑定命令窗口）
+          </h3>
+          <p className="text-gray-400">
+            直接用 <code className="font-mono">go run</code> 启动的话，关掉 PowerShell 窗口服务就没了。下面两种方式任选其一：
+          </p>
+
+          <p className="text-gray-300 font-medium mt-4">方式一：编译成 exe + 后台启动（推荐）</p>
+          <CodeBlock id="mb3" lang="PowerShell" code={`# 先编译成可执行文件（以后直接启动 exe，不用每次 go run）
+cd D:\\workspace\\moon-bridge
+go build -o moonbridge.exe ./cmd/moonbridge
+
+# 后台启动（窗口隐藏，关掉终端也不影响）
+Start-Process -WindowStyle Hidden -FilePath ".\\moonbridge.exe" -ArgumentList "-config config.yml"`} />
+          <p className="text-gray-400 text-sm">
+            之后如需重启 Moon Bridge，先在任务管理器里结束 <code className="px-1 py-0.5 rounded bg-gray-800 text-gray-300 font-mono text-xs">moonbridge.exe</code> 进程，再执行上面 <code className="font-mono">Start-Process</code> 那行即可。
+          </p>
+
+          <p className="text-gray-300 font-medium mt-4">方式二：编译为 Windows 服务（开机自启）</p>
+          <p className="text-gray-400 text-sm">
+            用 <a href="https://nssm.cc/download" target="_blank" rel="noopener" className="text-blue-400 hover:text-blue-300 underline">nssm</a>（Non-Sucking Service Manager）将 moonbridge 注册为 Windows 服务：
+          </p>
+          <CodeBlock id="mb4" lang="PowerShell (管理员)" code={`# 先编译
+cd D:\\workspace\\moon-bridge
+go build -o moonbridge.exe ./cmd/moonbridge
+
+# 安装 nssm（装完后关掉此窗口，重新以管理员身份打开 PowerShell）
+winget install nssm
+
+# 注册并启动 Windows 服务
+nssm install MoonBridge "D:\\workspace\\moon-bridge\\moonbridge.exe" "-config config.yml"
+nssm set MoonBridge AppDirectory "D:\\workspace\\moon-bridge"
+nssm start MoonBridge`} />
+          <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-sm text-amber-200/90 mt-3">
+            <p>⚠️ <code className="font-mono">winget install nssm</code> 完成后，如果提示 <b>"无法将 nssm 项识别为 cmdlet"</b>，关掉当前 PowerShell 窗口，重新以管理员身份打开即可。winget 安装后 PATH 需要新终端才会生效。</p>
+          </div>
+          <p className="text-gray-400 text-sm">
+            注册后 Moon Bridge 会随 Windows 开机自动启动，可在 <code className="font-mono">services.msc</code> 中管理。
+          </p>
+
+          <div className="p-3 rounded-xl bg-green-500/10 border border-green-500/30 text-sm text-green-200/90">
+            <p>✅ 选任意一种方式启动后，在另一个终端执行 <code className="px-1 py-0.5 rounded bg-gray-800 text-green-400 font-mono text-xs">curl http://127.0.0.1:38440/health</code> 验证服务在运行。</p>
           </div>
         </section>
 
@@ -263,16 +437,20 @@ go run ./cmd/moonbridge -config config.yml`} />
             <span className="w-6 h-6 rounded-full bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 text-xs">1</span>
             生成配置
           </h3>
-          <CodeBlock id="cg1" lang="PowerShell (新窗口)" code={`# 第 1 条：设置 Codex 目录路径
+          <CodeBlock id="cg1" lang="PowerShell (新窗口)" code={`# 第 1 条：先进入 Moon Bridge 目录并设置 Codex 目录路径
+cd D:\\workspace\\moon-bridge
 $CODEX_HOME_DIR = if ($env:CODEX_HOME) { $env:CODEX_HOME } else { "$HOME\\.codex" }
 
 # 第 2 条：获取默认模型名
-$MODEL = go run ./cmd/moonbridge -print-codex-model -config "D:\\workspace\\moon-bridge\\config.yml"
+$MODEL = go run ./cmd/moonbridge -print-codex-model -config config.yml
 
 # 第 3 条：生成 config.toml + models_catalog.json
-go run ./cmd/moonbridge -print-codex-config "$MODEL" -codex-base-url "http://127.0.0.1:38440/v1" -codex-home "$CODEX_HOME_DIR" -config "D:\\workspace\\moon-bridge\\config.yml" | Set-Content -Path "$CODEX_HOME_DIR\\config.toml" -NoNewline`} />
+# -print-codex-config 会同时做两件事：
+#   ① 把 config.toml 内容输出到 stdout → 管道写入 ~/.codex/config.toml
+#   ② 把 models_catalog.json 自动写入 -codex-home 指定的目录
+go run ./cmd/moonbridge -print-codex-config "$MODEL" -codex-base-url "http://127.0.0.1:38440/v1" -codex-home "$CODEX_HOME_DIR" -config config.yml | Set-Content -Path "$CODEX_HOME_DIR\\config.toml" -NoNewline`} />
           <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/30 text-sm text-blue-200/90">
-            <p>注意：上述路径 <code className="font-mono">D:\\workspace\\moon-bridge</code> 请替换为你的实际 Moon Bridge 目录。</p>
+            <p><code className="font-mono">models_catalog.json</code> 由 <code className="font-mono">-print-codex-config</code> 自动写入 <code className="font-mono">-codex-home</code> 目录，<b>无需手动创建</b>。</p>
           </div>
 
           <h3 className="text-lg font-semibold text-white flex items-center gap-2">
