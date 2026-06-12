@@ -2,7 +2,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, desc
-from models import User, RequestLog, TopUp, ModelConfig, Referral, Message, UserTask
+from models import User, RequestLog, TopUp, ModelConfig, Referral, Message, UserTask, GuideContent
 from auth import get_current_user
 from database import get_db
 
@@ -305,3 +305,22 @@ async def get_topups(
             for t in topups
         ],
     }
+
+
+@router.get("/site-config")
+async def get_site_config(
+    key: str = Query(None),
+    db: AsyncSession = Depends(get_db),
+    _: User = Depends(get_current_user),
+):
+    """Read site configuration by key (e.g. purchase_link). Returns all if no key given."""
+    q = select(GuideContent)
+    if key:
+        q = q.where(GuideContent.section_key == f"redeem_{key}" if not key.startswith("redeem_") else GuideContent.section_key == key)
+        r = await db.execute(q)
+        row = r.scalar_one_or_none()
+        if not row:
+            return {"key": key, "value": ""}
+        return {"key": row.section_key, "title": row.title, "value": row.content}
+    r = await db.execute(q.order_by(GuideContent.id))
+    return [{"key": s.section_key, "title": s.title, "value": s.content} for s in r.scalars().all()]

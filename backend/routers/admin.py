@@ -285,6 +285,7 @@ async def get_guide_sections(
             ("openai", "OpenAI 兼容接口", "使用说明..."),
             ("models", "可用模型", "模型列表..."),
             ("pricing", "定价说明", "10元=1000T粒..."),
+            ("redeem_purchase_link", "购买兑换券链接", "https://m.tb.cn/h.RPaDRYm?tk=bzAWgW5A5RY"),
         ]
         for key, title, content in defaults:
             db.add(GuideContent(section_key=key, title=title, content=content))

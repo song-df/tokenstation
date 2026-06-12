@@ -29,12 +29,14 @@ export default function StudentDashboard() {
   const [redeemMsg, setRedeemMsg] = useState('')
   const [redeeming, setRedeeming] = useState(false)
   const [copiedModel, setCopiedModel] = useState<string | null>(null)
+  const [purchaseUrl, setPurchaseUrl] = useState('')
 
   useEffect(() => {
     api.getStudentProfile().then(setProfile)
     api.getStudentModels().then(setModels)
     api.getStudentLogs(1, 10).then(setLogs)
     api.getStudentTopups(1, 10).then(setTopups)
+    api.getSiteConfig('purchase_link').then((r: any) => setPurchaseUrl(r.value || ''))
   }, [])
 
   const copyKey = () => { if (profile?.api_key) { navigator.clipboard.writeText(profile.api_key); setCopied(true); setTimeout(() => setCopied(false), 2000) } }
@@ -67,8 +69,27 @@ export default function StudentDashboard() {
         <button onClick={doRedeem} disabled={redeeming || !redeemCode.trim()} className="px-4 py-2 rounded-lg bg-yellow-600 hover:bg-yellow-500 text-white text-sm disabled:opacity-50 transition-colors">{redeeming ? '兑换中' : '兑换'}</button>
       </div>
       {redeemMsg && <p className={'text-xs mt-2 ' + (redeemMsg.includes('成功') ? 'text-green-400' : 'text-red-400')}>{redeemMsg}</p>}
-      <a href="https://m.tb.cn/h.Rm8GLH2?tk=PJP1g39rTWz" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-1 mt-3 py-1.5 rounded-lg bg-orange-600/20 hover:bg-orange-600/30 border border-orange-600/30 text-orange-400 text-xs transition-colors"><ShoppingCart size={12} /> 购买兑换券</a>
+      {purchaseUrl && (
+        <a href={purchaseUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-1 mt-3 py-1.5 rounded-lg bg-orange-600/20 hover:bg-orange-600/30 border border-orange-600/30 text-orange-400 text-xs transition-colors"><ShoppingCart size={12} /> 购买兑换券</a>
+      )}
     </div>
+              </div>
+              <p className="text-xs text-gray-500 mt-0.5">{t.description}</p>
+            </div>
+            {t.is_commission ? (
+              copiedRef ? <span className="text-xs text-green-400 px-3 py-1">已复制</span> :
+              <button onClick={() => { navigator.clipboard.writeText(window.location.origin + '/register?ref=' + (profile?.referral_code || '')); setCopiedRef(true); setTimeout(() => setCopiedRef(false), 2000) }} className="px-3 py-1 rounded-lg bg-pink-600/20 hover:bg-pink-600/30 text-pink-400 text-xs border border-pink-600/30">复制分享链接</button>
+            ) : t.key === 'verify_email' ? (
+              t.completed ? <span className="text-xs text-green-400">已完成</span> :
+              <button onClick={async () => { try { await api.verifyEmail(profile.email || ''); api.getStudentProfile().then(setProfile); api.getTasks().then(setTasks) } catch(e: any) { alert(e.message) } }} className="px-3 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs">验证</button>
+            ) : t.completed ? (
+              <span className="text-xs text-green-400">已完成</span>
+            ) : (
+              <span className="text-xs text-gray-500">{t.count !== undefined ? '已' + t.count + '次' : '-'}</span>
+            )}
+          </div>
+        ))}
+      </div>
 
     <div id="api-config" className="scroll-mt-20 rounded-xl bg-gray-900 border border-gray-800 p-6">
       <h2 className="flex items-center gap-2 text-lg font-semibold text-white mb-4"><Key size={18} className="text-blue-400" /> API 配置</h2>

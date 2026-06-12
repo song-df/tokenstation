@@ -229,6 +229,9 @@ export const api = {
   },
   deleteKey: (id: number) => request(`/token/${id}`, { method: 'DELETE' }),
 
+  // Site config (student-facing)
+  getSiteConfig: (key?: string) => request(`/student/site-config${key ? `?key=${key}` : ''}`),
+
   // ── 已砍掉的定制功能:留空实现,避免组件报错(任务/站内信,决策2) ──
   getTasks: async () => ({ items: [], tasks: [] }),
   sendMessage: async (_content: string) => ({ success: false, message: '该功能已下线' }),
