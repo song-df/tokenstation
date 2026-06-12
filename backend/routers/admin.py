@@ -379,3 +379,122 @@ async def list_logs(
         log._username = un
         rows.append(log)
     return {"total": total, "items": rows}
+
+
+# ── Proxy subscription management ─────────────────────────────────────────
+
+from models import ProxyPlan, ProxySubscription, ProxyTopUp
+
+
+@router.get("/proxy/subscriptions")
+async def admin_proxy_subs(
+    db: AsyncSession = Depends(get_db),
+    _=Depends(get_admin_user),
+):
+    """List all proxy subscriptions with user info."""
+    now = datetime.now()
+    r = await db.execute(
+        select(ProxySubscription)
+        .order_by(desc(ProxySubscription.created_at))
+    )
+    result = []
+    for sub in r.scalars().all():
+        # Look up username from new-api DB
+        username = f"user_{sub.user_id}"
+        try:
+            import sqlite3
+            conn = sqlite3.connect("file:/opt/newapi/data/data.db?mode=ro", uri=True)
+            conn.row_factory = sqlite3.Row
+            row = conn.execute("SELECT username FROM users WHERE id = ?", (sub.user_id,)).fetchone()
+            conn.close()
+            if row:
+                username = row["username"]
+        except Exception:
+            pass
+
+        is_active = sub.expires_at and sub.expires_at > now and not sub.canceled_at
+        days_remaining = max(0, (sub.expires_at - now).days + 1) if sub.expires_at and not sub.canceled_at else 0
+
+        result.append({
+            "id": sub.id,
+            "user_id": sub.user_id,
+            "username": username,
+            "plan_id": sub.plan_id,
+            "total_days": sub.total_days,
+            "started_at": sub.started_at.isoformat() if sub.started_at else None,
+            "expires_at": sub.expires_at.isoformat() if sub.expires_at else None,
+            "canceled_at": sub.canceled_at.isoformat() if sub.canceled_at else None,
+            "tli_spent": sub.tli_spent,
+            "is_active": is_active,
+            "days_remaining": days_remaining,
+        })
+    return result
+
+
+@router.post("/proxy/subscriptions/{sub_id}/cancel")
+async def admin_cancel_sub(
+    sub_id: int,
+    db: AsyncSession = Depends(get_db),
+    _=Depends(get_admin_user),
+):
+    """Admin force-cancel a subscription."""
+    r = await db.execute(select(ProxySubscription).where(ProxySubscription.id == sub_id))
+    sub = r.scalar_one_or_none()
+    if not sub:
+        raise HTTPException(404, "Subscription not found")
+    sub.canceled_at = datetime.now()
+    await db.commit()
+    from services.proxy import sync_singbox
+    await sync_singbox(db)
+    return {"ok": True}
+
+
+@router.get("/proxy/plans")
+async def admin_proxy_plans(
+    db: AsyncSession = Depends(get_db),
+    _=Depends(get_admin_user),
+):
+    """List proxy pricing plans."""
+    r = await db.execute(select(ProxyPlan).order_by(ProxyPlan.days))
+    plans = r.scalars().all()
+    return [
+        {"id": p.id, "name": p.name, "days": p.days, "price": p.price, "is_active": p.is_active}
+        for p in plans
+    ]
+
+
+@router.post("/proxy/plans")
+async def admin_create_plan(
+    data: dict,
+    db: AsyncSession = Depends(get_db),
+    _=Depends(get_admin_user),
+):
+    """Create a new proxy pricing plan."""
+    plan = ProxyPlan(
+        name=data.get("name", ""),
+        days=int(data.get("days", 30)),
+        price=float(data.get("price", 0)),
+    )
+    db.add(plan)
+    await db.commit()
+    await db.refresh(plan)
+    return {"id": plan.id, "name": plan.name, "days": plan.days, "price": plan.price}
+
+
+@router.put("/proxy/plans/{plan_id}")
+async def admin_update_plan(
+    plan_id: int,
+    data: dict,
+    db: AsyncSession = Depends(get_db),
+    _=Depends(get_admin_user),
+):
+    """Update a proxy pricing plan."""
+    r = await db.execute(select(ProxyPlan).where(ProxyPlan.id == plan_id))
+    plan = r.scalar_one_or_none()
+    if not plan:
+        raise HTTPException(404, "Plan not found")
+    for k in ("name", "days", "price", "is_active"):
+        if k in data:
+            setattr(plan, k, data[k])
+    await db.commit()
+    return {"id": plan.id, "name": plan.name, "days": plan.days, "price": plan.price, "is_active": plan.is_active}

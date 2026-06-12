@@ -1,4 +1,4 @@
-import { Terminal, Zap, Globe, Cpu, ArrowRight, Monitor } from 'lucide-react'
+import { Terminal, Zap, Globe, Cpu, ArrowRight, Monitor, Wifi } from 'lucide-react'
 
 export default function QuickGuide() {
   return (
@@ -27,6 +27,18 @@ export default function QuickGuide() {
         </section>
 
         <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <a href="/guide/flclash" className="group p-5 rounded-xl bg-gray-900 border border-gray-800 hover:border-emerald-500/40 transition-colors">
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Wifi size={20} className="text-emerald-400" />
+                  <h3 className="text-base font-semibold text-white">FlClash 代理客户端</h3>
+                </div>
+                <p className="text-sm text-gray-500">下载安装 FlClash、导入配置文件、开启代理，图文教程。</p>
+              </div>
+              <ArrowRight size={16} className="text-gray-700 group-hover:text-emerald-400 shrink-0 mt-1 transition-colors" />
+            </div>
+          </a>
           <a href="/guide/claude-code" className="group p-5 rounded-xl bg-gray-900 border border-gray-800 hover:border-orange-500/40 transition-colors">
             <div className="flex items-start justify-between">
               <div>

@@ -8,14 +8,14 @@ import Register from './pages/Register'
 import QuickGuide from './pages/QuickGuide'
 import CodexGuide from './pages/CodexGuide'
 import ClaudeCodeGuide from './pages/ClaudeCodeGuide'
+import FlClashGuide from './pages/FlClashGuide'
 import LandingPage from './pages/LandingPage'
 import StudentDashboard from './pages/StudentDashboard'
 import StudentProfile from './pages/StudentProfile'
 import ApiKeysPage from './pages/ApiKeysPage'
-
-// 管理后台已迁移到 new-api 自带控制台(https://nai.aiotedu.cc)。
-// 学生端保留本前端;管理员登录后引导至该后台,不再使用旧 admin 页面。
-const ADMIN_CONSOLE_URL = 'https://admin-nai.aiotedu.cc'
+import ProxySubscription from './pages/ProxySubscription'
+import AdminProxy from './pages/AdminProxy'
+import ReferralPage from './pages/ReferralPage'
 
 export default function App() {
   const [user, setUser] = useState<any>(null)
@@ -46,35 +46,28 @@ function AppInner({ user, loading, setUser }: { user: any; loading: boolean; set
       <Route path="/guide" element={<QuickGuide />} />
       <Route path="/guide/codex" element={<CodexGuide />} />
       <Route path="/guide/claude-code" element={<ClaudeCodeGuide />} />
+      <Route path="/guide/flclash" element={<FlClashGuide />} />
       <Route path="/register" element={<Register />} />
       <Route path="/login" element={<Login onLogin={setUser} />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
 
-  // Admin view:管理后台已迁移到 new-api 自带控制台,引导跳转。
-  if (user.role === 'admin') {
-    return (
-      <div className="flex flex-col items-center justify-center h-screen gap-4 text-gray-300">
-        <p className="text-lg">管理后台已迁移至新版控制台</p>
-        <a href={ADMIN_CONSOLE_URL} className="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white">
-          前往管理后台 →
-        </a>
-        <button onClick={() => { setToken(null); setUser(null) }} className="text-sm text-gray-500 hover:text-gray-300">退出登录</button>
-      </div>
-    )
-  }
-
-  // Student view
+  // Authenticated — admin and student share the same layout
+  // Admin gets extra nav items injected by UserLayout via user.role
   return (
     <UserLayout user={user}>
       <Routes>
         <Route path="/" element={<StudentDashboard />} />
         <Route path="/profile" element={<StudentProfile />} />
         <Route path="/keys" element={<ApiKeysPage />} />
+        <Route path="/proxy" element={<ProxySubscription />} />
+        <Route path="/referral" element={<ReferralPage />} />
         <Route path="/guide" element={<QuickGuide />} />
         <Route path="/guide/codex" element={<CodexGuide />} />
         <Route path="/guide/claude-code" element={<ClaudeCodeGuide />} />
+      <Route path="/guide/flclash" element={<FlClashGuide />} />
+        <Route path="/admin/proxy" element={<AdminProxy />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </UserLayout>

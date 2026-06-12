@@ -1,12 +1,14 @@
 import { useNavigate, Link, useLocation } from 'react-router-dom'
 import ThemeToggle from './ThemeToggle'
 import { setToken } from '../lib/api'
-import { LogOut, LayoutDashboard, Key, BookOpen, User, Coins, Ticket, Cpu, Clock, Wallet, Settings } from 'lucide-react'
+import { LogOut, LayoutDashboard, Key, BookOpen, User, Coins, Ticket, Cpu, Clock, Wallet, Settings, Wifi, Share2, ShieldCheck } from 'lucide-react'
 
 // 路由级 Tab
 const TABS = [
   { to: '/', label: '概览', icon: LayoutDashboard },
   { to: '/keys', label: 'Key 管理', icon: Key },
+  { to: '/proxy', label: '代理订阅', icon: Wifi },
+  { to: '/referral', label: '推荐有礼', icon: Share2 },
   { to: '/guide', label: '使用说明', icon: BookOpen },
   { to: '/profile', label: '个人资料', icon: User },
 ]
@@ -16,7 +18,6 @@ const ANCHORS = [
   { id: 'overview', label: '账户概览', icon: Coins },
   { id: 'redeem', label: '兑换 / 充值', icon: Ticket },
   { id: 'api-config', label: 'API 配置', icon: Settings },
-  { id: 'guide-usage', label: '快速使用说明', icon: BookOpen },
   { id: 'models', label: '可用模型', icon: Cpu },
   { id: 'logs', label: '使用记录', icon: Clock },
   { id: 'topups', label: '充值记录', icon: Wallet },
@@ -61,6 +62,16 @@ export default function UserLayout({ user, children }: { user: any; children: Re
                   </a>
                 )
               })}
+            </div>
+          )}
+
+          {user?.role === 'admin' && (
+            <div className="pt-4 mt-3 border-t border-amber-500/30">
+              <p className="px-3 pb-1 text-xs text-amber-500/70 uppercase tracking-wide">管理</p>
+              <Link to="/admin/proxy"
+                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${loc.pathname === '/admin/proxy' ? 'bg-amber-600/20 text-amber-300 font-medium' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200'}`}>
+                <ShieldCheck size={16} /> 代理管理
+              </Link>
             </div>
           )}
         </nav>

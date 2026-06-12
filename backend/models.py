@@ -30,6 +30,7 @@ class User(Base):
 
     top_ups = relationship("TopUp", back_populates="user")
     logs = relationship("RequestLog", back_populates="user")
+    proxy_subscription = relationship("ProxySubscription", back_populates="user", uselist=False)
 
 
 class Channel(Base):
@@ -197,3 +198,50 @@ class EmailVerification(Base):
     is_verified = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.now)
     expires_at = Column(DateTime, nullable=False)
+
+
+class ProxyPlan(Base):
+    """Pricing plans for proxy subscriptions."""
+    __tablename__ = "proxy_plans"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(64), nullable=False)
+    days = Column(Integer, nullable=False)
+    price = Column(Float, nullable=False)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.now)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+
+
+class ProxySubscription(Base):
+    """Active proxy subscription — one per user."""
+    __tablename__ = "proxy_subscriptions"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id"), unique=True, nullable=False, index=True)
+    hy2_password = Column(String(128), unique=True, nullable=False, index=True)
+    plan_id = Column(Integer, ForeignKey("proxy_plans.id"), nullable=False)
+    total_days = Column(Integer, nullable=False)
+    started_at = Column(DateTime, default=datetime.now, nullable=False)
+    expires_at = Column(DateTime, nullable=False)
+    canceled_at = Column(DateTime, nullable=True)
+    tli_spent = Column(Float, nullable=False)
+    created_at = Column(DateTime, default=datetime.now)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+
+    user = relationship("User", back_populates="proxy_subscription")
+
+
+class ProxyTopUp(Base):
+    """Audit log for proxy purchases."""
+    __tablename__ = "proxy_topups"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    plan_id = Column(Integer, nullable=True)
+    days = Column(Integer, nullable=False)
+    tli_amount = Column(Float, nullable=False)
+    remark = Column(String(256), default="")
+    created_at = Column(DateTime, default=datetime.now)
+
+    user = relationship("User")

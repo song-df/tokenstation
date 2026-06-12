@@ -234,4 +234,21 @@ export const api = {
   sendMessage: async (_content: string) => ({ success: false, message: '该功能已下线' }),
   verifyEmail: (email: string) => request('/user/register', { method: 'POST', body: JSON.stringify({ email, verification_only: true }) }),
   getMyMessages: async () => ({ items: [] }),
+
+  // ── 代理订阅 ──
+  getProxyStatus: async () => request('/proxy/status'),
+  subscribeProxy: async (planId: number, days: number) =>
+    request('/proxy/subscribe', { method: 'POST', body: JSON.stringify({ plan_id: planId, days }) }),
+  cancelProxy: async () => request('/proxy/cancel', { method: 'POST' }),
+  getReferral: async () => request('/proxy/referral'),
+
+  // ── 代理订阅（管理端）──
+  adminListProxySubs: async () => request('/proxy/admin/subscriptions'),
+  adminCancelProxySub: async (id: number) =>
+    request(`/proxy/admin/subscriptions/${id}/cancel`, { method: 'POST' }),
+  adminListProxyPlans: async () => request('/proxy/admin/plans'),
+  adminCreateProxyPlan: async (data: {name: string; days: number; price: number}) =>
+    request('/proxy/admin/plans', { method: 'POST', body: JSON.stringify(data) }),
+  adminUpdateProxyPlan: async (id: number, data: {name: string; days: number; price: number; is_active: boolean}) =>
+    request(`/proxy/admin/plans/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
 };

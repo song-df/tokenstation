@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Copy, Check, Terminal, Zap, Key } from 'lucide-react'
+import { Copy, Check, Terminal, Zap, Key, Download, AlertTriangle } from 'lucide-react'
 
 export default function ClaudeCodeGuide() {
   const [copied, setCopied] = useState<Record<string, boolean>>({})
@@ -50,45 +50,130 @@ export default function ClaudeCodeGuide() {
           </p>
         </section>
 
+        {/* ── 一、获取 API Key ── */}
         <section className="space-y-6">
           <h2 className="flex items-center gap-3 text-2xl font-bold">
-            <Key size={24} className="text-blue-400" /> 获取 API Key
+            <Key size={24} className="text-blue-400" /> 一、获取 API Key
           </h2>
           <p className="text-gray-400">
-            注册账号后在个人主页即可查看 API Key。Anthropic 原生接口地址：
+            注册账号后在「概览」页面或「Key 管理」页面查看 API Key。Anthropic 原生接口地址：
             <code className="px-2 py-0.5 rounded bg-gray-800 text-blue-400 font-mono text-sm">{origin}</code>
           </p>
         </section>
 
+        {/* ── 二、安装 Node.js ── */}
         <section className="space-y-6">
           <h2 className="flex items-center gap-3 text-2xl font-bold">
-            <Terminal size={24} className="text-orange-400" /> 接入步骤
+            <Download size={24} className="text-green-400" /> 二、安装 Node.js
           </h2>
+          <p className="text-gray-400">
+            Claude Code 需要 Node.js 运行环境。如果已安装（<code className="px-1.5 py-0.5 rounded bg-gray-800 text-gray-300 font-mono text-xs">node -v</code> 输出版本号 ≥ 18），可跳过此步骤。
+          </p>
 
-          <p className="text-gray-400">第 1 步：安装 Claude Code（已装可跳过）：</p>
-          <CodeBlock id="cc0" lang="终端" code="npm install -g @anthropic-ai/claude-code" />
+          <h3 className="text-base font-semibold text-white mt-4">🪟 Windows</h3>
+          <p className="text-gray-400 text-sm">打开 PowerShell，执行以下命令安装 nvm，然后用 nvm 安装 Node.js：</p>
+          <CodeBlock id="nvm-win" lang="PowerShell" code={`winget install CoreyButler.NVMforWindows
+nvm version
+nvm install 24.14.1
+nvm list
+node -v`} />
 
-          <p className="text-gray-400 mt-6">第 2 步：选择下面一种方式配置：</p>
+          <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-sm text-amber-200/90 space-y-1.5">
+            <p className="flex items-center gap-2"><AlertTriangle size={16} className="text-amber-400 shrink-0" /> 如果 <code className="font-mono">npm --version</code> 报权限错误，以<b>管理员身份</b>打开 PowerShell 执行：</p>
+            <CodeBlock id="nvm-fix" lang="PowerShell (管理员)" code={`Set-ExecutionPolicy RemoteSigned -Scope CurrentUser`} />
+            <p>输入 <b>Y</b> 确认，关掉终端重新打开即可正常使用 npm。</p>
+          </div>
 
-          <h3 className="text-base font-semibold text-white mt-4">方式 A · 环境变量（推荐）</h3>
-          <p className="text-gray-400 text-sm">把下面 4 行<b className="text-orange-300">一起</b>复制到终端执行（把 <code className="px-1.5 py-0.5 rounded bg-gray-800 text-orange-400 font-mono text-xs">sk-你的APIKey</code> 换成你的 Key）：</p>
-          <CodeBlock id="cc1" lang="终端 (macOS / Linux)" code={`export ANTHROPIC_BASE_URL=${origin}
+          <h3 className="text-base font-semibold text-white mt-6">🍎 macOS / 🐧 Linux</h3>
+          <CodeBlock id="nvm-mac" lang="终端 (macOS / Linux)" code={`# 安装 nvm（Node 版本管理器）
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+# 重启终端，然后安装 Node.js LTS
+nvm install --lts
+node -v
+npm -v`} />
+        </section>
+
+        {/* ── 三、安装 Claude Code ── */}
+        <section className="space-y-6">
+          <h2 className="flex items-center gap-3 text-2xl font-bold">
+            <Download size={24} className="text-orange-400" /> 三、安装 Claude Code
+          </h2>
+          <p className="text-gray-400">所有平台通用，终端执行一行命令即可：</p>
+          <CodeBlock id="cc-install" lang="终端" code={`npm install -g @anthropic-ai/claude-code
+# 验证安装
+claude --version`} />
+
+          <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-sm text-amber-200/90 space-y-1.5">
+            <p className="flex items-center gap-2"><AlertTriangle size={16} className="text-amber-400 shrink-0" /> macOS / Linux 如果报 <code className="font-mono">EACCES</code> 权限错误，加 <code className="font-mono">sudo</code> 即可：<code className="font-mono">sudo npm install -g @anthropic-ai/claude-code</code>。</p>
+            <p>也可以参考 <a href="https://docs.npmjs.com/resolving-eacces-permissions-errors-when-installing-packages-globally" target="_blank" rel="noopener" className="text-blue-400 hover:text-blue-300 underline">npm 官方文档</a> 用非 root 方式安装全局包。</p>
+          </div>
+        </section>
+
+        {/* ── 四、配置 ── */}
+        <section className="space-y-6">
+          <h2 className="flex items-center gap-3 text-2xl font-bold">
+            <Terminal size={24} className="text-cyan-400" /> 四、配置 Claude Code
+          </h2>
+          <p className="text-gray-400">选择下面一种方式，把 <b className="text-orange-300">sk-你的APIKey</b> 换成你的实际 Key。</p>
+
+          <h3 className="text-base font-semibold text-white mt-4">方式 A · 环境变量（临时生效，推荐快速测试）</h3>
+
+          <p className="text-gray-400 text-sm font-medium mt-4">🪟 Windows（PowerShell）：</p>
+          <CodeBlock id="cc-env-win" lang="PowerShell" code={`$env:ANTHROPIC_BASE_URL="${origin}"
+$env:ANTHROPIC_AUTH_TOKEN="sk-你的APIKey"
+$env:ANTHROPIC_MODEL="claude-opus-4-8"
+$env:ANTHROPIC_SMALL_FAST_MODEL="claude-haiku-4-5"`} />
+
+          <p className="text-gray-400 text-sm font-medium mt-4">🍎 macOS / 🐧 Linux（终端）：</p>
+          <CodeBlock id="cc-env-unix" lang="终端 (macOS / Linux)" code={`export ANTHROPIC_BASE_URL=${origin}
 export ANTHROPIC_AUTH_TOKEN=sk-你的APIKey
 export ANTHROPIC_MODEL=claude-opus-4-8
 export ANTHROPIC_SMALL_FAST_MODEL=claude-haiku-4-5`} />
 
-          <h3 className="text-base font-semibold text-white mt-4">方式 B · 永久配置</h3>
-          <p className="text-gray-400 text-sm">写入 <code className="px-1.5 py-0.5 rounded bg-gray-800 text-gray-300 font-mono text-xs">~/.claude/settings.json</code>，一次配置永久生效：</p>
-          <CodeBlock id="cc2" lang="JSON" code={`{
+          <h3 className="text-base font-semibold text-white mt-8">方式 B · 永久配置（一次配置，始终生效）</h3>
+          <p className="text-gray-400 text-sm">写入 <code className="px-1.5 py-0.5 rounded bg-gray-800 text-gray-300 font-mono text-xs">~/.claude/settings.json</code>（所有平台通用）：</p>
+
+          <p className="text-gray-400 text-sm font-medium mt-4">🪟 Windows（PowerShell）：</p>
+          <CodeBlock id="cc-perm-win" lang="PowerShell" code={`# 创建 .claude 目录
+mkdir "$env:USERPROFILE\\.claude" -Force
+
+# 写入配置文件
+@'
+{
   "env": {
     "ANTHROPIC_BASE_URL": "${origin}",
     "ANTHROPIC_AUTH_TOKEN": "sk-你的APIKey",
     "ANTHROPIC_MODEL": "claude-opus-4-8",
     "ANTHROPIC_SMALL_FAST_MODEL": "claude-haiku-4-5"
   }
-}`} />
+}
+'@ | Out-File -FilePath "$env:USERPROFILE\\.claude\\settings.json" -Encoding utf8`} />
 
-          <p className="text-gray-400 mt-6">第 3 步：在你的项目目录输入 <code className="px-2 py-0.5 rounded bg-gray-800 text-orange-400 font-mono text-sm">claude</code> 即可开始使用。</p>
+          <p className="text-gray-400 text-sm font-medium mt-4">🍎 macOS / 🐧 Linux（终端）：</p>
+          <CodeBlock id="cc-perm-unix" lang="终端 (macOS / Linux)" code={`mkdir -p ~/.claude
+cat > ~/.claude/settings.json << 'EOF'
+{
+  "env": {
+    "ANTHROPIC_BASE_URL": "${origin}",
+    "ANTHROPIC_AUTH_TOKEN": "sk-你的APIKey",
+    "ANTHROPIC_MODEL": "claude-opus-4-8",
+    "ANTHROPIC_SMALL_FAST_MODEL": "claude-haiku-4-5"
+  }
+}
+EOF`} />
+        </section>
+
+        {/* ── 五、启动 ── */}
+        <section className="space-y-6">
+          <h2 className="flex items-center gap-3 text-2xl font-bold">
+            <Terminal size={24} className="text-emerald-400" /> 五、启动 Claude Code
+          </h2>
+          <p className="text-gray-400">
+            在你的项目目录打开终端，输入 <code className="px-2 py-0.5 rounded bg-gray-800 text-emerald-400 font-mono text-sm">claude</code> 即可开始使用。
+          </p>
+          <p className="text-gray-400 text-sm">
+            💡 首次启动会提示登录，选择 <b>API Key</b> 方式，粘贴你的 Key 即可（如果已通过上面方式配置了环境变量或 settings.json，会自动跳过）。
+          </p>
 
           <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-sm text-amber-200/90 space-y-1.5">
             <p>⚠️ <b>必须设置 <code className="font-mono">ANTHROPIC_MODEL</code></b>：本站不使用 Claude 官方默认模型名，不设会报"模型不存在"。可选：</p>
@@ -98,7 +183,6 @@ export ANTHROPIC_SMALL_FAST_MODEL=claude-haiku-4-5`} />
               <li><code className="font-mono">claude-haiku-4-5</code> — 快速便宜</li>
             </ul>
             <p className="mt-2">💡 <code className="font-mono">ANTHROPIC_SMALL_FAST_MODEL</code> 是后台小任务用的便宜模型，设为 <code className="font-mono">claude-haiku-4-5</code> 更省 T粒。</p>
-            <p>🪟 Windows（PowerShell）：把每行写成 <code className="font-mono">$env:ANTHROPIC_BASE_URL="{origin}"</code> 这种形式。</p>
           </div>
         </section>
 

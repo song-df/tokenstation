@@ -6,9 +6,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from pydantic import BaseModel
 from database import engine, Base, get_db, async_session
-from models import User, UserRole
+from models import User, UserRole, ProxyPlan
 from auth import verify_password, create_access_token, hash_password, generate_api_key, get_current_user
-from routers import admin, api, student, auth_public, redeem, autogen, keys
+from routers import admin, api, student, auth_public, redeem, autogen, keys, proxy
 
 
 @asynccontextmanager
@@ -37,7 +37,38 @@ async def lifespan(app: FastAPI):
             )
             session.add(admin_user)
             await session.commit()
+
+        # Seed default proxy plans
+        plans_r = await session.execute(select(ProxyPlan).limit(1))
+        if not plans_r.scalar_one_or_none():
+            session.add_all([
+                ProxyPlan(name="7天套餐", days=7, price=210),
+                ProxyPlan(name="30天套餐", days=30, price=750),
+                ProxyPlan(name="90天套餐", days=90, price=1800),
+            ])
+            await session.commit()
+
+    # Background proxy expiration checker
+    import asyncio
+    async def proxy_expire_loop():
+        while True:
+            try:
+                async with async_session() as session:
+                    from services.proxy import expire_check
+                    await expire_check(session)
+            except Exception:
+                pass
+            await asyncio.sleep(300)  # every 5 minutes
+
+    expire_task = asyncio.create_task(proxy_expire_loop())
+
     yield
+
+    expire_task.cancel()
+    try:
+        await expire_task
+    except asyncio.CancelledError:
+        pass
     # Close the shared upstream HTTP client's connection pool on shutdown.
     from services.relay import aclose_client
     await aclose_client()
@@ -115,3 +146,4 @@ app.include_router(auth_public.router, prefix="/api")
 app.include_router(redeem.router, prefix="/api")
 app.include_router(autogen.router, prefix="/api")
 app.include_router(keys.router, prefix="/api")
+app.include_router(proxy.router, prefix="/api")
