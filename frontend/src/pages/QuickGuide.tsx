@@ -78,6 +78,18 @@ export ANTHROPIC_SMALL_FAST_MODEL=claude-haiku-4-5`} />
 
         <section className="space-y-6">
           <h2 className="flex items-center gap-3 text-2xl font-bold">
+            <Terminal size={24} className="text-cyan-400" /> Codex CLI 接入（Windows）
+          </h2>
+          <p className="text-gray-400">
+            Windows 环境下 Codex CLI + Moon Bridge 中转方案的完整配置教程，包含 nvm/Node.js/Go 安装、Moon Bridge 配置、Codex 对接全流程。
+          </p>
+          <a href="/guide/codex" className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-cyan-600/15 border border-cyan-500/30 hover:bg-cyan-600/25 text-cyan-400 transition-colors text-sm font-medium">
+            查看 Codex 安装教程 →
+          </a>
+        </section>
+
+        <section className="space-y-6">
+          <h2 className="flex items-center gap-3 text-2xl font-bold">
             <Globe size={24} className="text-green-400" /> OpenAI 兼容接口
           </h2>
           <p className="text-gray-400">所有模型均支持 OpenAI 兼容格式，可直接接入 Cursor、Continue、Aider 等工具：</p>

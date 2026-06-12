@@ -94,6 +94,9 @@ export ANTHROPIC_SMALL_FAST_MODEL=claude-haiku-4-5`
             <a href="/guide" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gray-800 border border-gray-700 hover:bg-gray-700 text-gray-200 font-medium transition-colors">
               查看接入指南
             </a>
+            <a href="/guide/codex" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gray-800 border border-gray-700 hover:bg-gray-700 text-cyan-400 font-medium transition-colors">
+              🪟 Codex 安装教程
+            </a>
           </div>
         </div>
       </section>
@@ -152,6 +155,9 @@ export ANTHROPIC_SMALL_FAST_MODEL=claude-haiku-4-5`
             </button>
           </div>
           <p className="text-xs text-gray-600 mt-4">支持 Claude Code · Codex CLI · Cursor · Continue · Aider 等主流 AI 编程工具</p>
+          <a href="/guide/codex" className="inline-flex items-center gap-1.5 mt-4 text-sm text-cyan-400 hover:text-cyan-300 transition-colors">
+            🪟 Windows 用户参考 Codex 完整安装教程 →
+          </a>
         </div>
       </section>
 
@@ -250,6 +256,7 @@ export ANTHROPIC_SMALL_FAST_MODEL=claude-haiku-4-5`
           </div>
           <div className="flex items-center gap-6">
             <a href="/guide" className="hover:text-gray-400 transition-colors">接入指南</a>
+            <a href="/guide/codex" className="hover:text-gray-400 transition-colors">Codex 教程</a>
             <a href="/login" className="hover:text-gray-400 transition-colors">登录</a>
             <a href="/register" className="hover:text-gray-400 transition-colors">注册</a>
           </div>
