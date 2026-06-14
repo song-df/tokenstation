@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { api } from '../lib/api'
-import { Copy, Check, Key, Coins, Wallet, TrendingUp, Clock, Cpu, Ticket, ShoppingCart } from 'lucide-react'
+import { Copy, Check, Key, Coins, Wallet, TrendingUp, Clock, Cpu, Ticket, ShoppingCart, ExternalLink } from 'lucide-react'
 
 interface ModelInfo {
   model_name: string
@@ -66,30 +67,15 @@ export default function StudentDashboard() {
       <div className="flex items-center gap-2 text-gray-400 text-sm mb-3"><Ticket size={16} className="text-yellow-400" /> 兑换码</div>
       <div className="flex items-center gap-2">
         <input className="flex-1 px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-gray-100 text-sm placeholder-gray-500 focus:outline-none focus:border-yellow-500" placeholder="输入兑换码" value={redeemCode} onChange={e => setRedeemCode(e.target.value)} onKeyDown={e => e.key === 'Enter' && doRedeem()} />
-        <button onClick={doRedeem} disabled={redeeming || !redeemCode.trim()} className="px-4 py-2 rounded-lg bg-yellow-600 hover:bg-yellow-500 text-white text-sm disabled:opacity-50 transition-colors">{redeeming ? '兑换中' : '兑换'}</button>
+        <button onClick={doRedeem} disabled={redeeming || !redeemCode.trim()} className="px-4 py-2 rounded-lg bg-yellow-600 hover:bg-yellow-500 text-white text-sm disabled:opacity-50 transition-colors shrink-0">{redeeming ? '兑换中' : '兑换'}</button>
+        {false && <Link to="/purchase" className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-orange-600/20 hover:bg-orange-600/30 border border-orange-600/30 text-orange-400 text-xs transition-colors shrink-0"><ShoppingCart size={12} /> T粒充值</Link>}
+        {false && <Link to="/purchase" className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-green-600/20 hover:bg-green-600/30 border border-green-600/30 text-green-400 text-xs transition-colors shrink-0"><ShoppingCart size={12} /> T粒充值 (微信)</Link>}
+        {purchaseUrl && (
+          <a href={purchaseUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-pink-600/10 hover:bg-pink-600/20 border border-pink-600/20 text-pink-400 text-xs transition-colors shrink-0"><ExternalLink size={12} /> 淘兑换码</a>
+        )}
       </div>
       {redeemMsg && <p className={'text-xs mt-2 ' + (redeemMsg.includes('成功') ? 'text-green-400' : 'text-red-400')}>{redeemMsg}</p>}
-      {purchaseUrl && (
-        <a href={purchaseUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-1 mt-3 py-1.5 rounded-lg bg-orange-600/20 hover:bg-orange-600/30 border border-orange-600/30 text-orange-400 text-xs transition-colors"><ShoppingCart size={12} /> 购买兑换券</a>
-      )}
     </div>
-              </div>
-              <p className="text-xs text-gray-500 mt-0.5">{t.description}</p>
-            </div>
-            {t.is_commission ? (
-              copiedRef ? <span className="text-xs text-green-400 px-3 py-1">已复制</span> :
-              <button onClick={() => { navigator.clipboard.writeText(window.location.origin + '/register?ref=' + (profile?.referral_code || '')); setCopiedRef(true); setTimeout(() => setCopiedRef(false), 2000) }} className="px-3 py-1 rounded-lg bg-pink-600/20 hover:bg-pink-600/30 text-pink-400 text-xs border border-pink-600/30">复制分享链接</button>
-            ) : t.key === 'verify_email' ? (
-              t.completed ? <span className="text-xs text-green-400">已完成</span> :
-              <button onClick={async () => { try { await api.verifyEmail(profile.email || ''); api.getStudentProfile().then(setProfile); api.getTasks().then(setTasks) } catch(e: any) { alert(e.message) } }} className="px-3 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs">验证</button>
-            ) : t.completed ? (
-              <span className="text-xs text-green-400">已完成</span>
-            ) : (
-              <span className="text-xs text-gray-500">{t.count !== undefined ? '已' + t.count + '次' : '-'}</span>
-            )}
-          </div>
-        ))}
-      </div>
 
     <div id="api-config" className="scroll-mt-20 rounded-xl bg-gray-900 border border-gray-800 p-6">
       <h2 className="flex items-center gap-2 text-lg font-semibold text-white mb-4"><Key size={18} className="text-blue-400" /> API 配置</h2>

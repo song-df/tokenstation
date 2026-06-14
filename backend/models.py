@@ -245,3 +245,63 @@ class ProxyTopUp(Base):
     created_at = Column(DateTime, default=datetime.now)
 
     user = relationship("User")
+
+
+class TliPackage(Base):
+    """Predefined T粒 packages for Alipay purchase."""
+    __tablename__ = "tli_packages"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(64), nullable=False)
+    tli_amount = Column(Float, nullable=False)
+    price_yuan = Column(Float, nullable=False)
+    is_active = Column(Boolean, default=True)
+    sort_order = Column(Integer, default=0)
+    created_at = Column(DateTime, default=datetime.now)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+
+
+class AlipayOrder(Base):
+    """Alipay payment orders."""
+    __tablename__ = "alipay_orders"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    out_trade_no = Column(String(64), unique=True, nullable=False, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    package_id = Column(Integer, ForeignKey("tli_packages.id"), nullable=True)
+    tli_amount = Column(Float, nullable=False)
+    total_amount = Column(Float, nullable=False)  # CNY
+    subject = Column(String(256), nullable=False)
+    trade_no = Column(String(64), default="")  # Alipay trade number
+    trade_status = Column(String(32), default="WAIT_BUYER_PAY")
+    buyer_id = Column(String(32), default="")
+    buyer_logon_id = Column(String(64), default="")
+    credit_applied = Column(Boolean, default=False)  # idempotency guard
+    paid_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.now)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+
+    user = relationship("User", backref="alipay_orders")
+
+
+class WechatOrder(Base):
+    """WeChat Pay Native payment orders."""
+    __tablename__ = "wechat_orders"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    out_trade_no = Column(String(64), unique=True, nullable=False, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    package_id = Column(Integer, ForeignKey("tli_packages.id"), nullable=True)
+    tli_amount = Column(Float, nullable=False)
+    total_amount = Column(Float, nullable=False)  # CNY (in yuan, not fen)
+    subject = Column(String(256), nullable=False)
+    prepay_id = Column(String(64), default="")  # WeChat prepay_id
+    code_url = Column(String(256), default="")  # QR code URL
+    trade_status = Column(String(32), default="NOTPAY")  # NOTPAY/SUCCESS/CLOSED/PAYERROR
+    transaction_id = Column(String(64), default="")  # WeChat transaction ID
+    credit_applied = Column(Boolean, default=False)
+    paid_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.now)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+
+    user = relationship("User", backref="wechat_orders")

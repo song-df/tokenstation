@@ -9,6 +9,9 @@ import QuickGuide from './pages/QuickGuide'
 import CodexGuide from './pages/CodexGuide'
 import ClaudeCodeGuide from './pages/ClaudeCodeGuide'
 import FlClashGuide from './pages/FlClashGuide'
+import VSCodeGuide from './pages/VSCodeGuide'
+import OpenAIGuide from './pages/OpenAIGuide'
+import ModelsPage from './pages/ModelsPage'
 import LandingPage from './pages/LandingPage'
 import StudentDashboard from './pages/StudentDashboard'
 import StudentProfile from './pages/StudentProfile'
@@ -16,6 +19,8 @@ import ApiKeysPage from './pages/ApiKeysPage'
 import ProxySubscription from './pages/ProxySubscription'
 import AdminProxy from './pages/AdminProxy'
 import ReferralPage from './pages/ReferralPage'
+import TliPurchase from './pages/TliPurchase'
+import AlipayResult from './pages/AlipayResult'
 
 export default function App() {
   const [user, setUser] = useState<any>(null)
@@ -47,6 +52,10 @@ function AppInner({ user, loading, setUser }: { user: any; loading: boolean; set
       <Route path="/guide/codex" element={<CodexGuide />} />
       <Route path="/guide/claude-code" element={<ClaudeCodeGuide />} />
       <Route path="/guide/flclash" element={<FlClashGuide />} />
+      <Route path="/guide/vscode" element={<VSCodeGuide />} />
+      <Route path="/guide/openai" element={<OpenAIGuide />} />
+      <Route path="/models" element={<ModelsPage />} />
+      <Route path="/models" element={<ModelsPage />} />
       <Route path="/register" element={<Register />} />
       <Route path="/login" element={<Login onLogin={setUser} />} />
       <Route path="*" element={<Navigate to="/" replace />} />
@@ -63,10 +72,15 @@ function AppInner({ user, loading, setUser }: { user: any; loading: boolean; set
         <Route path="/keys" element={<ApiKeysPage />} />
         <Route path="/proxy" element={<ProxySubscription />} />
         <Route path="/referral" element={<ReferralPage />} />
+        <Route path="/purchase" element={<TliPurchase />} />
+        <Route path="/alipay-result" element={<AlipayResult />} />
         <Route path="/guide" element={<QuickGuide />} />
         <Route path="/guide/codex" element={<CodexGuide />} />
         <Route path="/guide/claude-code" element={<ClaudeCodeGuide />} />
       <Route path="/guide/flclash" element={<FlClashGuide />} />
+      <Route path="/guide/vscode" element={<VSCodeGuide />} />
+      <Route path="/guide/openai" element={<OpenAIGuide />} />
+      <Route path="/models" element={<ModelsPage />} />
         <Route path="/admin/proxy" element={<AdminProxy />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
