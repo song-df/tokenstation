@@ -6,9 +6,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from pydantic import BaseModel
 from database import engine, Base, get_db, async_session
-from models import User, UserRole, ProxyPlan
+from models import User, UserRole, ProxyPlan, TliPackage
 from auth import verify_password, create_access_token, hash_password, generate_api_key, get_current_user
-from routers import admin, api, student, auth_public, redeem, autogen, keys, proxy
+from routers import admin, api, student, auth_public, redeem, autogen, keys, proxy, alipay, wechat
 
 
 @asynccontextmanager
@@ -19,6 +19,10 @@ async def lifespan(app: FastAPI):
         for stmt in [
             "ALTER TABLE redeem_codes ADD COLUMN is_shipped BOOLEAN DEFAULT FALSE",
             "ALTER TABLE redeem_codes ADD COLUMN shipped_at DATETIME",
+            # Alipay payment tables
+            "ALTER TABLE alipay_orders ADD COLUMN credit_applied BOOLEAN DEFAULT FALSE",
+            # WeChat Pay tables
+            "ALTER TABLE wechat_orders ADD COLUMN credit_applied BOOLEAN DEFAULT FALSE",
         ]:
             try:
                 await conn.run_sync(lambda c, s=stmt: c.exec_driver_sql(s))
@@ -45,6 +49,18 @@ async def lifespan(app: FastAPI):
                 ProxyPlan(name="7天套餐", days=7, price=210),
                 ProxyPlan(name="30天套餐", days=30, price=750),
                 ProxyPlan(name="90天套餐", days=90, price=1800),
+            ])
+            await session.commit()
+
+        # Seed default T粒 packages for Alipay
+        packs_r = await session.execute(select(TliPackage).limit(1))
+        if not packs_r.scalar_one_or_none():
+            session.add_all([
+                TliPackage(name="100 T粒", tli_amount=100, price_yuan=1.00, sort_order=1),
+                TliPackage(name="500 T粒", tli_amount=500, price_yuan=5.00, sort_order=2),
+                TliPackage(name="1,000 T粒", tli_amount=1000, price_yuan=9.90, sort_order=3),
+                TliPackage(name="5,000 T粒", tli_amount=5000, price_yuan=45.00, sort_order=4),
+                TliPackage(name="10,000 T粒", tli_amount=10000, price_yuan=80.00, sort_order=5),
             ])
             await session.commit()
 
@@ -147,3 +163,5 @@ app.include_router(redeem.router, prefix="/api")
 app.include_router(autogen.router, prefix="/api")
 app.include_router(keys.router, prefix="/api")
 app.include_router(proxy.router, prefix="/api")
+app.include_router(alipay.router, prefix="/api")
+app.include_router(wechat.router, prefix="/api")

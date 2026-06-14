@@ -230,7 +230,7 @@ export const api = {
   deleteKey: (id: number) => request(`/token/${id}`, { method: 'DELETE' }),
 
   // Site config (student-facing)
-  getSiteConfig: (key?: string) => request(`/student/site-config${key ? `?key=${key}` : ''}`),
+  getSiteConfig: (key?: string) => request(`/alipay/site-config${key ? `?key=${key}` : ''}`),
 
   // ── 已砍掉的定制功能:留空实现,避免组件报错(任务/站内信,决策2) ──
   getTasks: async () => ({ items: [], tasks: [] }),
@@ -254,4 +254,21 @@ export const api = {
     request('/proxy/admin/plans', { method: 'POST', body: JSON.stringify(data) }),
   adminUpdateProxyPlan: async (id: number, data: {name: string; days: number; price: number; is_active: boolean}) =>
     request(`/proxy/admin/plans/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+
+  // ── Alipay T粒充值 ──
+  getTliPackages: async () => request('/alipay/packages'),
+  createAlipayOrder: async (packageId: number) =>
+    request('/alipay/create-order', { method: 'POST', body: JSON.stringify({ package_id: packageId }) }),
+  getAlipayOrders: async (page: number = 1, pageSize: number = 20) =>
+    request(`/alipay/orders?page=${page}&page_size=${pageSize}`),
+  getAlipayOrderStatus: async (outTradeNo: string) =>
+    request(`/alipay/order-status/${outTradeNo}`),
+
+  // ── WeChat Pay T粒充值 ──
+  createWechatOrder: async (packageId: number) =>
+    request('/wechat/create-order', { method: 'POST', body: JSON.stringify({ package_id: packageId }) }),
+  getWechatOrderStatus: async (outTradeNo: string) =>
+    request(`/wechat/order-status/${outTradeNo}`),
+  getWechatOrders: async (page: number = 1, pageSize: number = 20) =>
+    request(`/wechat/orders?page=${page}&page_size=${pageSize}`),
 };

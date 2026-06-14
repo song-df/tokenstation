@@ -1,4 +1,4 @@
-import { Terminal, Zap, Globe, Cpu, ArrowRight, Monitor, Wifi } from 'lucide-react'
+import { Terminal, Zap, Globe, Cpu, ArrowRight, Monitor, Wifi, Code } from 'lucide-react'
 
 export default function QuickGuide() {
   return (
@@ -51,6 +51,18 @@ export default function QuickGuide() {
               <ArrowRight size={16} className="text-gray-700 group-hover:text-orange-400 shrink-0 mt-1 transition-colors" />
             </div>
           </a>
+          <a href="/guide/vscode" className="group p-5 rounded-xl bg-gray-900 border border-gray-800 hover:border-purple-500/40 transition-colors">
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Code size={20} className="text-purple-400" />
+                  <h3 className="text-base font-semibold text-white">VSCode + Claude Code</h3>
+                </div>
+                <p className="text-sm text-gray-500">从零安装 VSCode，配置 Claude Code 插件，AI 编程能力起飞。</p>
+              </div>
+              <ArrowRight size={16} className="text-gray-700 group-hover:text-purple-400 shrink-0 mt-1 transition-colors" />
+            </div>
+          </a>
           <a href="/guide/codex" className="group p-5 rounded-xl bg-gray-900 border border-gray-800 hover:border-cyan-500/40 transition-colors">
             <div className="flex items-start justify-between">
               <div>
@@ -63,19 +75,19 @@ export default function QuickGuide() {
               <ArrowRight size={16} className="text-gray-700 group-hover:text-cyan-400 shrink-0 mt-1 transition-colors" />
             </div>
           </a>
-          <a className="group p-5 rounded-xl bg-gray-900 border border-gray-800 hover:border-green-500/40 transition-colors cursor-pointer">
+          <a href="/guide/openai" className="group p-5 rounded-xl bg-gray-900 border border-gray-800 hover:border-green-500/40 transition-colors">
             <div className="flex items-start justify-between">
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <Globe size={20} className="text-green-400" />
                   <h3 className="text-base font-semibold text-white">OpenAI 兼容接口</h3>
                 </div>
-                <p className="text-sm text-gray-500">Cursor、Continue、Aider 等工具通用接入方式。</p>
+                <p className="text-sm text-gray-500">Cursor、Continue、Aider、Cline 等工具通用接入方式。</p>
               </div>
               <ArrowRight size={16} className="text-gray-700 group-hover:text-green-400 shrink-0 mt-1 transition-colors" />
             </div>
           </a>
-          <a className="group p-5 rounded-xl bg-gray-900 border border-gray-800 hover:border-purple-500/40 transition-colors cursor-pointer">
+          <a href="/models" className="group p-5 rounded-xl bg-gray-900 border border-gray-800 hover:border-purple-500/40 transition-colors">
             <div className="flex items-start justify-between">
               <div>
                 <div className="flex items-center gap-2 mb-2">
