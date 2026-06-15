@@ -94,7 +94,7 @@ export default function QuickGuide() {
                   <Cpu size={20} className="text-purple-400" />
                   <h3 className="text-base font-semibold text-white">可用模型 & 定价</h3>
                 </div>
-                <p className="text-sm text-gray-500">全部 17 款模型、价格档位、T粒消耗参考。</p>
+                <p className="text-sm text-gray-500">全部模型、输出价格档位、token 限制一览。</p>
               </div>
               <ArrowRight size={16} className="text-gray-700 group-hover:text-purple-400 shrink-0 mt-1 transition-colors" />
             </div>

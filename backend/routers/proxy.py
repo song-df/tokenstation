@@ -213,7 +213,7 @@ async def download_config(
         raise HTTPException(404, "没有活跃的代理订阅，请先订阅")
 
     expires_str = sub.expires_at.strftime("%Y-%m-%d %H:%M") if sub.expires_at else ""
-    yaml_content = generate_flclash_yaml(username, sub.hy2_password, expires_str)
+    yaml_content = generate_flclash_yaml(username, sub.hy2_password, sub.hy2_port, expires_str)
 
     return Response(
         content=yaml_content,
@@ -273,6 +273,75 @@ async def get_referral(
         logger.warning(f"Referral lookup failed: {e}")
 
     return result
+
+
+# ── POST /api/proxy/course ──────────────────────────────────────────────────
+
+class CoursePurchaseBody(BaseModel):
+    pass  # No params needed — fixed 1000 T粒
+
+
+@router.post("/course")
+async def purchase_course(
+    _data: CoursePurchaseBody,
+    proxy_user: dict = Depends(get_proxy_user),
+):
+    """Purchase a course invite code for 1000 T粒."""
+    from services.proxy import deduct_tli, get_tli_balance, NEWAPI_DB_PATH
+    from config import settings
+    import httpx
+
+    user_id = proxy_user["user_id"]
+
+    # Check balance
+    balance = get_tli_balance(user_id)
+    price = int(getattr(settings, "course_price_tli", 1000))
+    if balance < price:
+        raise HTTPException(400, f"T粒余额不足，需要 {price} T粒，当前余额 {balance:.0f} T粒")
+
+    # Deduct T粒
+    try:
+        deduct_tli(user_id, price)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+
+    # Call external API for invite code
+    api_url = str(getattr(settings, "course_invite_api_url", ""))
+    secret = str(getattr(settings, "course_invite_secret", ""))
+
+    try:
+        async with httpx.AsyncClient(timeout=15) as client:
+            resp = await client.post(api_url, json={"system_secret": secret, "limit": 1})
+            if resp.status_code != 200:
+                # Refund on failure
+                import sqlite3
+                conn = sqlite3.connect(f"file:{NEWAPI_DB_PATH}?mode=rw", uri=True)
+                conn.execute(
+                    "UPDATE users SET quota = quota + ?, used_quota = used_quota - ? WHERE id = ?",
+                    (price * 10000, price * 10000, user_id),
+                )
+                conn.commit(); conn.close()
+                raise HTTPException(502, f"获取邀请码失败，T粒已退回 (API返回 {resp.status_code})")
+
+            data = resp.json()
+            codes = data.get("codes", [])
+            if not codes or not codes[0].get("code"):
+                raise HTTPException(502, "获取邀请码失败，T粒已退回（无可用码）")
+
+            code = codes[0]["code"]
+    except httpx.HTTPError as e:
+        raise HTTPException(502, f"获取邀请码失败，T粒已退回: {e}")
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(500, f"系统错误: {e}")
+
+    return {
+        "message": "购买成功",
+        "code": code,
+        "tli_spent": price,
+        "tli_balance": get_tli_balance(user_id),
+    }
 
 
 # ── Admin auth dependency ───────────────────────────────────────────────────
