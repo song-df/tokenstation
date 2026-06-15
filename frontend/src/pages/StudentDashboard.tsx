@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../lib/api'
-import { Copy, Check, Coins, Wallet, TrendingUp, Clock, Cpu, Ticket, ShoppingCart, ExternalLink } from 'lucide-react'
+import { Copy, Check, Key, Coins, Wallet, TrendingUp, Clock, Cpu, Ticket, ShoppingCart, ExternalLink } from 'lucide-react'
 
 interface ModelInfo {
   model_name: string
@@ -22,7 +22,6 @@ function priceTier(outputPrice: number) {
 
 export default function StudentDashboard() {
   const [profile, setProfile] = useState<any>(null)
-  const [models, setModels] = useState<ModelInfo[]>([])
   const [logs, setLogs] = useState<any>({ total: 0, items: [] })
   const [topups, setTopups] = useState<any>({ total: 0, items: [] })
   const [redeemCode, setRedeemCode] = useState('')
@@ -30,16 +29,18 @@ export default function StudentDashboard() {
   const [redeeming, setRedeeming] = useState(false)
   const [copiedModel, setCopiedModel] = useState<string | null>(null)
   const [purchaseUrl, setPurchaseUrl] = useState('')
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     api.getStudentProfile().then(setProfile)
-    api.getStudentModels().then(setModels)
     api.getStudentLogs(1, 10).then(setLogs)
     api.getStudentTopups(1, 10).then(setTopups)
     api.getSiteConfig('purchase_link').then((r: any) => setPurchaseUrl(r.value || ''))
   }, [])
 
   const copyModelName = (name: string) => { navigator.clipboard.writeText(name); setCopiedModel(name); setTimeout(() => setCopiedModel(null), 1500) }
+  const copyKey = () => { if (profile?.api_key) { navigator.clipboard.writeText(profile.api_key); setCopied(true); setTimeout(() => setCopied(false), 2000) } }
+  const copyCurl = () => { navigator.clipboard.writeText("curl "+window.location.origin+"/v1/chat/completions \\\n  -H \"Authorization: Bearer "+(profile?.api_key||'')+"\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"model\":\"deepseek-v4-flash\",\"messages\":[{\"role\":\"user\",\"content\":\"hello\"}]}'") }
 
   const doRedeem = async () => {
     if (!redeemCode.trim()) return
@@ -70,11 +71,6 @@ export default function StudentDashboard() {
         )}
       </div>
       {redeemMsg && <p className={'text-xs mt-2 ' + (redeemMsg.includes('成功') ? 'text-green-400' : 'text-red-400')}>{redeemMsg}</p>}
-    </div>
-
-    <div id="models" className="scroll-mt-20 rounded-xl bg-gray-900 border border-gray-800 overflow-hidden"><div className="p-4 border-b border-gray-800"><h2 className="flex items-center gap-2 text-lg font-semibold text-white"><Cpu size={18} className="text-purple-400"/> 可用模型</h2></div>
-      <table className="w-full text-sm"><thead><tr className="border-b border-gray-800 text-gray-400 text-left"><th className="p-3 font-medium">模型名称</th><th className="p-3 font-medium">价格档位</th><th className="p-3 font-medium">供应商</th><th className="p-3 font-medium">最大 T粒</th></tr></thead>
-      <tbody>{models.map((m,i)=>{const t=priceTier(m.output_price);return(<tr key={i} className="border-b border-gray-800/50 hover:bg-gray-800/50"><td className="p-3"><span className="text-gray-100 font-mono text-xs">{m.model_name}</span>{m.display_name&&<span className="ml-2 text-gray-500 text-xs">{m.display_name}</span>}<button onClick={() => copyModelName(m.model_name)} className="ml-2 p-0.5 rounded hover:bg-gray-700 text-gray-600 hover:text-gray-300 transition-colors inline-flex align-middle" title="复制模型名">{copiedModel === m.model_name ? <Check size={12} className="text-green-400" /> : <Copy size={12} />}</button></td><td className="p-3"><span className={`px-2 py-0.5 rounded text-xs font-medium ${t.cls}`}>{t.label}</span></td><td className="p-3"><span className="px-2 py-0.5 rounded bg-gray-800 text-gray-300 text-xs">{m.provider}</span></td><td className="p-3 text-gray-400 font-mono text-xs">{m.max_tokens.toLocaleString()}</td></tr>)})}{models.length===0&&<tr><td colSpan={4} className="p-6 text-center text-gray-500">暂无可用的模型</td></tr>}</tbody></table>
     </div>
 
     <div id="logs" className="scroll-mt-20 rounded-xl bg-gray-900 border border-gray-800 overflow-hidden"><div className="p-4 border-b border-gray-800"><h2 className="flex items-center gap-2 text-lg font-semibold text-white"><Clock size={18} className="text-purple-400"/> 使用记录 <span className="text-sm text-gray-500 font-normal ml-2">最近 10 条</span></h2></div>

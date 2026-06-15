@@ -64,7 +64,7 @@ async def lifespan(app: FastAPI):
             ])
             await session.commit()
 
-    # Background proxy expiration checker
+    # Background proxy tasks
     import asyncio
     async def proxy_expire_loop():
         while True:
@@ -76,13 +76,26 @@ async def lifespan(app: FastAPI):
                 pass
             await asyncio.sleep(300)  # every 5 minutes
 
+    async def proxy_monitor_loop():
+        while True:
+            try:
+                async with async_session() as session:
+                    from services.proxy import check_multi_ip
+                    await check_multi_ip(session)
+            except Exception:
+                pass
+            await asyncio.sleep(30)  # every 30 seconds
+
     expire_task = asyncio.create_task(proxy_expire_loop())
+    monitor_task = asyncio.create_task(proxy_monitor_loop())
 
     yield
 
     expire_task.cancel()
+    monitor_task.cancel()
     try:
         await expire_task
+        await monitor_task
     except asyncio.CancelledError:
         pass
     # Close the shared upstream HTTP client's connection pool on shutdown.

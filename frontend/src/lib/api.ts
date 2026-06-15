@@ -10,23 +10,24 @@ const QUOTA_PER_TLI = 10000; // 1 T粒 = 10000 quota
 // 模型输出价格 (T粒/1k tokens) = ModelRatio × CompletionRatio / 10
 // 从 new-api options 同步，后续可改为动态 API
 const MODEL_OUTPUT_PRICE: Record<string, number> = {
-  'deepseek-v4-pro':       0.11,    // 0.275 × 4.0 / 10
-  'deepseek-v4-flash':     0.30,    // 1.5 × 2.0 / 10
-  'claude-opus-4-8':      27.0,     // 54.0 × 5.0 / 10
-  'claude-sonnet-4-6':    16.2,     // 32.4 × 5.0 / 10
-  'claude-haiku-4-5':      5.4,     // 10.8 × 5.0 / 10
-  'gpt-5.5':              32.4,     // 54.0 × 6.0 / 10
-  'gpt-5.5-pro':         194.4,     // 324.0 × 6.0 / 10
-  'gpt-5.3-codex':        15.12,    // 18.9 × 8.0 / 10
-  'gemini-3.5-flash':      9.72,    // 16.2 × 6.0 / 10
-  'gemini-3.1-pro':       12.96,    // 21.6 × 6.0 / 10
-  'step-3.7-flash':        1.242,   // 2.16 × 5.75 / 10
-  'qwen3.7-max':           4.05,    // 13.5 × 3.0 / 10
-  'glm-5.1':               3.6,     // 9.0 × 4.0 / 10
-  'kimi-k2.6':             4.05,    // 9.75 × 4.1538 / 10
-  'minimax-m2.5':          1.26,    // 3.15 × 4.0 / 10
-  'minimax-m3':            1.8,     // 4.5 × 4.0 / 10
-  'qwen3.5-397b-a17b':     1.08,    // 1.8 × 6.0 / 10
+  'deepseek-v4-pro':       0.232,   // 0.58 × 4.0 / 10
+  'deepseek-v4-flash':     0.036,   // 0.18 × 2.0 / 10
+  'claude-opus-4-8':      28.8,     // 57.6 × 5.0 / 10
+  'claude-sonnet-4-6':    17.28,    // 34.56 × 5.0 / 10
+  'claude-haiku-4-5':      5.76,    // 11.52 × 5.0 / 10
+  'claude-fable-5':       86.4,     // 172.8 × 5.0 / 10
+  'gpt-5.5':              34.56,    // 57.6 × 6.0 / 10
+  'gpt-5.5-pro':         172.8,     // 288.0 × 6.0 / 10
+  'gpt-5.3-codex':        16.13,    // 20.16 × 8.0 / 10
+  'gemini-3.5-flash':      10.37,    // 17.28 × 6.0 / 10
+  'gemini-3.1-pro':       13.82,    // 23.04 × 6.0 / 10
+  'step-3.7-flash':        1.324,   // 2.304 × 5.75 / 10
+  'qwen3.7-max':           4.32,    // 14.4 × 3.0 / 10
+  'glm-5.1':               4.61,    // 11.52 × 4.0 / 10
+  'kimi-k2.6':             3.93,    // 9.457 × 4.154 / 10
+  'minimax-m2.5':          1.037,   // 2.592 × 4.0 / 10
+  'minimax-m3':            2.30,    // 5.76 × 4.0 / 10
+  'qwen3.5-397b-a17b':     3.46,    // 5.76 × 6.0 / 10
 };
 
 // 模型供应商映射
@@ -36,6 +37,7 @@ const MODEL_PROVIDER: Record<string, string> = {
   'claude-opus-4-8':      'Anthropic',
   'claude-sonnet-4-6':    'Anthropic',
   'claude-haiku-4-5':     'Anthropic',
+  'claude-fable-5':       'Anthropic',
   'gpt-5.5':              'OpenAI',
   'gpt-5.5-pro':          'OpenAI',
   'gpt-5.3-codex':        'OpenAI',
@@ -235,6 +237,9 @@ export const api = {
     request('/proxy/subscribe', { method: 'POST', body: JSON.stringify({ plan_id: planId, days }) }),
   cancelProxy: async () => request('/proxy/cancel', { method: 'POST' }),
   getReferral: async () => request('/proxy/referral'),
+
+  // ── 课程订阅 ──
+  purchaseCourse: async () => request('/proxy/course', { method: 'POST', body: '{}' }),
 
   // ── 代理订阅（管理端）──
   adminListProxySubs: async () => request('/proxy/admin/subscriptions'),
