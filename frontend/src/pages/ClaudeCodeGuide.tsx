@@ -87,7 +87,11 @@ node -v`} />
           <h3 className="text-base font-semibold text-white mt-6">🍎 macOS / 🐧 Linux</h3>
           <CodeBlock id="nvm-mac" lang="终端 (macOS / Linux)" code={`# 安装 nvm（Node 版本管理器）
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
-# 重启终端，然后安装 Node.js LTS
+# 重启终端，若提示 nvm 命令不存在则执行:
+echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.zshrc
+echo '[ -s "$NVM_DIR/nvm.sh" ] && \\. "$NVM_DIR/nvm.sh"' >> ~/.zshrc
+source ~/.zshrc
+# 安装 Node.js LTS
 nvm install --lts
 node -v
 npm -v`} />
