@@ -175,18 +175,58 @@ claude --version`} />
           </p>
         </section>
 
-        {/* ── 六、配置插件 ── */}
+        {/* ── 六、配置 Claude Code 认证 ── */}
         <section className="space-y-6">
           <h2 className="flex items-center gap-3 text-2xl font-bold">
-            <Settings size={24} className="text-cyan-400" /> 六、配置 Claude Code 插件（关键步骤）
+            <Settings size={24} className="text-cyan-400" /> 六、配置 Claude Code 认证（关键步骤）
           </h2>
           <p className="text-gray-400">
-            按 <kbd className="px-1.5 py-0.5 rounded bg-gray-800 text-xs">Ctrl+Shift+P</kbd> 打开命令面板，搜索
-            <b className="text-cyan-300"> Open User Settings (JSON)</b>，将以下配置粘贴进去：
+            VSCode 插件依赖 Claude Code CLI 的配置文件来做认证。先在终端执行：
           </p>
 
           <p className="text-gray-400 text-sm mt-2">
             ⚠️ 把 <code className="px-1.5 py-0.5 rounded bg-gray-800 text-orange-300 font-mono text-xs">sk-你的APIKey</code> 替换为你的真实 Key。
+          </p>
+
+          <p className="text-gray-400 text-sm font-medium mt-4">🍎 macOS / 🐧 Linux（终端）：</p>
+          <CodeBlock id="cc-config-unix" lang="终端" code={`mkdir -p ~/.claude
+cat > ~/.claude/settings.json << 'EOF'
+{
+  "env": {
+    "ANTHROPIC_BASE_URL": "${origin}",
+    "ANTHROPIC_AUTH_TOKEN": "sk-你的APIKey",
+    "ANTHROPIC_MODEL": "deepseek-v4-pro",
+    "ANTHROPIC_SMALL_FAST_MODEL": "deepseek-v4-flash"
+  }
+}
+EOF`} />
+
+          <p className="text-gray-400 text-sm font-medium mt-4">🪟 Windows（PowerShell）：</p>
+          <CodeBlock id="cc-config-win" lang="PowerShell" code={`mkdir "$env:USERPROFILE\\.claude" -Force
+@'
+{
+  "env": {
+    "ANTHROPIC_BASE_URL": "${origin}",
+    "ANTHROPIC_AUTH_TOKEN": "sk-你的APIKey",
+    "ANTHROPIC_MODEL": "deepseek-v4-pro",
+    "ANTHROPIC_SMALL_FAST_MODEL": "deepseek-v4-flash"
+  }
+}
+'@ | Out-File -FilePath "$env:USERPROFILE\\.claude\\settings.json" -Encoding utf8`} />
+
+          <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-sm text-emerald-200/90 space-y-2">
+            <p>✅ 这个文件创建后，Claude Code（包括 VSCode 插件和命令行）会自动读取，不再提示登录。</p>
+          </div>
+        </section>
+
+        {/* ── 七、配置 VSCode 插件 ── */}
+        <section className="space-y-6">
+          <h2 className="flex items-center gap-3 text-2xl font-bold">
+            <Monitor size={24} className="text-purple-400" /> 七、配置 VSCode 插件面板
+          </h2>
+          <p className="text-gray-400">
+            按 <kbd className="px-1.5 py-0.5 rounded bg-gray-800 text-xs">Ctrl+Shift+P</kbd> 打开命令面板，搜索
+            <b className="text-purple-300"> Open User Settings (JSON)</b>，将以下配置粘贴进去（控制插件界面行为，非认证）：
           </p>
 
           <CodeBlock id="vscode-config" lang="JSON (settings.json)" code={vscodeSettings} />
@@ -194,20 +234,17 @@ claude --version`} />
           <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/30 text-sm text-blue-200/90 space-y-3">
             <h3 className="font-semibold text-white">📋 配置项说明</h3>
             <ul className="space-y-1.5">
-              <li><code className="font-mono text-xs bg-gray-800 px-1 py-0.5 rounded">ANTHROPIC_BASE_URL</code> — T粒加油站 API 地址</li>
-              <li><code className="font-mono text-xs bg-gray-800 px-1 py-0.5 rounded">ANTHROPIC_AUTH_TOKEN</code> — 你的 API Key（<b>sk-</b> 开头）</li>
-              <li><code className="font-mono text-xs bg-gray-800 px-1 py-0.5 rounded">ANTHROPIC_MODEL</code> — 主力模型，推荐 <b>deepseek-v4-pro</b>（强且便宜）</li>
-              <li><code className="font-mono text-xs bg-gray-800 px-1 py-0.5 rounded">ANTHROPIC_DEFAULT_HAIKU_MODEL</code> — 轻量任务模型</li>
-              <li><code className="font-mono text-xs bg-gray-800 px-1 py-0.5 rounded">ANTHROPIC_DEFAULT_SONNET_MODEL</code> — 中量任务模型</li>
-              <li><code className="font-mono text-xs bg-gray-800 px-1 py-0.5 rounded">ANTHROPIC_DEFAULT_OPUS_MODEL</code> — 重量任务模型</li>
+              <li><code className="font-mono text-xs bg-gray-800 px-1 py-0.5 rounded">claudeCode.preferredLocation</code> — 面板位置（panel=底部面板）</li>
+              <li><code className="font-mono text-xs bg-gray-800 px-1 py-0.5 rounded">claudeCode.disableLoginPrompt</code> — 禁用登录提示（已通过 settings.json 认证）</li>
+              <li><code className="font-mono text-xs bg-gray-800 px-1 py-0.5 rounded">claudeCode.environmentVariables</code> — 模型选择（与 ~/.claude/settings.json 保持一致）</li>
             </ul>
           </div>
         </section>
 
-        {/* ── 七、启动 ── */}
+        {/* ── 八、启动 ── */}
         <section className="space-y-6">
           <h2 className="flex items-center gap-3 text-2xl font-bold">
-            <Zap size={24} className="text-emerald-400" /> 七、起飞
+            <Zap size={24} className="text-emerald-400" /> 八、起飞
           </h2>
           <p className="text-gray-400">
             重启 VSCode，按 <kbd className="px-1.5 py-0.5 rounded bg-gray-800 text-xs">Ctrl+Shift+L</kbd> 打开 Claude Code 面板，开始用 AI 写代码。
@@ -216,6 +253,7 @@ claude --version`} />
           <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-sm space-y-2">
             <p className="text-emerald-200">🚀 <b>至此配置完成！</b>你可以在任何项目里直接和 Claude Code 对话，让它帮你写代码、Debug、重构——全部走 T粒加油站，不用翻墙、不用海外信用卡。</p>
             <p className="text-gray-400">💡 提示：后续使用只需打开 VSCode → Ctrl+Shift+L，无需重复配置。</p>
+            <p className="text-amber-300 text-xs">⚠️ 如仍弹出登录，选择 <b>API Key</b> 方式粘贴你的 Key 即可（选一次后不再出现）。</p>
           </div>
         </section>
 
