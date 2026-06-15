@@ -127,7 +127,11 @@ node -v`} />
 
           <h3 className="text-base font-semibold text-white mt-4">🍎 macOS / 🐧 Linux</h3>
           <CodeBlock id="node-unix" lang="终端" code={`curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
-# 重启终端
+# 重启终端，若提示 nvm 命令不存在则执行:
+echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.zshrc
+echo '[ -s "$NVM_DIR/nvm.sh" ] && \\. "$NVM_DIR/nvm.sh"' >> ~/.zshrc
+source ~/.zshrc
+# 安装 Node.js LTS
 nvm install --lts
 node -v`} />
         </section>
