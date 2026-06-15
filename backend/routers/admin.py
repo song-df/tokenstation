@@ -1,3 +1,5 @@
+from __future__ import annotations
+import sqlite3
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -499,3 +501,61 @@ async def admin_update_plan(
             setattr(plan, k, data[k])
     await db.commit()
     return {"id": plan.id, "name": plan.name, "days": plan.days, "price": plan.price, "is_active": plan.is_active}
+
+
+# ── Accurate data dashboard (reads new-api SQLite directly) ────────────────
+
+@router.get("/newapi-stats")
+async def newapi_stats(_=Depends(get_admin_user)):
+    """Get accurate usage stats directly from new-api database."""
+    from services.proxy import NEWAPI_DB_PATH
+    db = sqlite3.connect(f"file:{NEWAPI_DB_PATH}?mode=ro", uri=True)
+    db.row_factory = sqlite3.Row
+
+    today_start = int(datetime.now().replace(hour=0, minute=0, second=0, microsecond=0).timestamp())
+    TLI = 10000  # 1 T粒 = 10000 new-api quota units
+
+    # Total requests
+    total = db.execute("SELECT COUNT(*) as c FROM logs WHERE type=2").fetchone()["c"]
+
+    # Today's requests
+    today = db.execute(
+        "SELECT COUNT(*) as c FROM logs WHERE type=2 AND created_at >= ?", (today_start,)
+    ).fetchone()["c"]
+
+    # Today's T粒 consumed
+    tli_today = db.execute(
+        "SELECT COALESCE(SUM(quota), 0) as s FROM logs WHERE type=2 AND created_at >= ?",
+        (today_start,),
+    ).fetchone()["s"] / TLI
+
+    # Total T粒 consumed
+    tli_total = db.execute(
+        "SELECT COALESCE(SUM(quota), 0) as s FROM logs WHERE type=2"
+    ).fetchone()["s"] / TLI
+
+    # Active users (today)
+    active_users = db.execute(
+        "SELECT COUNT(DISTINCT user_id) as c FROM logs WHERE type=2 AND created_at >= ?",
+        (today_start,),
+    ).fetchone()["c"]
+
+    # Top models today
+    top_models = [
+        {"model": r["model_name"] or "unknown", "count": r["c"], "tli": (r["s"] or 0) / TLI}
+        for r in db.execute(
+            "SELECT model_name, COUNT(*) as c, SUM(quota) as s FROM logs WHERE type=2 AND created_at >= ? "
+            "GROUP BY model_name ORDER BY c DESC LIMIT 10",
+            (today_start,),
+        ).fetchall()
+    ]
+
+    db.close()
+    return {
+        "total_requests": total,
+        "today_requests": today,
+        "today_tli": round(tli_today, 2),
+        "total_tli": round(tli_total, 2),
+        "active_users_today": active_users,
+        "top_models": top_models,
+    }

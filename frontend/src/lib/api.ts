@@ -95,16 +95,6 @@ async function buildProfile() {
     const toks = await request('/token/?p=1&size=50');
     const items = (toks && toks.items) ? toks.items : (Array.isArray(toks) ? toks : []);
     let active = items.filter((t: any) => t.status === 1);
-    // 新用户如果没有 token，自动创建一个
-    if (active.length === 0) {
-      await request('/token/', {
-        method: 'POST',
-        body: JSON.stringify({ name: 'legacy', unlimited_quota: true, expired_time: -1, group: 'default', model_limits_enabled: false }),
-      });
-      const toks2 = await request('/token/?p=1&size=50');
-      const items2 = (toks2 && toks2.items) ? toks2.items : (Array.isArray(toks2) ? toks2 : []);
-      active = items2.filter((t: any) => t.status === 1);
-    }
     const primary = active.find((t: any) => t.name === 'legacy') || active[0];
     if (primary) {
       const r = await request(`/token/${primary.id}/key`, { method: 'POST' });
@@ -195,7 +185,8 @@ export const api = {
       id: t.id, name: t.name, key: '',            // 列表不返回明文;需要时单独取
       is_active: t.status === 1,
       created_at: (t.created_time || 0) * 1000,
-      usage_count: 0, total_tokens: 0,
+      used_quota: quotaToTli(t.used_quota || 0),
+      accessed_time: t.accessed_time ? t.accessed_time * 1000 : null,
     }));
   },
   // 取某把 key 的明文(供"复制"按钮调用)

@@ -66,9 +66,8 @@ export default function ApiKeysPage() {
             </div>
             <code className="block text-xs text-gray-500 font-mono mb-2">{k.key}</code>
             <div className="flex items-center gap-4 text-xs text-gray-600">
-              <span>调用 {k.usage_count} 次</span>
-              <span>消耗 {k.total_tokens} T粒</span>
-              {k.last_used_at && <span>最后使用: {new Date(k.last_used_at).toLocaleString()}</span>}
+              <span>消耗 {k.used_quota?.toFixed(2) || '0.00'} T粒</span>
+              {k.accessed_time ? <span>最后使用: {new Date(k.accessed_time).toLocaleString()}</span> : <span>从未使用</span>}
               <span>创建: {new Date(k.created_at).toLocaleString()}</span>
             </div>
           </div>

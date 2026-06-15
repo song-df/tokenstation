@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../lib/api'
-import { Copy, Check, Key, Coins, Wallet, TrendingUp, Clock, Cpu, Ticket, ShoppingCart, ExternalLink } from 'lucide-react'
+import { Copy, Check, Coins, Wallet, TrendingUp, Clock, Cpu, Ticket, ShoppingCart, ExternalLink } from 'lucide-react'
 
 interface ModelInfo {
   model_name: string
@@ -25,7 +25,6 @@ export default function StudentDashboard() {
   const [models, setModels] = useState<ModelInfo[]>([])
   const [logs, setLogs] = useState<any>({ total: 0, items: [] })
   const [topups, setTopups] = useState<any>({ total: 0, items: [] })
-  const [copied, setCopied] = useState(false)
   const [redeemCode, setRedeemCode] = useState('')
   const [redeemMsg, setRedeemMsg] = useState('')
   const [redeeming, setRedeeming] = useState(false)
@@ -40,8 +39,6 @@ export default function StudentDashboard() {
     api.getSiteConfig('purchase_link').then((r: any) => setPurchaseUrl(r.value || ''))
   }, [])
 
-  const copyKey = () => { if (profile?.api_key) { navigator.clipboard.writeText(profile.api_key); setCopied(true); setTimeout(() => setCopied(false), 2000) } }
-  const copyCurl = () => { navigator.clipboard.writeText("curl "+window.location.origin+"/v1/chat/completions \\\n  -H \"Authorization: Bearer "+(profile?.api_key||'')+"\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"model\":\"deepseek-v4-flash\",\"messages\":[{\"role\":\"user\",\"content\":\"hello\"}]}'") }
   const copyModelName = (name: string) => { navigator.clipboard.writeText(name); setCopiedModel(name); setTimeout(() => setCopiedModel(null), 1500) }
 
   const doRedeem = async () => {
@@ -53,8 +50,6 @@ export default function StudentDashboard() {
   }
 
   if (!profile) return <div className="text-center text-gray-500 py-12">加载中...</div>
-
-  const curlexample = "curl "+window.location.origin+"/v1/chat/completions \\\n  -H \"Authorization: Bearer "+(profile.api_key||'').slice(0,16)+"...\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"model\":\"deepseek-v4-flash\",\"messages\":[{\"role\":\"user\",\"content\":\"hello\"}]}'"
 
   return (<div className="space-y-6">
     <div id="overview" className="scroll-mt-20 grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -75,15 +70,6 @@ export default function StudentDashboard() {
         )}
       </div>
       {redeemMsg && <p className={'text-xs mt-2 ' + (redeemMsg.includes('成功') ? 'text-green-400' : 'text-red-400')}>{redeemMsg}</p>}
-    </div>
-
-    <div id="api-config" className="scroll-mt-20 rounded-xl bg-gray-900 border border-gray-800 p-6">
-      <h2 className="flex items-center gap-2 text-lg font-semibold text-white mb-4"><Key size={18} className="text-blue-400" /> API 配置</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div><label className="text-xs text-gray-500 mb-1 block">接口地址</label><code className="block px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-gray-200 text-sm font-mono break-all">{window.location.origin}/v1</code></div>
-        <div><label className="text-xs text-gray-500 mb-1 block">API Key</label><div className="flex items-center gap-2"><code className="flex-1 px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-gray-200 text-sm font-mono truncate">{profile.api_key}</code><button onClick={copyKey} className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-green-400 transition-colors shrink-0">{copied?<Check size={16} className="text-green-400"/>:<Copy size={16}/>}</button></div></div>
-      </div>
-      <div className="mt-4 p-3 rounded-lg bg-gray-800/50 border border-gray-700"><div className="flex items-center justify-between mb-2"><span className="text-xs text-gray-400">curl 快速测试</span><button onClick={copyCurl} className="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300"><Copy size={12}/> 复制命令</button></div><pre className="text-xs text-gray-300 overflow-x-auto"><code>{curlexample}</code></pre></div>
     </div>
 
     <div id="models" className="scroll-mt-20 rounded-xl bg-gray-900 border border-gray-800 overflow-hidden"><div className="p-4 border-b border-gray-800"><h2 className="flex items-center gap-2 text-lg font-semibold text-white"><Cpu size={18} className="text-purple-400"/> 可用模型</h2></div>

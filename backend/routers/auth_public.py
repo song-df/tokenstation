@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from pydantic import BaseModel, EmailStr
-from models import User, UserRole, Referral, TopUp, RedeemCode
+from models import User, UserRole, Referral
 from auth import hash_password, generate_api_key, get_current_user, get_admin_user
 from database import get_db
 
@@ -73,18 +73,12 @@ async def register(data: RegisterBody, db: AsyncSession = Depends(get_db)):
     db.add(user)
     await db.flush()
 
-    # Handle referral
+    # Handle referral relationship (rewards handled by new-api affiliate system)
     if data.referral_code:
         r = await db.execute(select(User).where(User.referral_code == data.referral_code))
         referrer = r.scalar_one_or_none()
         if referrer and referrer.id != user.id:
-            # Create referral relationship
             db.add(Referral(referrer_id=referrer.id, referred_id=user.id))
-            # Give both 1000 bonus
-            referrer.quota += 1000
-            user.quota += 1000
-            db.add(TopUp(user_id=referrer.id, amount=100, remark=f"推荐用户 {username} 奖励"))
-            db.add(TopUp(user_id=user.id, amount=100, remark=f"通过推荐码注册奖励"))
 
     await db.commit()
     await db.refresh(user)

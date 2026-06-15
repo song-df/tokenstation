@@ -1,12 +1,11 @@
 import { useNavigate, Link, useLocation } from 'react-router-dom'
 import ThemeToggle from './ThemeToggle'
 import { setToken } from '../lib/api'
-import { LogOut, LayoutDashboard, Key, BookOpen, User, Coins, Ticket, Cpu, Clock, Wallet, Settings, Wifi, Share2, ShieldCheck, ShoppingCart } from 'lucide-react'
+import { LogOut, LayoutDashboard, Key, BookOpen, User, Coins, Ticket, Cpu, Clock, Wallet, Wifi, Share2, ShieldCheck } from 'lucide-react'
 
 // 路由级 Tab
 const TABS = [
   { to: '/', label: '概览', icon: LayoutDashboard },
-  { to: '/purchase', label: 'T粒充值', icon: ShoppingCart },
   { to: '/keys', label: 'Key 管理', icon: Key },
   { to: '/proxy', label: '代理订阅', icon: Wifi },
   { to: '/referral', label: '推荐有礼', icon: Share2 },
@@ -18,7 +17,6 @@ const TABS = [
 const ANCHORS = [
   { id: 'overview', label: '账户概览', icon: Coins },
   { id: 'redeem', label: '兑换 / 充值', icon: Ticket },
-  { id: 'api-config', label: 'API 配置', icon: Settings },
   { id: 'models', label: '可用模型', icon: Cpu },
   { id: 'logs', label: '使用记录', icon: Clock },
   { id: 'topups', label: '充值记录', icon: Wallet },
