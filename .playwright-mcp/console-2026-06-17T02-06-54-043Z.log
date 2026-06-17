@@ -1,0 +1,8 @@
+[   55637ms] TypeError: Cannot set properties of null (setting 'innerHTML')
+    at https://shop.lra.cn/aiplus/:113:52
+[   88979ms] [WARNING] Error with Feature-Policy header: Unrecognized feature: '*'. @ :0
+[   92707ms] [VERBOSE] [DOM] Input elements should have autocomplete attributes (suggested: "current-password"): (More info: https://goo.gl/9p2vKq) %o @ https://aiplus.lra.cn/auth?redirect=%252Fpromotion%253F_userMenuKey%253Dd9ac815a4098746f598f00b9aafb5724:0
+[   98214ms] [WARNING] Error with Feature-Policy header: Unrecognized feature: '*'. @ :0
+[   99204ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_CLOSED @ https://scripts.simpleanalyticscdn.com/latest.js:0
+[  146328ms] [VERBOSE] [DOM] Input elements should have autocomplete attributes (suggested: "current-password"): (More info: https://goo.gl/9p2vKq) %o @ https://aiplus.lra.cn/auth:0
+[  151158ms] [VERBOSE] [DOM] Input elements should have autocomplete attributes (suggested: "current-password"): (More info: https://goo.gl/9p2vKq) %o @ https://aiplus.lra.cn/auth:0

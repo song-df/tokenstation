@@ -1,0 +1,46 @@
+#!/bin/bash
+# T粒加油站 · 前端部署脚本 (example)
+# 复制为 deploy.sh 并填入真实值:
+#   cp deploy.sh.example deploy.sh
+# deploy.sh 已 gitignore, 不会被提交。
+#
+# 使用方式：
+#   KEY=~/.ssh/your_key HOST=your.server.ip ./deploy.sh
+#   SKIP_BUILD=1 KEY=... HOST=... ./deploy.sh  # 跳过构建
+
+set -euo pipefail
+
+KEY="${KEY:?请设置 SSH 私钥路径}"
+HOST="${HOST:?请设置服务器 IP}"
+REMOTE_USER="${REMOTE_USER:-root}"
+REMOTE_DIR="${REMOTE_DIR:-/www/wwwroot/ai-new}"
+
+SOURCE_DIR="$(dirname "$0")/frontend/dist"
+
+if [ ! -f "$KEY" ]; then
+  echo "[错误] 未找到 SSH 私钥: $KEY"
+  exit 1
+fi
+
+SSH_CMD="ssh -i $KEY -o StrictHostKeyChecking=accept-new"
+SCP_CMD="scp -i $KEY -o StrictHostKeyChecking=accept-new"
+
+if [ "${SKIP_BUILD:-0}" = "1" ]; then
+  echo "[提示] 跳过构建"
+else
+  echo "[1/2] 构建前端..."
+  (cd "$(dirname "$0")/frontend" && npx vite build)
+fi
+
+if [ ! -d "$SOURCE_DIR" ] || [ ! -f "$SOURCE_DIR/index.html" ]; then
+  echo "[错误] 未找到构建产物"
+  exit 1
+fi
+
+echo "[2/2] 上传到 ${REMOTE_USER}@${HOST}:${REMOTE_DIR}/"
+$SCP_CMD "$SOURCE_DIR/assets/"* "${REMOTE_USER}@${HOST}:${REMOTE_DIR}/assets/"
+$SCP_CMD "$SOURCE_DIR/index.html" "${REMOTE_USER}@${HOST}:${REMOTE_DIR}/index.html"
+# 如有 og-image.png / favicon 等静态文件, 一并上传
+# $SCP_CMD "$SOURCE_DIR/og-image.png" "${REMOTE_USER}@${HOST}:${REMOTE_DIR}/og-image.png"
+
+echo "  完成 $(date '+%H:%M:%S')"

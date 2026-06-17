@@ -1,0 +1,367 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]:
+        - img [ref=e7]
+        - generic [ref=e9]: T粒加油站
+      - generic [ref=e10]:
+        - link "← 使用说明" [ref=e11] [cursor=pointer]:
+          - /url: /guide
+        - link "注册使用" [ref=e12] [cursor=pointer]:
+          - /url: /register
+  - main [ref=e13]:
+    - generic [ref=e14]:
+      - heading "Mac / Linux 从零安装 Codex" [level=1] [ref=e15]
+      - paragraph [ref=e16]: Codex CLI + Moon Bridge 中转方案 · 国内直连 · 免翻墙免信用卡
+    - generic [ref=e17]:
+      - heading "一、安装 Node.js（Codex 运行环境）" [level=2] [ref=e18]:
+        - img [ref=e19]
+        - text: 一、安装 Node.js（Codex 运行环境）
+      - paragraph [ref=e22]:
+        - text: Codex CLI 依赖 Node.js 20+。在终端输入
+        - code [ref=e23]: node -v
+        - text: ，如果没输出版本号或版本 < 20，需要安装。
+      - generic [ref=e24]:
+        - generic [ref=e25]:
+          - generic [ref=e26]: 终端
+          - button "复制" [ref=e27]:
+            - img [ref=e28]
+            - text: 复制
+        - code [ref=e32]: "# 安装 nvm（Node 版本管理器） curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash # 重启终端，或执行： source ~/.zshrc # 如果用 zsh（macOS 默认） source ~/.bashrc # 如果用 bash（Linux 常见） # 安装并使用 Node.js LTS nvm install --lts node -v"
+      - generic [ref=e33]:
+        - paragraph [ref=e34]:
+          - img [ref=e35]
+          - generic [ref=e37]: macOS 用户注意
+        - paragraph [ref=e38]: 如果系统未安装 Xcode Command Line Tools，先执行：
+        - generic [ref=e39]:
+          - generic [ref=e40]:
+            - generic [ref=e41]: 终端
+            - button "复制" [ref=e42]:
+              - img [ref=e43]
+              - text: 复制
+          - code [ref=e47]: xcode-select --install
+    - generic [ref=e48]:
+      - heading "二、安装 Codex CLI" [level=2] [ref=e49]:
+        - img [ref=e50]
+        - text: 二、安装 Codex CLI
+      - generic [ref=e53]:
+        - generic [ref=e54]:
+          - generic [ref=e55]: 终端
+          - button "复制" [ref=e56]:
+            - img [ref=e57]
+            - text: 复制
+        - code [ref=e61]: "npm install -g @openai/codex # 验证安装 codex --version"
+      - generic [ref=e62]:
+        - paragraph [ref=e63]:
+          - img [ref=e64]
+          - generic [ref=e66]: 权限错误处理
+        - paragraph [ref=e67]:
+          - text: 如果报
+          - code [ref=e68]: EACCES
+          - text: 权限错误：
+        - generic [ref=e69]:
+          - generic [ref=e70]:
+            - generic [ref=e71]: 终端
+            - button "复制" [ref=e72]:
+              - img [ref=e73]
+              - text: 复制
+          - code [ref=e77]: "# 推荐：配置 npm 全局安装目录 mkdir -p ~/.npm-global npm config set prefix '~/.npm-global' echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.zshrc # zsh echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.bashrc # bash source ~/.zshrc # 或 source ~/.bashrc # 重新安装 npm install -g @openai/codex"
+    - generic [ref=e78]:
+      - heading "三、配置 Moon Bridge（中转）" [level=2] [ref=e79]:
+        - img [ref=e80]
+        - text: 三、配置 Moon Bridge（中转）
+      - paragraph [ref=e83]: Moon Bridge 负责将 Codex 的 Anthropic 格式请求转发到 T粒加油站。需要安装 Go 语言环境。
+      - heading "1 安装 Go" [level=3] [ref=e84]:
+        - generic [ref=e85]: "1"
+        - text: 安装 Go
+      - paragraph [ref=e86]: 🍎 macOS：
+      - generic [ref=e87]:
+        - generic [ref=e88]:
+          - generic [ref=e89]: 终端
+          - button "复制" [ref=e90]:
+            - img [ref=e91]
+            - text: 复制
+        - code [ref=e95]: brew install go go version
+      - paragraph [ref=e96]: 🐧 Linux：
+      - generic [ref=e97]:
+        - generic [ref=e98]:
+          - generic [ref=e99]: 终端
+          - button "复制" [ref=e100]:
+            - img [ref=e101]
+            - text: 复制
+        - code [ref=e105]: "# Debian / Ubuntu sudo apt update && sudo apt install -y golang-go # CentOS / RHEL / Fedora sudo dnf install -y golang # Arch sudo pacman -S go go version"
+      - generic [ref=e106]:
+        - generic [ref=e107]:
+          - generic [ref=e108]: 终端
+          - button "复制" [ref=e109]:
+            - img [ref=e110]
+            - text: 复制
+        - code [ref=e114]: "# 配置国内代理（加速下载，所有平台通用） go env -w GOPROXY=https://goproxy.cn,direct"
+      - heading "2 克隆 Moon Bridge 仓库" [level=3] [ref=e115]:
+        - generic [ref=e116]: "2"
+        - text: 克隆 Moon Bridge 仓库
+      - generic [ref=e117]:
+        - generic [ref=e118]:
+          - generic [ref=e119]: 终端
+          - button "复制" [ref=e120]:
+            - img [ref=e121]
+            - text: 复制
+        - code [ref=e125]: "# 创建工作目录（可换成你想要的路径） mkdir -p ~/workspace cd ~/workspace # 克隆 Moon Bridge git clone https://github.com/ZhiYi-R/moon-bridge.git cd moon-bridge"
+      - heading "3 创建配置文件" [level=3] [ref=e126]:
+        - generic [ref=e127]: "3"
+        - text: 创建配置文件
+      - paragraph [ref=e128]:
+        - text: 在 Moon Bridge 目录下创建
+        - code [ref=e129]: config.yml
+        - text: ，把 api_key 改成你的 Key：
+      - generic [ref=e130]:
+        - generic [ref=e131]:
+          - generic [ref=e132]: config.yml
+          - button "复制" [ref=e133]:
+            - img [ref=e134]
+            - text: 复制
+        - code [ref=e138]: "# yaml-language-server: $schema=./config.schema.json mode: \"Transform\" log: level: \"info\" format: \"text\" server: addr: \"127.0.0.1:38440\" persistence: active_provider: db_sqlite extensions: deepseek_v4: config: reinforce_instructions: true reinforce_prompt: \"[System Reminder]: Please pay close attention to the system instructions, AGENTS.md files, and any other context provided. Follow them carefully and completely in your response.\\n[User]:\" kimi_workaround: config: max_tool_rounds: 50 convergence_margin: 0.8 db_sqlite: enabled: true config: path: ./data/moonbridge.db wal: true busy_timeout_ms: 5000 max_open_conns: 1 metrics: enabled: true config: default_limit: 100 max_limit: 1000 cache: mode: \"explicit\" ttl: \"5m\" prompt_caching: true automatic_prompt_cache: false explicit_cache_breakpoints: true allow_retention_downgrade: false max_breakpoints: 4 min_cache_tokens: 1024 expected_reuse: 2 minimum_value_score: 2048 min_breakpoint_tokens: 1024 defaults: model: \"moonbridge\" max_tokens: 65536 trace: enabled: false models: deepseek-v4-pro: context_window: 1000000 max_output_tokens: 384000 display_name: \"DeepSeek V4 Pro\" description: \"DeepSeek V4 with selectable reasoning effort.\" default_reasoning_level: \"high\" supported_reasoning_levels: - effort: \"high\" description: \"High reasoning effort\" - effort: \"xhigh\" description: \"Extra high reasoning effort\" supports_reasoning_summaries: true default_reasoning_summary: \"auto\" web_search: support: \"auto\" extensions: deepseek_v4: enabled: true deepseek-v4-flash: context_window: 1000000 max_output_tokens: 384000 display_name: \"DeepSeek V4 Flash\" description: \"DeepSeek V4 Flash with selectable reasoning effort.\" default_reasoning_level: \"high\" supported_reasoning_levels: - effort: \"high\" description: \"High reasoning effort\" - effort: \"xhigh\" description: \"Extra high reasoning effort\" supports_reasoning_summaries: true default_reasoning_summary: \"auto\" web_search: support: \"auto\" extensions: deepseek_v4: enabled: true claude-sonnet-4-6: context_window: 200000 max_output_tokens: 64000 display_name: \"Claude Sonnet 4\" description: \"Frontier model for everyday coding.\" default_reasoning_level: \"medium\" supported_reasoning_levels: - effort: \"low\" description: \"Fast responses with lighter reasoning\" - effort: \"medium\" description: \"Balances speed and reasoning depth\" - effort: \"high\" description: \"Greater reasoning depth for complex problems\" - effort: \"xhigh\" description: \"Extra high reasoning depth\" input_modalities: - \"text\" - \"image\" supports_image_detail_original: true providers: default: base_url: \"https://ai.aiotedu.cc\" api_key: \"sk-你的APIKey\" version: \"2023-06-01\" user_agent: \"moonbridge/1.0\" web_search: support: \"auto\" offers: - model: deepseek-v4-pro pricing: input_price: 2 output_price: 8 cache_write_price: 1 cache_read_price: 0.2 - model: deepseek-v4-flash pricing: input_price: 1 output_price: 2 cache_write_price: 1 cache_read_price: 0.02 - model: claude-sonnet-4-6 pricing: input_price: 3 output_price: 15 cache_write_price: 3.75 cache_read_price: 0.30 routes: moonbridge: model: deepseek-v4-pro provider: default"
+      - generic [ref=e139]:
+        - paragraph [ref=e140]: 📋 如何添加其他模型
+        - paragraph [ref=e141]:
+          - text: 配置中默认使用
+          - code [ref=e142]: deepseek-v4-pro
+          - text: ，如果要添加其他模型（如 Claude、GPT 等），需要改三个地方：
+        - list [ref=e143]:
+          - listitem [ref=e144]:
+            - text: models 节：复制现有模型块，修改模型名和参数。
+            - generic [ref=e145]:
+              - generic [ref=e146]:
+                - generic [ref=e147]: "yaml (追加到 models: 下)"
+                - button "复制" [ref=e148]:
+                  - img [ref=e149]
+                  - text: 复制
+              - code [ref=e153]: "claude-opus-4-8: context_window: 200000 max_output_tokens: 64000 display_name: \"Claude Opus 4.8\" description: \"Most capable Claude model.\" default_reasoning_level: \"high\" supported_reasoning_levels: - effort: \"medium\" description: \"Balanced reasoning\" - effort: \"high\" description: \"Deep reasoning\" input_modalities: - \"text\" - \"image\""
+          - listitem [ref=e154]:
+            - text: providers.default.offers 节：为新模型添加定价条目：
+            - generic [ref=e155]:
+              - generic [ref=e156]:
+                - generic [ref=e157]: "yaml (追加到 offers: 下)"
+                - button "复制" [ref=e158]:
+                  - img [ref=e159]
+                  - text: 复制
+              - code [ref=e163]: "- model: claude-opus-4-8 pricing: input_price: 3 output_price: 15 cache_write_price: 3.75 cache_read_price: 0.30"
+          - listitem [ref=e164]:
+            - text: routes.moonbridge.model：如果要切换默认模型，修改此行即可。
+            - generic [ref=e165]:
+              - generic [ref=e166]:
+                - generic [ref=e167]: yaml
+                - button "复制" [ref=e168]:
+                  - img [ref=e169]
+                  - text: 复制
+              - code [ref=e173]: "routes: moonbridge: model: claude-opus-4-8 provider: default"
+        - paragraph [ref=e174]:
+          - text: T粒加油站支持的模型 ID 及价格见
+          - link "使用说明" [ref=e175] [cursor=pointer]:
+            - /url: /guide
+          - text: 。修改配置后重启 Moon Bridge 生效。
+      - heading "4 启动前准备" [level=3] [ref=e176]:
+        - generic [ref=e177]: "4"
+        - text: 启动前准备
+      - paragraph [ref=e178]: ① 创建 data 目录（SQLite 数据库需要）
+      - generic [ref=e179]:
+        - generic [ref=e180]:
+          - generic [ref=e181]: 终端
+          - button "复制" [ref=e182]:
+            - img [ref=e183]
+            - text: 复制
+        - code [ref=e187]: cd ~/workspace/moon-bridge mkdir -p data
+      - paragraph [ref=e188]: ② 检查端口是否被占用
+      - generic [ref=e189]:
+        - generic [ref=e190]:
+          - generic [ref=e191]: 终端
+          - button "复制" [ref=e192]:
+            - img [ref=e193]
+            - text: 复制
+        - code [ref=e197]: "# 查看 38440 端口是否已被占用 lsof -i :38440"
+      - paragraph [ref=e198]:
+        - text: 如果输出为空 → 端口空闲，可以启动。
+        - text: 如果有输出 → 端口被占用，记下最后一列的 PID，执行
+        - code [ref=e199]: kill 进程号
+        - text: 结束旧进程。
+      - paragraph [ref=e200]: ③ 替换 API Key
+      - paragraph [ref=e201]:
+        - text: 确认
+        - code [ref=e202]: config.yml
+        - text: 中
+        - code [ref=e203]: "api_key: \"sk-你的APIKey\""
+        - text: 已替换为你的真实 Key。在
+        - link "个人主页" [ref=e204] [cursor=pointer]:
+          - /url: /
+        - text: 可查看。
+      - heading "5 启动 Moon Bridge" [level=3] [ref=e205]:
+        - generic [ref=e206]: "5"
+        - text: 启动 Moon Bridge
+      - generic [ref=e207]:
+        - generic [ref=e208]:
+          - generic [ref=e209]: 终端
+          - button "复制" [ref=e210]:
+            - img [ref=e211]
+            - text: 复制
+        - code [ref=e215]: cd ~/workspace/moon-bridge go run ./cmd/moonbridge -config config.yml
+      - paragraph [ref=e216]:
+        - text: 看到
+        - code [ref=e217]: Moon Bridge 监听于 127.0.0.1:38440
+        - text: 就说明启动成功。
+      - paragraph [ref=e219]: 保持此窗口运行，后续步骤需要 Moon Bridge 在后台持续监听。
+      - generic [ref=e220]:
+        - paragraph [ref=e221]: ⚠️ 启动报错排查
+        - list [ref=e222]:
+          - listitem [ref=e223]:
+            - text: unable to open database file → 没创建
+            - code [ref=e224]: data
+            - text: 目录，执行上面第①步。
+          - listitem [ref=e225]: "bind: address already in use → 端口被占用，执行上面第②步。"
+          - listitem [ref=e226]:
+            - text: Invalid token / 401 →
+            - code [ref=e227]: api_key
+            - text: 还是占位符没改，执行上面第③步。
+      - heading "6 让 Moon Bridge 驻留后台（不绑定终端窗口）" [level=3] [ref=e228]:
+        - generic [ref=e229]: "6"
+        - text: 让 Moon Bridge 驻留后台（不绑定终端窗口）
+      - paragraph [ref=e230]:
+        - text: 直接用
+        - code [ref=e231]: go run
+        - text: 启动的话，关掉终端服务就没了。下面三种方式任选其一：
+      - paragraph [ref=e232]: 方式一：nohup（最简单）
+      - generic [ref=e233]:
+        - generic [ref=e234]:
+          - generic [ref=e235]: 终端
+          - button "复制" [ref=e236]:
+            - img [ref=e237]
+            - text: 复制
+        - code [ref=e241]: cd ~/workspace/moon-bridge nohup go run ./cmd/moonbridge -config config.yml > /dev/null 2>&1 &
+      - paragraph [ref=e242]:
+        - text: 进程在后台运行，关终端不受影响。需要停止时执行
+        - code [ref=e243]: pkill -f moonbridge
+        - text: 。
+      - paragraph [ref=e244]: 方式二：tmux / screen
+      - generic [ref=e245]:
+        - generic [ref=e246]:
+          - generic [ref=e247]: 终端
+          - button "复制" [ref=e248]:
+            - img [ref=e249]
+            - text: 复制
+        - code [ref=e253]: "# 使用 tmux tmux new -s moonbridge cd ~/workspace/moon-bridge go run ./cmd/moonbridge -config config.yml # 按 Ctrl+B 然后按 D 分离会话 # 下次查看: tmux attach -t moonbridge # 或使用 screen screen -S moonbridge cd ~/workspace/moon-bridge go run ./cmd/moonbridge -config config.yml # 按 Ctrl+A 然后按 D 分离会话 # 下次查看: screen -r moonbridge"
+      - paragraph [ref=e254]: 方式三：编译 + 后台启动（推荐长期使用）
+      - generic [ref=e255]:
+        - generic [ref=e256]:
+          - generic [ref=e257]: 终端
+          - button "复制" [ref=e258]:
+            - img [ref=e259]
+            - text: 复制
+        - code [ref=e263]: "# 先编译成可执行文件 cd ~/workspace/moon-bridge go build -o moonbridge ./cmd/moonbridge # 后台启动 nohup ./moonbridge -config config.yml > /dev/null 2>&1 & # 验证 curl http://127.0.0.1:38440/health"
+      - generic [ref=e264]:
+        - paragraph [ref=e265]: 🍎 macOS 用户：开机自启（launchd）
+        - generic [ref=e266]:
+          - generic [ref=e267]:
+            - generic [ref=e268]: 终端
+            - button "复制" [ref=e269]:
+              - img [ref=e270]
+              - text: 复制
+          - code [ref=e274]: "cat > ~/Library/LaunchAgents/com.moonbridge.plist << 'PLIST_EOF' <?xml version=\"1.0\" encoding=\"UTF-8\"?> <!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\"> <plist version=\"1.0\"> <dict> <key>Label</key> <string>com.moonbridge</string> <key>ProgramArguments</key> <array> <string>${HOME}/workspace/moon-bridge/moonbridge</string> <string>-config</string> <string>${HOME}/workspace/moon-bridge/config.yml</string> </array> <key>WorkingDirectory</key> <string>${HOME}/workspace/moon-bridge</string> <key>RunAtLoad</key> <true/> <key>KeepAlive</key> <true/> </dict> </plist> PLIST_EOF launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.moonbridge.plist"
+        - paragraph [ref=e275]:
+          - text: 一键创建并加载。注意
+          - code [ref=e276]: "${HOME}"
+          - text: 在写入文件时会被 shell 展开为你的用户目录，plist 里存的是实际路径。
+      - generic [ref=e277]:
+        - paragraph [ref=e278]: 🐧 Linux 用户：开机自启（systemd）
+        - generic [ref=e279]:
+          - generic [ref=e280]:
+            - generic [ref=e281]: 终端
+            - button "复制" [ref=e282]:
+              - img [ref=e283]
+              - text: 复制
+          - code [ref=e287]: "sudo tee /etc/systemd/system/moonbridge.service << 'SVC_EOF' [Unit] Description=Moon Bridge After=network.target [Service] Type=simple User=${USER} WorkingDirectory=${HOME}/workspace/moon-bridge ExecStart=${HOME}/workspace/moon-bridge/moonbridge -config config.yml Restart=always RestartSec=5 [Install] WantedBy=multi-user.target SVC_EOF sudo systemctl daemon-reload sudo systemctl enable moonbridge --now"
+        - paragraph [ref=e288]:
+          - text: 同样，
+          - code [ref=e289]: "${USER}"
+          - text: 和
+          - code [ref=e290]: "${HOME}"
+          - text: 在写入文件时自动展开为当前用户名和家目录。
+      - paragraph [ref=e292]:
+        - text: ✅ 选任意一种方式启动后，执行
+        - code [ref=e293]: curl http://127.0.0.1:38440/health
+        - text: 验证服务在运行。
+    - generic [ref=e294]:
+      - heading "四、配置 Codex 连接 Moon Bridge" [level=2] [ref=e295]:
+        - img [ref=e296]
+        - text: 四、配置 Codex 连接 Moon Bridge
+      - paragraph [ref=e298]: 新开一个终端窗口，逐条执行以下命令来生成 Codex 配置：
+      - heading "1 生成配置" [level=3] [ref=e299]:
+        - generic [ref=e300]: "1"
+        - text: 生成配置
+      - generic [ref=e301]:
+        - generic [ref=e302]:
+          - generic [ref=e303]: 终端（新窗口）
+          - button "复制" [ref=e304]:
+            - img [ref=e305]
+            - text: 复制
+        - code [ref=e309]: "# 第 1 条：先进入 Moon Bridge 目录 cd ~/workspace/moon-bridge export CODEX_HOME_DIR=${CODEX_HOME:-$HOME/.codex} # 第 2 条：获取默认模型名 MODEL=$(go run ./cmd/moonbridge -print-codex-model -config config.yml) # 第 3 条：生成 config.toml + models_catalog.json # -print-codex-config 会同时做两件事： # ① 把 config.toml 内容输出到 stdout → 管道写入 ~/.codex/config.toml # ② 把 models_catalog.json 自动写入 -codex-home 指定的目录 go run ./cmd/moonbridge -print-codex-config \"$MODEL\" \\ -codex-base-url \"http://127.0.0.1:38440/v1\" \\ -codex-home \"$CODEX_HOME_DIR\" \\ -config config.yml > \"$CODEX_HOME_DIR/config.toml\""
+      - paragraph [ref=e311]:
+        - code [ref=e312]: models_catalog.json
+        - text: 由
+        - code [ref=e313]: "-print-codex-config"
+        - text: 自动写入
+        - code [ref=e314]: "-codex-home"
+        - text: 目录，无需手动创建。
+      - heading "2 额外配置（手动添加到 config.toml）" [level=3] [ref=e315]:
+        - generic [ref=e316]: "2"
+        - text: 额外配置（手动添加到 config.toml）
+      - paragraph [ref=e317]:
+        - text: 编辑
+        - code [ref=e318]: ~/.codex/config.toml
+        - text: ，确保包含以下内容：
+      - generic [ref=e319]:
+        - generic [ref=e320]:
+          - generic [ref=e321]: config.toml
+          - button "复制" [ref=e322]:
+            - img [ref=e323]
+            - text: 复制
+        - code [ref=e327]: "cat >> ~/.codex/config.toml << 'TOML_EOF' model = \"moonbridge\" model_provider = \"moonbridge\" model_context_window = 1000000 model_max_output_tokens = 384000 model_catalog_json = \"${HOME}/.codex/models_catalog.json\" [model_providers.moonbridge] name = \"Moon Bridge\" base_url = \"http://127.0.0.1:38440/v1\" wire_api = \"responses\" TOML_EOF"
+      - heading "3 重启 Codex App" [level=3] [ref=e328]:
+        - generic [ref=e329]: "3"
+        - text: 重启 Codex App
+      - paragraph [ref=e330]: 完成配置后，完全退出 Codex App（如果已经在运行的话），然后重新启动。
+    - generic [ref=e331]:
+      - heading "五、验证是否成功" [level=2] [ref=e332]:
+        - img [ref=e333]
+        - text: 五、验证是否成功
+      - paragraph [ref=e335]: 重启 Codex 后，在 Codex 终端中测试对话。如果正常回复，说明配置成功。
+      - generic [ref=e336]:
+        - paragraph [ref=e337]: ✅ 成功的标志：
+        - list [ref=e338]:
+          - listitem [ref=e339]: Moon Bridge 窗口中看到请求日志
+          - listitem [ref=e340]: Codex 能正常回复对话
+          - listitem [ref=e341]:
+            - link "T粒加油站" [ref=e342] [cursor=pointer]:
+              - /url: /
+            - text: 的使用记录中能看到扣费
+    - generic [ref=e343]:
+      - heading "常见问题" [level=2] [ref=e344]:
+        - img [ref=e345]
+        - text: 常见问题
+      - generic [ref=e347]:
+        - group [ref=e348]:
+          - 'generic "Q: Codex 提示 \"No available channel for model\"？" [ref=e349] [cursor=pointer]'
+        - group [ref=e350]:
+          - 'generic "Q: macOS 提示 \"go: command not found\"？" [ref=e351] [cursor=pointer]'
+        - group [ref=e352]:
+          - 'generic "Q: go run 下载依赖很慢？" [ref=e353] [cursor=pointer]'
+        - group [ref=e354]:
+          - 'generic "Q: Linux 上 git clone 失败？" [ref=e355] [cursor=pointer]'
+        - group [ref=e356]:
+          - 'generic "Q: 如何确认当前使用的是哪个模型？" [ref=e357] [cursor=pointer]'
+        - group [ref=e358]:
+          - 'generic "Q: 如何升级 Moon Bridge 到最新版本？" [ref=e359] [cursor=pointer]'
+    - link "还没有 Key？立即注册" [ref=e361] [cursor=pointer]:
+      - /url: /register
+  - contentinfo [ref=e362]:
+    - text: T粒加油站 · ai.aiotedu.cc ·
+    - link "使用说明" [ref=e363] [cursor=pointer]:
+      - /url: /guide

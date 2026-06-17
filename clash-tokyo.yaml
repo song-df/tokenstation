@@ -1,0 +1,141 @@
+# ClashX Meta / Clash Verge (mihomo) 配置
+# 东京自建节点 8.209.242.59 — AI 相关流量走东京，其它默认直连
+# 用法：放入 ClashX Meta 配置目录或在 Clash Verge 导入为本地配置
+
+mixed-port: 7890
+allow-lan: false
+mode: rule
+log-level: warning
+ipv6: false
+unified-delay: true
+tcp-concurrent: true
+
+# 如需全局透明代理可开启 tun（ClashX Meta 需授权 helper）
+tun:
+  enable: false
+  stack: system
+  auto-route: true
+  auto-detect-interface: true
+  dns-hijack:
+    - any:53
+
+dns:
+  enable: true
+  listen: 127.0.0.1:1053
+  ipv6: false
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  fake-ip-filter:
+    - "*.lan"
+    - "*.local"
+    - "+.aiotedu.cc"        # 自己网关走直连解析
+  default-nameserver:
+    - 223.5.5.5
+    - 119.29.29.29
+  nameserver:               # 国内直连域名用国内 DNS
+    - https://223.5.5.5/dns-query
+    - https://1.12.12.12/dns-query
+  proxy-server-nameserver:  # 解析节点服务器地址用
+    - https://223.5.5.5/dns-query
+  # 走代理的域名由节点在东京就地解析（fake-ip 已保证不在本地泄漏）
+
+proxies:
+  - name: "🇯🇵东京自建"
+    type: ss
+    server: 8.209.242.59
+    port: 37858
+    cipher: 2022-blake3-aes-128-gcm
+    password: "RhDmno7UUnj1qmYjMr2oeQ=="
+    udp: true
+  # 备用：公网被干扰时改用 ZeroTier 内网（需本机已加入 ZeroTier）
+  - name: "🇯🇵东京-ZT"
+    type: ss
+    server: 10.114.108.147
+    port: 37858
+    cipher: 2022-blake3-aes-128-gcm
+    password: "RhDmno7UUnj1qmYjMr2oeQ=="
+    udp: true
+
+proxy-groups:
+  - name: "AI专线"          # AI 相关流量走这里
+    type: select
+    proxies:
+      - "🇯🇵东京自建"
+      - "🇯🇵东京-ZT"
+      - DIRECT
+  - name: "其它流量"        # 漏网之鱼，默认直连，可手动切到节点
+    type: select
+    proxies:
+      - DIRECT
+      - "🇯🇵东京自建"
+
+rules:
+  # —— AI 相关：走东京 ——
+  - DOMAIN-SUFFIX,anthropic.com,AI专线
+  - DOMAIN-SUFFIX,claude.ai,AI专线
+  - DOMAIN-SUFFIX,claude.com,AI专线
+  - DOMAIN-SUFFIX,openai.com,AI专线
+  - DOMAIN-SUFFIX,chatgpt.com,AI专线
+  - DOMAIN-SUFFIX,oaistatic.com,AI专线
+  - DOMAIN-SUFFIX,oaiusercontent.com,AI专线
+  - DOMAIN-SUFFIX,huggingface.co,AI专线
+  - DOMAIN-SUFFIX,perplexity.ai,AI专线
+  - DOMAIN-SUFFIX,mistral.ai,AI专线
+  - DOMAIN-SUFFIX,cursor.com,AI专线
+  - DOMAIN-SUFFIX,github.com,AI专线
+  - DOMAIN-SUFFIX,githubassets.com,AI专线
+  - DOMAIN-SUFFIX,githubusercontent.com,AI专线
+  # —— Google 全家桶 ——
+  - DOMAIN-SUFFIX,google.com,AI专线
+  - DOMAIN-SUFFIX,google.com.hk,AI专线
+  - DOMAIN-SUFFIX,googleapis.com,AI专线
+  - DOMAIN-SUFFIX,generativelanguage.googleapis.com,AI专线
+  - DOMAIN-SUFFIX,gemini.google.com,AI专线
+  - DOMAIN-SUFFIX,googleusercontent.com,AI专线
+  - DOMAIN-SUFFIX,gstatic.com,AI专线
+  - DOMAIN-SUFFIX,gmail.com,AI专线
+  - DOMAIN-SUFFIX,googlevideo.com,AI专线
+  - DOMAIN-SUFFIX,youtube.com,AI专线
+  - DOMAIN-SUFFIX,ytimg.com,AI专线
+  - DOMAIN-SUFFIX,ggpht.com,AI专线
+  # —— 社交 / 社区 ——
+  - DOMAIN-SUFFIX,twitter.com,AI专线
+  - DOMAIN-SUFFIX,x.com,AI专线
+  - DOMAIN-SUFFIX,reddit.com,AI专线
+  - DOMAIN-SUFFIX,discord.com,AI专线
+  - DOMAIN-SUFFIX,telegram.org,AI专线
+  # —— 开发 ——
+  - DOMAIN-SUFFIX,stackoverflow.com,AI专线
+  - DOMAIN-SUFFIX,docker.com,AI专线
+  - DOMAIN-SUFFIX,docker.io,AI专线
+  - DOMAIN-SUFFIX,registry-1.docker.io,AI专线
+  - DOMAIN-SUFFIX,cloudflare.com,AI专线
+  - DOMAIN-SUFFIX,wikipedia.org,AI专线
+  # —— 常用 ——
+  - DOMAIN-SUFFIX,notion.so,AI专线
+  - DOMAIN-SUFFIX,figma.com,AI专线
+  - DOMAIN-SUFFIX,medium.com,AI专线
+  # —— TikTok ——
+  - DOMAIN-SUFFIX,tiktok.com,AI专线
+  - DOMAIN-SUFFIX,tiktokv.com,AI专线
+  - DOMAIN-SUFFIX,tiktokcdn.com,AI专线
+  - DOMAIN-SUFFIX,tiktokcdn-us.com,AI专线
+  - DOMAIN-SUFFIX,tiktokcdn-eu.com,AI专线
+  - DOMAIN-SUFFIX,tiktok-share.com,AI专线
+  - DOMAIN-SUFFIX,tiktok.org,AI专线
+  - DOMAIN-SUFFIX,ibytedtos.com,AI专线
+  - DOMAIN-SUFFIX,bytedap.com,AI专线
+  - DOMAIN-SUFFIX,byteoversea.com,AI专线
+  - DOMAIN-SUFFIX,bytecdn.cn,AI专线
+  - DOMAIN-SUFFIX,bytedance.com,AI专线
+  - DOMAIN-KEYWORD,tiktok,AI专线
+  - DOMAIN-KEYWORD,bytedance,AI专线
+  - DOMAIN-KEYWORD,anthropic,AI专线
+  - DOMAIN-KEYWORD,claude,AI专线
+  # —— 自己的网关：直连 ——
+  - DOMAIN-SUFFIX,aiotedu.cc,DIRECT
+  # —— 国内/局域网：直连 ——
+  - GEOIP,LAN,DIRECT,no-resolve
+  - GEOIP,CN,DIRECT
+  # —— 其余：交给“其它流量”组（默认直连）——
+  - MATCH,其它流量

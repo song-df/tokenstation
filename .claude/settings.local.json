@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//private/tmp/new-api-eval/**)",
+      "Bash(mkdir -p web/default/dist web/classic/dist)",
+      "Bash(export GOPROXY=https://goproxy.cn,direct GOSUMDB=off CGO_ENABLED=0)",
+      "Bash(go build *)",
+      "Bash(echo \"BUILD_EXIT=$?\")",
+      "Read(//tmp/new-api-eval/**)"
+    ]
+  }
+}
