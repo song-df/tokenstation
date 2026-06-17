@@ -1,0 +1,212 @@
+- generic [ref=e3]:
+  - navigation [ref=e4]:
+    - generic [ref=e5]:
+      - link "T粒加油站" [ref=e6] [cursor=pointer]:
+        - /url: /
+        - img [ref=e7]
+        - text: T粒加油站
+      - generic [ref=e9]:
+        - link "登录" [ref=e10] [cursor=pointer]:
+          - /url: /login
+        - link "免费注册" [ref=e11] [cursor=pointer]:
+          - /url: /register
+  - generic [ref=e16]:
+    - generic [ref=e17]:
+      - img [ref=e18]
+      - text: 已服务大量AI场景 · 7×24 在线
+    - heading "国内直连 16 款 AI 模型" [level=1] [ref=e20]
+    - paragraph [ref=e21]:
+      - text: 免翻墙免信用卡 · Claude Code / Cursor / Codex 即开即用
+      - text: 兑换码秒充到账，10元起充
+    - generic [ref=e22]:
+      - link "免费注册" [ref=e23] [cursor=pointer]:
+        - /url: /register
+        - text: 免费注册
+        - img [ref=e24]
+      - link "查看接入指南" [ref=e26] [cursor=pointer]:
+        - /url: /guide
+      - link "🪟 Codex 安装教程" [ref=e27] [cursor=pointer]:
+        - /url: /guide/codex
+  - generic [ref=e29]:
+    - generic [ref=e30]:
+      - paragraph [ref=e31]: 16+
+      - paragraph [ref=e32]: 精选模型
+    - generic [ref=e33]:
+      - paragraph [ref=e34]: < 2s
+      - paragraph [ref=e35]: 平均响应
+    - generic [ref=e36]:
+      - paragraph [ref=e37]: 7×24
+      - paragraph [ref=e38]: 在线服务
+    - generic [ref=e39]:
+      - paragraph [ref=e40]: 一键
+      - paragraph [ref=e41]: 复制接入
+  - generic [ref=e43]:
+    - generic [ref=e44]:
+      - heading "为什么选择 T粒加油站" [level=2] [ref=e45]
+      - paragraph [ref=e46]: 不用再为跨境外支付发愁，不用忍受代理延迟——一个账号，16款模型开箱即用。
+    - generic [ref=e47]:
+      - generic [ref=e48]:
+        - img [ref=e49]
+        - heading "16款精选大模型" [level=3] [ref=e52]
+        - paragraph [ref=e53]: Claude、GPT、Gemini、DeepSeek 等一线模型一站接入，无需分别注册多个平台。
+      - generic [ref=e54]:
+        - img [ref=e55]
+        - heading "官方直连 · 极速响应" [level=3] [ref=e57]
+        - paragraph [ref=e58]: 全链路延迟优于市场中位，与官方直连速度相当，告别代理超时与掉线。
+      - generic [ref=e59]:
+        - img [ref=e60]
+        - heading "免翻墙 · 免信用卡" [level=3] [ref=e62]
+        - paragraph [ref=e63]: 国内网络直接访问，兑换码充值即可使用，无需境外支付手段。
+      - generic [ref=e64]:
+        - img [ref=e65]
+        - heading "新模型第一时间上线" [level=3] [ref=e70]
+        - paragraph [ref=e71]: Anthropic、OpenAI、Google 等厂商发布新模型后，本站第一时间接入，无需等待。
+  - generic [ref=e73]:
+    - img [ref=e74]
+    - heading "一行命令接入 Claude Code" [level=2] [ref=e76]
+    - paragraph [ref=e77]: 复制下面三行到终端，即刻开始使用。
+    - generic [ref=e78]:
+      - code [ref=e80]: export ANTHROPIC_BASE_URL=https://ai.aiotedu.cc/api export ANTHROPIC_AUTH_TOKEN=sk-你的APIKey export ANTHROPIC_MODEL=claude-opus-4-8 export ANTHROPIC_SMALL_FAST_MODEL=claude-haiku-4-5
+      - button [ref=e81]:
+        - img [ref=e82]
+    - paragraph [ref=e85]: 支持 Claude Code · Codex CLI · Cursor · Continue · Aider 等主流 AI 编程工具
+    - link "🪟 Windows 用户参考 Codex 完整安装教程 →" [ref=e86] [cursor=pointer]:
+      - /url: /guide/codex
+  - generic [ref=e88]:
+    - generic [ref=e89]:
+      - heading "全部可用模型" [level=2] [ref=e90]
+      - paragraph [ref=e91]: 一个 API Key，16 款模型任意切换
+    - generic [ref=e92]:
+      - generic [ref=e93]:
+        - generic [ref=e95]: 贵
+        - paragraph [ref=e96]: Claude Opus 4.8
+        - code [ref=e97]: claude-opus-4-8
+      - generic [ref=e98]:
+        - generic [ref=e100]: 中等
+        - paragraph [ref=e101]: Claude Sonnet 4.6
+        - code [ref=e102]: claude-sonnet-4-6
+      - generic [ref=e103]:
+        - generic [ref=e105]: 中等
+        - paragraph [ref=e106]: Claude Haiku 4.5
+        - code [ref=e107]: claude-haiku-4-5
+      - generic [ref=e108]:
+        - generic [ref=e110]: 贵
+        - paragraph [ref=e111]: GPT-5.5
+        - code [ref=e112]: gpt-5.5
+      - generic [ref=e113]:
+        - generic [ref=e115]: 非常贵
+        - paragraph [ref=e116]: GPT-5.5 Pro
+        - code [ref=e117]: gpt-5.5-pro
+      - generic [ref=e118]:
+        - generic [ref=e120]: 贵
+        - paragraph [ref=e121]: GPT-5.3 Codex
+        - code [ref=e122]: gpt-5.3-codex
+      - generic [ref=e123]:
+        - generic [ref=e125]: 中等
+        - paragraph [ref=e126]: Gemini 3.5 Flash
+        - code [ref=e127]: gemini-3.5-flash
+      - generic [ref=e128]:
+        - generic [ref=e130]: 中等
+        - paragraph [ref=e131]: Gemini 3.1 Pro
+        - code [ref=e132]: gemini-3.1-pro
+      - generic [ref=e133]:
+        - generic [ref=e135]: 低价
+        - paragraph [ref=e136]: DeepSeek V4 Pro
+        - code [ref=e137]: deepseek-v4-pro
+      - generic [ref=e138]:
+        - generic [ref=e140]: 低价
+        - paragraph [ref=e141]: DeepSeek V4 Flash
+        - code [ref=e142]: deepseek-v4-flash
+      - generic [ref=e143]:
+        - generic [ref=e145]: 中等
+        - paragraph [ref=e146]: Qwen 3.7 Max
+        - code [ref=e147]: qwen3.7-max
+      - generic [ref=e148]:
+        - generic [ref=e150]: 中等
+        - paragraph [ref=e151]: Kimi K2.6
+        - code [ref=e152]: kimi-k2.6
+      - generic [ref=e153]:
+        - generic [ref=e155]: 中等
+        - paragraph [ref=e156]: GLM-5.1
+        - code [ref=e157]: glm-5.1
+      - generic [ref=e158]:
+        - generic [ref=e160]: 低价
+        - paragraph [ref=e161]: MiniMax M2.5
+        - code [ref=e162]: minimax-m2.5
+      - generic [ref=e163]:
+        - generic [ref=e165]: 低价
+        - paragraph [ref=e166]: Step 3.7 Flash
+        - code [ref=e167]: step-3.7-flash
+      - generic [ref=e168]:
+        - generic [ref=e170]: 低价
+        - paragraph [ref=e171]: Qwen3.5-397B
+        - code [ref=e172]: qwen3.5-397b-a17b
+  - generic [ref=e174]:
+    - generic [ref=e175]:
+      - heading "三步开始" [level=2] [ref=e176]
+      - paragraph [ref=e177]: 从注册到调用，不超过 3 分钟
+    - generic [ref=e178]:
+      - generic [ref=e179]:
+        - generic [ref=e181]: "01"
+        - heading "注册账号" [level=3] [ref=e182]
+        - paragraph [ref=e183]: 30秒完成注册，立即获得免费体验额度。
+      - generic [ref=e186]:
+        - generic [ref=e188]: "02"
+        - heading "获取 API Key" [level=3] [ref=e189]
+        - paragraph [ref=e190]: 在个人主页一键复制 API Key 和接口地址。
+      - generic [ref=e193]:
+        - generic [ref=e195]: "03"
+        - heading "开始使用" [level=3] [ref=e196]
+        - paragraph [ref=e197]: 接入 Claude Code、Cursor、Codex 或任意 OpenAI 兼容工具。
+  - generic [ref=e199]:
+    - generic [ref=e200]:
+      - heading "简单定价" [level=2] [ref=e201]
+      - paragraph [ref=e202]: 1 T粒 = 1 分钱（0.01元），不同模型消耗不同
+    - generic [ref=e203]:
+      - generic [ref=e204]:
+        - paragraph [ref=e205]: 1,000 T粒
+        - paragraph [ref=e206]: ¥10
+      - generic [ref=e207]:
+        - generic [ref=e208]: 热门
+        - paragraph [ref=e209]: 5,000 T粒
+        - paragraph [ref=e210]: ¥50
+      - generic [ref=e211]:
+        - paragraph [ref=e212]: 10,000 T粒
+        - paragraph [ref=e213]: ¥100
+      - generic [ref=e214]:
+        - paragraph [ref=e215]: 50,000 T粒
+        - paragraph [ref=e216]: ¥500
+    - generic [ref=e217]:
+      - paragraph [ref=e218]: 参考消耗（以编程任务为例）：
+      - generic [ref=e219]:
+        - generic [ref=e220]:
+          - generic [ref=e221]: Claude Sonnet 4.6 · 一次对话
+          - generic [ref=e222]: ~0.1 T粒
+        - generic [ref=e223]:
+          - generic [ref=e224]: DeepSeek V4 Flash · 一次对话
+          - generic [ref=e225]: ~0.01 T粒
+        - generic [ref=e226]:
+          - generic [ref=e227]: 10元 = 1000 T粒
+          - generic [ref=e228]: ≈ 1万次对话
+  - generic [ref=e230]:
+    - img [ref=e231]
+    - heading "准备好体验了吗？" [level=2] [ref=e233]
+    - paragraph [ref=e234]: 注册即享免费额度，30 秒完成接入。
+    - link "免费注册" [ref=e235] [cursor=pointer]:
+      - /url: /register
+      - text: 免费注册
+      - img [ref=e236]
+  - contentinfo [ref=e238]:
+    - generic [ref=e239]:
+      - generic [ref=e240]:
+        - img [ref=e241]
+        - generic [ref=e243]: T粒加油站 · ai.aiotedu.cc
+      - generic [ref=e244]:
+        - link "接入指南" [ref=e245] [cursor=pointer]:
+          - /url: /guide
+        - link "Codex 教程" [ref=e246] [cursor=pointer]:
+          - /url: /guide/codex
+        - link "登录" [ref=e247] [cursor=pointer]:
+          - /url: /login
+        - link "注册" [ref=e248] [cursor=pointer]:
+          - /url: /register

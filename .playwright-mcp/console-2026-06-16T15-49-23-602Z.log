@@ -1,0 +1,11 @@
+[    8136ms] ReferenceError: HOME is not defined
+    at ki (https://ai.aiotedu.cc/assets/index-Bwn_FOcl.js:486:212)
+    at wo (https://ai.aiotedu.cc/assets/index-Bwn_FOcl.js:8:47529)
+    at gc (https://ai.aiotedu.cc/assets/index-Bwn_FOcl.js:8:69995)
+    at Nc (https://ai.aiotedu.cc/assets/index-Bwn_FOcl.js:8:80266)
+    at Mu (https://ai.aiotedu.cc/assets/index-Bwn_FOcl.js:8:115639)
+    at ku (https://ai.aiotedu.cc/assets/index-Bwn_FOcl.js:8:114722)
+    at Ou (https://ai.aiotedu.cc/assets/index-Bwn_FOcl.js:8:114561)
+    at gu (https://ai.aiotedu.cc/assets/index-Bwn_FOcl.js:8:111430)
+    at cd (https://ai.aiotedu.cc/assets/index-Bwn_FOcl.js:8:122945)
+    at MessagePort.ee (https://ai.aiotedu.cc/assets/index-Bwn_FOcl.js:1:10260)

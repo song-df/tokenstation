@@ -1,0 +1,34 @@
+[Unit]
+Description=new-api (parallel deploy on :8002)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/newapi
+Environment=PORT=8002
+Environment=SQLITE_PATH=/opt/newapi/data/data.db
+Environment=SESSION_SECRET=<YOUR_SESSION_SECRET>
+Environment=TZ=Asia/Shanghai
+
+# --- Process lifecycle hardening ---
+# Verify binary exists and is executable before starting
+ExecStartPre=/usr/bin/test -x /opt/newapi/new-api
+# Main process
+ExecStart=/opt/newapi/new-api
+# Wait up to 10s for port 8002 to be listening
+ExecStartPost=/bin/bash -c 'for i in $(seq 1 10); do ss -tlnp | grep -q ":8002 " && exit 0; sleep 1; done; echo "ERROR: port 8002 not listening after 10s" >&2; exit 1'
+
+# SIGTERM main process, then SIGKILL all remaining after timeout
+KillMode=mixed
+TimeoutStopSec=15
+
+# Stop restarting after 3 failures in 60s (prevents restart storms)
+Restart=on-failure
+RestartSec=3
+StartLimitBurst=3
+StartLimitIntervalSec=60
+
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target
