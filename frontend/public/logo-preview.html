@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>T粒加油站 Logo 预览</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0f172a;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    gap: 32px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    padding: 40px 20px;
+  }
+  h1 { color: #e2e8f0; font-size: 22px; font-weight: 600; }
+  .variants {
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+  }
+  .variant {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+  .variant .icon {
+    width: 220px;
+    height: 220px;
+    border-radius: 44px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    transition: transform 0.2s;
+  }
+  .variant .icon:hover { transform: scale(1.05); }
+  .variant .label {
+    color: #94a3b8;
+    font-size: 13px;
+    text-align: center;
+  }
+  .variant .desc {
+    color: #64748b;
+    font-size: 11px;
+    text-align: center;
+    max-width: 200px;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+<h1>T粒加油站 · Logo 方案预览</h1>
+<div class="variants">
+  <div class="variant">
+    <img class="icon" src="logo-v1.svg" alt="方案A" />
+    <span class="label">方案A：锤头即"A"</span>
+    <span class="desc">锤头梯形 + 横杠凹槽 → A<br>锤柄直柱 → I<br>合起来读作 AI</span>
+  </div>
+  <div class="variant">
+    <img class="icon" src="logo-v2.svg" alt="方案B" />
+    <span class="label">方案B：宽体锤</span>
+    <span class="desc">更宽的锤头比例<br>羊角细节更明显<br>AI 字形更舒展</span>
+  </div>
+  <div class="variant">
+    <img class="icon" src="logo-v3.svg" alt="方案C" />
+    <span class="label">方案C：极简几何</span>
+    <span class="desc">最干净的几何构成<br>AI 辨识度最高<br>现代感最强</span>
+  </div>
+</div>
+</body>
+</html>
