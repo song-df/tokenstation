@@ -37,3 +37,6 @@ deploy.sh
 # Sensitive / credentials
 admin-proxy.yaml
 *.pem
+
+# Server-side runtime data — never overwrite
+course_data.json
