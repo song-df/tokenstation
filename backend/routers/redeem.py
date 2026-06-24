@@ -36,7 +36,7 @@ async def generate_codes(
     for _ in range(data.count):
         for _ in range(100):  # collision safety
             code_val = secrets.token_hex(8).upper()
-            r = await db.execute(select(CourseInviteCode).where(CourseInviteCode.code == code_val))
+            r = await db.execute(select(RedeemCode).where(RedeemCode.code == code_val))
             if not r.scalar_one_or_none():
                 break
         c = RedeemCode(code=code_val, amount=data.amount, created_by=admin.id, batch_id=batch_id)
