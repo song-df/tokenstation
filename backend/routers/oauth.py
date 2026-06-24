@@ -4,7 +4,7 @@ Registers third-party apps via config.oauth_clients_json and issues
 standard JWT access tokens that work with /api/auth/me.
 """
 from __future__ import annotations
-import json, secrets, time
+import html, json, secrets, time
 from fastapi import APIRouter, Depends, HTTPException, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -80,11 +80,11 @@ button:hover{{background:#4096ff}}
 
 def _render_login(client_id: str, redirect_uri: str, state: str, error: str = "") -> str:
     return LOGIN_HTML.format(
-        client_name=client_id,
+        client_name=html.escape(client_id),
         error=error,
-        client_id=client_id,
-        redirect_uri=redirect_uri,
-        state=state,
+        client_id=html.escape(client_id),
+        redirect_uri=html.escape(redirect_uri),
+        state=html.escape(state),
     )
 
 
