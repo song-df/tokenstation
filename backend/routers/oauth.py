@@ -166,6 +166,8 @@ async def token(
         raise HTTPException(400, "invalid or expired authorization code")
     if entry["client_id"] != client_id:
         raise HTTPException(400, "code was issued to a different client")
+    if entry.get("redirect_uri") and redirect_uri and entry["redirect_uri"] != redirect_uri:
+        raise HTTPException(400, "redirect_uri mismatch")
 
     access_token = create_access_token({"sub": str(entry["user_id"])})
     return {
