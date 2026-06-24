@@ -105,6 +105,27 @@ class RedeemCode(Base):
     reserved_at = Column(DateTime, nullable=True)
     is_shipped = Column(Boolean, default=False)
     shipped_at = Column(DateTime, nullable=True)
+    purchased_by = Column(Integer, ForeignKey("users.id"), nullable=True)
+    purchased_at = Column(DateTime, nullable=True)
+class CourseInviteCode(Base):
+    """课程平台邀请码 — 学生花 T粒 购买，拿到课程平台完成注册验证。"""
+    __tablename__ = "course_invite_codes"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    code = Column(String(32), unique=True, nullable=False, index=True)
+    amount = Column(Integer, nullable=False, default=1000)
+    # state: null → available; shipped → purchased by student; used → consumed by course platform
+    is_used = Column(Boolean, default=False)
+    used_at = Column(DateTime, nullable=True)
+    is_shipped = Column(Boolean, default=False)
+    shipped_at = Column(DateTime, nullable=True)
+    purchased_by = Column(Integer, ForeignKey("users.id"), nullable=True)
+    purchased_at = Column(DateTime, nullable=True)
+    batch_id = Column(String(32), default="")
+    created_by = Column(Integer, ForeignKey("users.id"), nullable=True)
+    created_at = Column(DateTime, default=datetime.now)
+
+
 
 
 

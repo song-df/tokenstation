@@ -36,7 +36,7 @@
 
 **【画面：T粒加油站落地页滚动展示】**
 
-> 「先说一下这个项目叫什么——T粒加油站（ai.aiotedu.cc）。」
+> 「先说一下这个项目叫什么——T粒加油站（www.wiselink.cc）。」
 > 
 > 「它的本质是一个 AI API 网关。什么意思呢？就是它帮你去连 Anthropic、OpenAI、Google 这些官方 API，你只需要连它就行。国内直连，不用代理。」
 
@@ -50,7 +50,7 @@
 
 ## 3. 实操演示（1:30 - 4:30）
 
-**【画面：浏览器打开 ai.aiotedu.cc，点击注册】**
+**【画面：浏览器打开 www.wiselink.cc，点击注册】**
 
 > 「第一步，注册。邮箱注册就行，30 秒搞定。注册完进个人主页，这里就能看到你的 API Key。点一下复制。」
 
@@ -60,7 +60,7 @@
 >
 > 【逐行高亮显示命令】
 > ```
-> export ANTHROPIC_BASE_URL=https://ai.aiotedu.cc
+> export ANTHROPIC_BASE_URL=https://www.wiselink.cc
 > export ANTHROPIC_AUTH_TOKEN=sk-你的Key
 > export ANTHROPIC_MODEL=claude-opus-4-8
 > ```
@@ -105,7 +105,7 @@
 
 > 「除了 Claude Code，同一个 Key 还能接其他工具——」
 >
-> 「Cursor 和 Continue：把 OpenAI Base URL 设成 ai.aiotedu.cc/v1，Key 填你的 API Key 就行。」
+> 「Cursor 和 Continue：把 OpenAI Base URL 设成 www.wiselink.cc/v1，Key 填你的 API Key 就行。」
 >
 > 「Codex CLI：写到 ~/.codex/config.toml 里，格式评论区有。」
 >
@@ -130,12 +130,12 @@
 ## 附：评论区置顶文案
 
 ```
-🔗 注册地址：https://ai.aiotedu.cc/
+🔗 注册地址：https://www.wiselink.cc/
 
 📋 Claude Code 永久配置（~/.claude/settings.json）：
 {
   "env": {
-    "ANTHROPIC_BASE_URL": "https://ai.aiotedu.cc",
+    "ANTHROPIC_BASE_URL": "https://www.wiselink.cc",
     "ANTHROPIC_AUTH_TOKEN": "sk-你的APIKey",
     "ANTHROPIC_MODEL": "claude-opus-4-8",
     "ANTHROPIC_SMALL_FAST_MODEL": "claude-haiku-4-5"
@@ -148,7 +148,7 @@ model_provider = "aiotedu"
 
 [model_providers.aiotedu]
 name = "aiotedu"
-base_url = "https://ai.aiotedu.cc/v1"
+base_url = "https://api.wiselink.cc/v1"
 wire_api = "chat"
 env_key = "AIOTEDU_API_KEY"
 

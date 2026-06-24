@@ -6,7 +6,7 @@
 
 ## 一次失败的接入
 
-上周我用 Codex CLI 对接自己搭的 AI 网关（ai.aiotedu.cc），配置填好，回车——
+上周我用 Codex CLI 对接自己搭的 AI 网关（www.wiselink.cc），配置填好，回车——
 
 ```
 unexpected status 404 Not Found: Invalid URL (GET /v1/responses)
@@ -45,9 +45,9 @@ Codex 只认 OpenAI 在 2024 年推出的 **Responses 协议**（`/v1/responses`
 |---|---|
 | `api.openai.com/v1/responses` | ✅ 200（只有 OpenAI） |
 | `api.deepseek.com/v1/responses` | ❌ 404 |
-| `ai.aiotedu.cc/v1/responses` | ❌ 404 |
-| `ai.aiotedu.cc/v1/chat/completions` | ✅ 200（Chat Completions 正常） |
-| `ai.aiotedu.cc/v1/messages` | ✅ 200（Anthropic Messages 正常） |
+| `www.wiselink.cc/v1/responses` | ❌ 404 |
+| `www.wiselink.cc/v1/chat/completions` | ✅ 200（Chat Completions 正常） |
+| `www.wiselink.cc/v1/messages` | ✅ 200（Anthropic Messages 正常） |
 
 **结论：除了 OpenAI 自己，全行业没人实现 Responses。** 这不是 T粒加油站的问题，这是 Codex 选了条少有人走的路。
 
@@ -66,7 +66,7 @@ Codex CLI（说 Responses）
   ↓
 Moonbridge（翻译：Responses → Chat / Messages）
   ↓
-T粒加油站 网关（ai.aiotedu.cc）
+T粒加油站 网关（www.wiselink.cc）
   ↓
 上游模型（DeepSeek V4 Pro / Claude / GPT / ...）
 ```
@@ -95,7 +95,7 @@ wire_api = "responses"
 **Claude Code** 说的是 Anthropic Messages 协议，**T粒加油站原生支持，直连无需任何桥：**
 
 ```
-Base URL: https://ai.aiotedu.cc
+Base URL: https://www.wiselink.cc
 API Key: 你的 Key
 模型: claude-opus-4-8
 ```
@@ -105,7 +105,7 @@ API Key: 你的 Key
 **Cursor / Aider / Continue** 说的是 Chat Completions，同样直连：
 
 ```
-Base URL: https://ai.aiotedu.cc/v1
+Base URL: https://api.wiselink.cc/v1
 API Key: 你的 Key
 ```
 
@@ -131,6 +131,6 @@ API Key: 你的 Key
 
 ---
 
-*利益相关：本文提到的 T粒加油站（ai.aiotedu.cc）和 Moonbridge 均为作者自建/参与的项目。*
+*利益相关：本文提到的 T粒加油站（www.wiselink.cc）和 Moonbridge 均为作者自建/参与的项目。*
 
-🔗 T粒加油站：https://ai.aiotedu.cc/
+🔗 T粒加油站：https://www.wiselink.cc/

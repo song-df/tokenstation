@@ -40,3 +40,13 @@ admin-proxy.yaml
 
 # Server-side runtime data — never overwrite
 course_data.json
+
+# Playwright MCP debug artifacts
+.playwright-mcp/
+
+# Screenshots generated during debugging
+*.png
+
+# Cloned repos (managed independently)
+new-api/
+new-api-build/

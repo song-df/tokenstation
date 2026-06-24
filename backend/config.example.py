@@ -39,6 +39,10 @@ class Settings(BaseSettings):
     wechat_notify_url: str = ""  # https://your-domain.com/api/wechat/notify
     wechat_debug: bool = True  # True=沙箱环境, False=生产环境
 
+
+    # OAuth2 client registry (JSON). Format: [{"client_id":"...","client_secret":"...","redirect_uris":["..."]}]
+    oauth_clients_json: str = "[]"
+
     class Config:
         env_file = ".env"
 

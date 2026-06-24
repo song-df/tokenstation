@@ -23,7 +23,7 @@ export default function VSCodeGuide() {
     </div>
   )
 
-  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://ai.aiotedu.cc'
+  const apiBase = 'https://api.wiselink.cc'
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100">
@@ -109,7 +109,7 @@ node -v`} />
             <Settings size={24} className="text-yellow-400" /> 三、获取 API Key
           </h2>
           <p className="text-gray-400">
-            注册 <b>T粒加油站</b> 后在「概览」页面或「Key 管理」页面查看你的 API Key。接口地址：<code className="px-2 py-0.5 rounded bg-gray-800 text-blue-400 font-mono text-sm">{origin}</code>
+            注册 <b>T粒加油站</b> 后在「概览」页面或「Key 管理」页面查看你的 API Key。接口地址：<code className="px-2 py-0.5 rounded bg-gray-800 text-blue-400 font-mono text-sm">{apiBase}</code>
           </p>
         </section>
 
@@ -160,7 +160,7 @@ claude --version`} />
 cat > ~/.claude/settings.json << 'EOF'
 {
   "env": {
-    "ANTHROPIC_BASE_URL": "${origin}",
+    "ANTHROPIC_BASE_URL": "${apiBase}",
     "ANTHROPIC_AUTH_TOKEN": "sk-你的APIKey",
     "ANTHROPIC_MODEL": "deepseek-v4-pro",
     "ANTHROPIC_SMALL_FAST_MODEL": "deepseek-v4-flash"
@@ -173,7 +173,7 @@ EOF`} />
 @'
 {
   "env": {
-    "ANTHROPIC_BASE_URL": "${origin}",
+    "ANTHROPIC_BASE_URL": "${apiBase}",
     "ANTHROPIC_AUTH_TOKEN": "sk-你的APIKey",
     "ANTHROPIC_MODEL": "deepseek-v4-pro",
     "ANTHROPIC_SMALL_FAST_MODEL": "deepseek-v4-flash"
@@ -211,7 +211,7 @@ EOF`} />
       </main>
 
       <footer className="border-t border-gray-800 py-8 text-center text-sm text-gray-600">
-        T粒加油站 · ai.aiotedu.cc · <a href="/guide" className="hover:text-gray-400 transition-colors">使用说明</a>
+        T粒加油站 · wiselink.cc · <a href="/guide" className="hover:text-gray-400 transition-colors">使用说明</a>
       </footer>
     </div>
   )

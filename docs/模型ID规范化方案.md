@@ -1,4 +1,4 @@
-# 模型 ID 规范化方案（ai.aiotedu.cc 网关）
+# 模型 ID 规范化方案（www.wiselink.cc 网关）
 
 > 生成：2026-06-02。数据来源：DeepSeek / OpenRouter / SiliconFlow 官方 `/models` 接口实测 + `backend/services/relay.py`。
 > **铁律：只增不改不删** —— 现有在用 ID 全部保留为别名，避免学生/工具断访问。

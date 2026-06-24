@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Coins, ShoppingCart, Clock, ChevronDown, ChevronUp, AlertCircle } from 'lucide-react'
 import { api } from '../lib/api'
-import WechatQrCode from '../components/WechatQrCode'
 
 interface Package {
   id: number; name: string; tli_amount: number; price_yuan: number;
@@ -14,14 +13,11 @@ interface OrderItem {
   _method?: string;
 }
 
-type PayMethod = 'alipay' | 'wechat'
-
 export default function TliPurchase() {
   const [loading, setLoading] = useState(true)
   const [tliBalance, setTliBalance] = useState(0)
   const [packages, setPackages] = useState<Package[]>([])
   const [selectedPkg, setSelectedPkg] = useState<number | null>(null)
-  const [payMethod, setPayMethod] = useState<PayMethod>('alipay')
   const [ordering, setOrdering] = useState(false)
   const [msg, setMsg] = useState('')
   const [msgOk, setMsgOk] = useState(true)
@@ -29,31 +25,21 @@ export default function TliPurchase() {
   const [showHistory, setShowHistory] = useState(false)
   const [ordersTotal, setOrdersTotal] = useState(0)
 
-  // WeChat QR state
-  const [wcQrCode, setWcQrCode] = useState('')
-  const [wcOutTradeNo, setWcOutTradeNo] = useState('')
-  const [wcTotalAmount, setWcTotalAmount] = useState(0)
-  const [wcSubject, setWcSubject] = useState('')
-
   const load = async () => {
     try {
-      const [pkgs, profile, alipayOrds, wechatOrds] = await Promise.all([
+      const [pkgs, profile, alipayOrds] = await Promise.all([
         api.getTliPackages(),
         api.getStudentProfile(),
         api.getAlipayOrders(1, 10),
-        api.getWechatOrders(1, 10),
       ])
       setPackages(pkgs || [])
       setTliBalance(profile.quota || 0)
       if (pkgs?.length > 0 && !selectedPkg) setSelectedPkg(pkgs[0].id)
 
-      // Merge and sort orders
-      const merged = [
-        ...(alipayOrds.items || []).map((o: OrderItem) => ({ ...o, _method: 'alipay' })),
-        ...(wechatOrds.items || []).map((o: OrderItem) => ({ ...o, _method: 'wechat' })),
-      ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      const merged = (alipayOrds.items || []).map((o: OrderItem) => ({ ...o, _method: 'alipay' }))
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
       setOrders(merged.slice(0, 20))
-      setOrdersTotal((alipayOrds.total || 0) + (wechatOrds.total || 0))
+      setOrdersTotal(alipayOrds.total || 0)
     } catch (e: any) {
       setMsg(e.message || '加载失败')
       setMsgOk(false)
@@ -66,39 +52,17 @@ export default function TliPurchase() {
     if (!selectedPkg) return
     setOrdering(true); setMsg('')
     try {
-      if (payMethod === 'alipay') {
-        const res = await api.createAlipayOrder(selectedPkg)
-        if (res.pay_url) {
-          window.location.href = res.pay_url
-        } else {
-          setMsg('创建订单失败')
-          setMsgOk(false)
-        }
+      const res = await api.createAlipayOrder(selectedPkg)
+      if (res.pay_url) {
+        window.location.href = res.pay_url
       } else {
-        const res = await api.createWechatOrder(selectedPkg)
-        if (res.qr_code) {
-          setWcQrCode(res.qr_code)
-          setWcOutTradeNo(res.out_trade_no)
-          setWcTotalAmount(res.total_amount)
-          setWcSubject(res.subject)
-        } else {
-          setMsg('创建微信订单失败')
-          setMsgOk(false)
-        }
+        setMsg('创建订单失败')
+        setMsgOk(false)
       }
     } catch (e: any) {
       setMsg(e.message || '创建订单失败')
       setMsgOk(false)
     } finally { setOrdering(false) }
-  }
-
-  const handleWechatSuccess = () => {
-    setWcQrCode('')
-    load() // refresh balance and history
-  }
-
-  const handleWechatCancel = () => {
-    setWcQrCode('')
   }
 
   const statusLabel = (status: string) => {
@@ -116,22 +80,6 @@ export default function TliPurchase() {
 
   if (loading) return <div className="text-center text-gray-500 py-12">加载中...</div>
 
-  // Show QR code overlay for WeChat payment
-  if (wcQrCode) {
-    return (
-      <div className="max-w-md mx-auto">
-        <WechatQrCode
-          outTradeNo={wcOutTradeNo}
-          qrCode={wcQrCode}
-          totalAmount={wcTotalAmount}
-          subject={wcSubject}
-          onSuccess={handleWechatSuccess}
-          onCancel={handleWechatCancel}
-        />
-      </div>
-    )
-  }
-
   return (
     <div className="space-y-6">
       {/* ── Balance card ── */}
@@ -146,30 +94,6 @@ export default function TliPurchase() {
         </div>
       </div>
 
-      {/* ── Payment method tabs ── */}
-      <div className="flex rounded-lg bg-gray-900 border border-gray-800 overflow-hidden">
-        <button
-          onClick={() => setPayMethod('alipay')}
-          className={`flex-1 py-2.5 text-sm font-medium transition-colors ${
-            payMethod === 'alipay'
-              ? 'bg-orange-600 text-white'
-              : 'bg-transparent text-gray-400 hover:text-gray-200'
-          }`}
-        >
-          支付宝
-        </button>
-        <button
-          onClick={() => setPayMethod('wechat')}
-          className={`flex-1 py-2.5 text-sm font-medium transition-colors ${
-            payMethod === 'wechat'
-              ? 'bg-green-600 text-white'
-              : 'bg-transparent text-gray-400 hover:text-gray-200'
-          }`}
-        >
-          微信支付
-        </button>
-      </div>
-
       {/* ── Package selection ── */}
       <div className="rounded-xl bg-gray-900 border border-gray-800 p-6">
         <h3 className="text-sm font-semibold text-white mb-4">选择充值套餐</h3>
@@ -181,14 +105,12 @@ export default function TliPurchase() {
               onClick={() => setSelectedPkg(p.id)}
               className={`p-3 rounded-lg border text-center transition-colors ${
                 selectedPkg === p.id
-                  ? payMethod === 'wechat'
-                    ? 'bg-green-600/10 border-green-500/40 ring-1 ring-green-500/30'
-                    : 'bg-orange-600/10 border-orange-500/40 ring-1 ring-orange-500/30'
+                  ? 'bg-orange-600/10 border-orange-500/40 ring-1 ring-orange-500/30'
                   : 'bg-gray-800 border-gray-700 hover:border-gray-600'
               }`}
             >
               <div className="text-sm font-semibold text-white">{p.name}</div>
-              <div className={`text-lg font-bold mt-1 ${payMethod === 'wechat' ? 'text-green-400' : 'text-orange-400'}`}>&yen;{p.price_yuan.toFixed(2)}</div>
+              <div className="text-lg font-bold mt-1 text-orange-400">&yen;{p.price_yuan.toFixed(2)}</div>
               <div className="text-xs text-gray-500 mt-0.5">{p.tli_amount.toLocaleString()} T粒</div>
             </button>
           ))}
@@ -209,21 +131,15 @@ export default function TliPurchase() {
                 合计：<span className="text-white font-semibold">&yen;{selectedPkgObj.price_yuan.toFixed(2)}</span>
                 <span className="text-gray-500 text-xs ml-2">({selectedPkgObj.tli_amount.toLocaleString()} T粒)</span>
               </div>
-              <div className="text-xs text-gray-500 mt-0.5">
-                支付方式：{payMethod === 'alipay' ? '支付宝' : '微信支付'}
-              </div>
+              <div className="text-xs text-gray-500 mt-0.5">支付方式：支付宝</div>
             </div>
             <button
               onClick={doPurchase}
               disabled={ordering || !selectedPkg}
-              className={`px-6 py-2.5 rounded-lg text-white text-sm disabled:opacity-50 transition-colors flex items-center gap-2 ${
-                payMethod === 'wechat'
-                  ? 'bg-green-600 hover:bg-green-500'
-                  : 'bg-orange-600 hover:bg-orange-500'
-              }`}
+              className="px-6 py-2.5 rounded-lg text-white text-sm disabled:opacity-50 transition-colors flex items-center gap-2 bg-orange-600 hover:bg-orange-500"
             >
               <ShoppingCart size={16} />
-              {ordering ? '创建订单中...' : payMethod === 'alipay' ? '支付宝支付' : '微信支付'}
+              {ordering ? '创建订单中...' : '支付宝支付'}
             </button>
           </div>
         )}
@@ -269,9 +185,7 @@ export default function TliPurchase() {
                           {o.created_at ? new Date(o.created_at).toLocaleString('zh-CN') : '-'}
                         </td>
                         <td className="py-2 pr-4 text-xs">
-                          <span className={o._method === 'wechat' ? 'text-green-400' : 'text-orange-400'}>
-                            {o._method === 'wechat' ? '微信' : '支付宝'}
-                          </span>
+                          <span className="text-orange-400">支付宝</span>
                         </td>
                         <td className="py-2 pr-4 text-gray-300 text-xs">{o.subject}</td>
                         <td className="py-2 pr-4 text-orange-400 font-mono text-xs">&yen;{o.total_amount.toFixed(2)}</td>

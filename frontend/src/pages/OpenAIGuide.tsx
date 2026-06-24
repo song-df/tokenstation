@@ -23,7 +23,7 @@ export default function OpenAIGuide() {
     </div>
   )
 
-  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://ai.aiotedu.cc'
+  const apiBase = 'https://api.wiselink.cc'
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100">
@@ -56,7 +56,7 @@ export default function OpenAIGuide() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="p-4 rounded-xl bg-gray-900 border border-gray-800">
               <div className="text-xs text-gray-500 mb-1">接口地址</div>
-              <code className="text-sm font-mono text-blue-400 break-all">{origin}/v1</code>
+              <code className="text-sm font-mono text-blue-400 break-all">{apiBase}/v1</code>
             </div>
             <div className="p-4 rounded-xl bg-gray-900 border border-gray-800">
               <div className="text-xs text-gray-500 mb-1">鉴权方式</div>
@@ -92,7 +92,7 @@ export default function OpenAIGuide() {
             <div className="p-4 rounded-xl bg-gray-900 border border-gray-800">
               <h4 className="text-sm font-semibold text-white mb-2">OpenAI API Key</h4>
               <p className="text-xs text-gray-400">填入你的 T粒加油站 API Key（<code className="font-mono text-blue-400">sk-xxx</code>），OpenAI Base URL 填：</p>
-              <code className="block mt-2 px-3 py-1.5 rounded-lg bg-gray-800 text-green-400 font-mono text-sm">{origin}/v1</code>
+              <code className="block mt-2 px-3 py-1.5 rounded-lg bg-gray-800 text-green-400 font-mono text-sm">{apiBase}/v1</code>
             </div>
             <div className="p-4 rounded-xl bg-gray-900 border border-gray-800">
               <h4 className="text-sm font-semibold text-white mb-2">添加模型</h4>
@@ -120,21 +120,21 @@ export default function OpenAIGuide() {
       "title": "deepseek-v4-pro",
       "provider": "openai",
       "model": "deepseek-v4-pro",
-      "apiBase": "${origin}/v1",
+      "apiBase": "${apiBase}/v1",
       "apiKey": "sk-你的APIKey"
     },
     {
       "title": "deepseek-v4-flash",
       "provider": "openai",
       "model": "deepseek-v4-flash",
-      "apiBase": "${origin}/v1",
+      "apiBase": "${apiBase}/v1",
       "apiKey": "sk-你的APIKey"
     },
     {
       "title": "claude-opus-4-8",
       "provider": "openai",
       "model": "claude-opus-4-8",
-      "apiBase": "${origin}/v1",
+      "apiBase": "${apiBase}/v1",
       "apiKey": "sk-你的APIKey"
     }
   ],
@@ -142,7 +142,7 @@ export default function OpenAIGuide() {
     "title": "deepseek-v4-flash",
     "provider": "openai",
     "model": "deepseek-v4-flash",
-    "apiBase": "${origin}/v1",
+    "apiBase": "${apiBase}/v1",
     "apiKey": "sk-你的APIKey"
   }
 }`} />
@@ -156,11 +156,11 @@ export default function OpenAIGuide() {
           <p className="text-gray-400">
             <a href="https://aider.chat" target="_blank" rel="noopener" className="text-blue-400 hover:text-blue-300 underline">aider.chat</a> 安装后在项目目录启动，通过环境变量配置：
           </p>
-          <CodeBlock id="aider-env" lang="终端" code={`export OPENAI_API_BASE="${origin}/v1"
+          <CodeBlock id="aider-env" lang="终端" code={`export OPENAI_API_BASE="${apiBase}/v1"
 export OPENAI_API_KEY="sk-你的APIKey"
 aider --model openai/deepseek-v4-pro`} />
           <p className="text-gray-400 text-sm">或写入 <code className="px-1.5 py-0.5 rounded bg-gray-800 text-gray-300 font-mono text-xs">.aider.conf.yml</code>：</p>
-          <CodeBlock id="aider-conf" lang="YAML (.aider.conf.yml)" code={`openai-api-base: ${origin}/v1
+          <CodeBlock id="aider-conf" lang="YAML (.aider.conf.yml)" code={`openai-api-base: ${apiBase}/v1
 openai-api-key: sk-你的APIKey
 model: openai/deepseek-v4-pro
 weak-model: openai/deepseek-v4-flash`} />
@@ -179,7 +179,7 @@ weak-model: openai/deepseek-v4-flash`} />
             </div>
             <div className="p-3 rounded-lg bg-gray-900 border border-gray-800">
               <div className="text-xs text-gray-500">Base URL</div>
-              <div className="text-sm font-mono text-blue-400 truncate">{origin}/v1</div>
+              <div className="text-sm font-mono text-blue-400 truncate">{apiBase}/v1</div>
             </div>
             <div className="p-3 rounded-lg bg-gray-900 border border-gray-800">
               <div className="text-xs text-gray-500">API Key</div>
@@ -203,7 +203,7 @@ weak-model: openai/deepseek-v4-flash`} />
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-sm">
               <span className="text-gray-500 w-20">API 地址：</span>
-              <code className="px-2 py-1 rounded bg-gray-800 text-blue-400 font-mono text-xs">{origin}/v1</code>
+              <code className="px-2 py-1 rounded bg-gray-800 text-blue-400 font-mono text-xs">{apiBase}/v1</code>
             </div>
             <div className="flex items-center gap-2 text-sm">
               <span className="text-gray-500 w-20">API Key：</span>
@@ -222,7 +222,7 @@ weak-model: openai/deepseek-v4-flash`} />
             <a href="https://openwebui.com" target="_blank" rel="noopener" className="text-blue-400 hover:text-blue-300 underline">openwebui.com</a> 自部署的 ChatGPT 界面，管理员面板 → 设置 → 外部连接：
           </p>
           <CodeBlock id="openwebui" lang="环境变量 / Admin Settings" code={`# OpenAI API 连接
-OPENAI_API_BASE_URL=${origin}/v1
+OPENAI_API_BASE_URL=${apiBase}/v1
 OPENAI_API_KEY=sk-你的APIKey`} />
         </section>
 
@@ -232,7 +232,7 @@ OPENAI_API_KEY=sk-你的APIKey`} />
             <span className="text-3xl">🧪</span> curl 快速测试
           </h2>
           <p className="text-gray-400">验证接口是否配置正确：</p>
-          <CodeBlock id="curl" lang="终端" code={`curl ${origin}/v1/chat/completions \\
+          <CodeBlock id="curl" lang="终端" code={`curl ${apiBase}/v1/chat/completions \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer sk-你的APIKey" \\
   -d '{
@@ -249,7 +249,7 @@ OPENAI_API_KEY=sk-你的APIKey`} />
       </main>
 
       <footer className="border-t border-gray-800 py-8 text-center text-sm text-gray-600">
-        T粒加油站 · ai.aiotedu.cc · <a href="/guide" className="hover:text-gray-400 transition-colors">使用说明</a>
+        T粒加油站 · wiselink.cc · <a href="/guide" className="hover:text-gray-400 transition-colors">使用说明</a>
       </footer>
     </div>
   )
