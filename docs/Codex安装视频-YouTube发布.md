@@ -36,8 +36,8 @@
 21:30  查看 T粒消耗，对比官方价格优势
 
 🔗 相关链接
-• T粒加油站：https://ai.aiotedu.cc
-• Windows Codex 图文教程：https://ai.aiotedu.cc/guide/codex
+• T粒加油站：https://www.wiselink.cc
+• Windows Codex 图文教程：https://www.wiselink.cc/guide/codex
 • Moon Bridge 项目：https://github.com/0x4f5/moon-bridge
 • NSSM（服务管理工具）：https://nssm.cc/download
 
@@ -52,7 +52,7 @@
 💡 T粒加油站
 一站式 AI API 网关，支持 DeepSeek / Claude / GPT / Gemini / Qwen / Kimi 等 17 款模型。
 按量计费，兑换码充值，注册即用。Codex 调用消耗约为官方一半。
-https://ai.aiotedu.cc
+https://www.wiselink.cc
 
 🏷️ 标签
 #Codex #OpenAI #Windows #AI编程 #MoonBridge #T粒加油站 #DeepSeek #Claude

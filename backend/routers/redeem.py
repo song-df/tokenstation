@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Header
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, desc, Integer
 from pydantic import BaseModel
-from models import User, RedeemCode, Referral, TopUp, UserTask
+from models import User, RedeemCode, CourseInviteCode, Referral, TopUp, UserTask
 from routers.autogen import check_and_autogen
 from auth import get_current_user, get_admin_user
 from database import get_db
@@ -36,7 +36,7 @@ async def generate_codes(
     for _ in range(data.count):
         for _ in range(100):  # collision safety
             code_val = secrets.token_hex(8).upper()
-            r = await db.execute(select(RedeemCode).where(RedeemCode.code == code_val))
+            r = await db.execute(select(CourseInviteCode).where(CourseInviteCode.code == code_val))
             if not r.scalar_one_or_none():
                 break
         c = RedeemCode(code=code_val, amount=data.amount, created_by=admin.id, batch_id=batch_id)
@@ -204,6 +204,50 @@ async def allocate_code(
         "amount": code.amount,
         "batch_id": code.batch_id,
         "created_at": code.created_at.isoformat(),
+    }
+
+
+# ── External: verify code (called by course platform) ──
+
+@router.post("/external/verify")
+async def verify_code(
+    data: dict,
+    db: AsyncSession = Depends(get_db),
+):
+    """External API: verify a course invite code.
+    Called by the course platform when a student uses an invite code during registration.
+    POST JSON: { "system_secret": "...", "code": "..." }
+    Returns: { "valid": true, "code": "...", "amount": 1000 } or 404 if invalid.
+    Marks the code as used after verification.
+    """
+    from config import settings
+    secret = data.get("system_secret", "")
+    if not secret or secret != settings.system_api_secret:
+        raise HTTPException(403, "Invalid system secret")
+
+    code_val = data.get("code", "").strip().upper()
+    if not code_val:
+        raise HTTPException(400, "Missing code")
+
+    r = await db.execute(select(CourseInviteCode).where(CourseInviteCode.code == code_val))
+    rc = r.scalar_one_or_none()
+    if not rc:
+        raise HTTPException(404, "邀请码不存在")
+    if rc.is_used:
+        raise HTTPException(400, "该邀请码已被使用")
+
+    # Mark as consumed
+    rc.is_used = True
+    rc.used_at = datetime.now()
+    rc.reserved_at = None
+    await db.commit()
+
+    return {
+        "valid": True,
+        "code": rc.code,
+        "amount": rc.amount,
+        "batch_id": rc.batch_id,
+        "used_at": rc.used_at.isoformat() if rc.used_at else None,
     }
 
 

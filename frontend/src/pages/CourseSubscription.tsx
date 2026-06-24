@@ -1,9 +1,14 @@
 import { useEffect, useState } from 'react'
-import { BookOpen, ShoppingCart, Copy, Check, Coins, Clock, ChevronDown, ChevronUp } from 'lucide-react'
+import { BookOpen, ShoppingCart, Copy, Check, Coins, History } from 'lucide-react'
 import { api } from '../lib/api'
 
-interface HistoryItem {
-  id: number; code: string; tli_spent: number; created_at: string;
+interface CourseCode {
+  id: number; code: string; amount: number; state: string; purchased_at: string; used_at: string | null;
+}
+
+const STATE_LABELS: Record<string, string> = {
+  shipped: '未使用',
+  used: '已使用',
 }
 
 export default function CourseSubscription() {
@@ -14,11 +19,16 @@ export default function CourseSubscription() {
   const [msgOk, setMsgOk] = useState(true)
   const [copied, setCopied] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [history, setHistory] = useState<CourseCode[]>([])
 
   const load = async () => {
     try {
-      const d = await api.getProxyStatus()
-      setTliBalance(d.tli_balance)
+      const [status, codes] = await Promise.all([
+        api.getProxyStatus(),
+        api.getCourseCodes(),
+      ])
+      setTliBalance(status.tli_balance)
+      setHistory(codes || [])
     } catch (e: any) {
       setMsg(e.message || '加载失败')
       setMsgOk(false)
@@ -35,6 +45,8 @@ export default function CourseSubscription() {
       setMsg('购买成功！邀请码已生成')
       setMsgOk(true)
       setTliBalance(res.tli_balance)
+      const codes = await api.getCourseCodes()
+      setHistory(codes || [])
     } catch (e: any) {
       setMsg(e.message || '购买失败')
       setMsgOk(false)
@@ -116,6 +128,40 @@ export default function CourseSubscription() {
           </div>
         )}
       </div>
+
+      {/* Purchase history */}
+      {history.length > 0 && (
+        <div className="rounded-xl bg-gray-900 border border-gray-800 p-6">
+          <h3 className="flex items-center gap-2 text-sm font-semibold text-white mb-4">
+            <History size={16} className="text-gray-400" /> 购买记录
+          </h3>
+          <div className="space-y-2">
+            {history.map((item) => (
+              <div
+                key={item.id}
+                className="flex items-center justify-between p-3 rounded-lg bg-gray-800 border border-gray-700"
+              >
+                <div>
+                  <code className="text-sm font-mono text-gray-200 tracking-wide">{item.code}</code>
+                  <div className="text-xs text-gray-500 mt-0.5">
+                    {new Date(item.purchased_at).toLocaleString('zh-CN')}
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-gray-400">{item.amount.toLocaleString()} T粒</span>
+                  <span className={`text-xs px-2 py-0.5 rounded-full ${
+                    item.state === 'used'
+                      ? 'bg-gray-600 text-gray-400'
+                      : 'bg-green-500/20 text-green-400'
+                  }`}>
+                    {STATE_LABELS[item.state] || item.state}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

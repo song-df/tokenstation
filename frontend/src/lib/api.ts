@@ -13,24 +13,24 @@ const QUOTA_PER_TLI = 690; // 1 T粒 = 690 quota (1 T粒 ≈ ¥0.01)
 // 计算公式中 new-api 原始 quota 不变，仅前端显示用 QUOTA_PER_TLI=690 换算
 // 原值 ×(10000/690) 等比缩放，保持 T粒 定价与 ¥0.01/T粒 一致
 const MODEL_OUTPUT_PRICE: Record<string, number> = {
-  'deepseek-v4-pro':       3.36,    // 0.232 ×(10000/690)
-  'deepseek-v4-flash':     0.52,    // 0.036 ×(10000/690)
-  'claude-opus-4-8':     417.39,    // 28.8 ×(10000/690)
-  'claude-sonnet-4-6':   250.43,    // 17.28 ×(10000/690)
-  'claude-haiku-4-5':     83.48,    // 5.76 ×(10000/690)
-  'claude-fable-5':     1252.17,    // 86.4 ×(10000/690)
-  'gpt-5.5':             500.87,    // 34.56 ×(10000/690)
-  'gpt-5.5-pro':        2504.35,    // 172.8 ×(10000/690)
-  'gpt-5.3-codex':       233.77,    // 16.13 ×(10000/690)
-  'gemini-3.5-flash':     150.29,   // 10.37 ×(10000/690)
-  'gemini-3.1-pro':      200.29,    // 13.82 ×(10000/690)
-  'step-3.7-flash':       19.19,    // 1.324 ×(10000/690)
-  'qwen3.7-max':          62.61,    // 4.32 ×(10000/690)
-  'glm-5.1':              66.81,    // 4.61 ×(10000/690)
-  'kimi-k2.6':            56.96,    // 3.93 ×(10000/690)
-  'minimax-m2.5':         15.03,    // 1.037 ×(10000/690)
-  'minimax-m3':           33.33,    // 2.30 ×(10000/690)
-  'qwen3.5-397b-a17b':    50.14,    // 3.46 ×(10000/690)
+  'deepseek-v4-pro': 0.63,    // 0.232 ×(10000/690)
+  'deepseek-v4-flash': 0.1,    // 0.036 ×(10000/690)
+  'claude-opus-4-8': 77.68,    // 28.8 ×(10000/690)
+  'claude-sonnet-4-6': 46.61,    // 17.28 ×(10000/690)
+  'claude-haiku-4-5': 15.54,    // 5.76 ×(10000/690)
+  'claude-fable-5': 233.03,    // 86.4 ×(10000/690)
+  'gpt-5.5': 93.21,    // 34.56 ×(10000/690)
+  'gpt-5.5-pro': 466.07,    // 172.8 ×(10000/690)
+  'gpt-5.3-codex': 43.51,    // 16.13 ×(10000/690)
+  'gemini-3.5-flash': 27.97,   // 10.37 ×(10000/690)
+  'gemini-3.1-pro': 37.27,    // 13.82 ×(10000/690)
+  'step-3.7-flash': 3.57,    // 1.324 ×(10000/690)
+  'qwen3.7-max': 11.65,    // 4.32 ×(10000/690)
+  'glm-5.1': 12.43,    // 4.61 ×(10000/690)
+  'kimi-k2.6': 10.6,    // 3.93 ×(10000/690)
+  'minimax-m2.5': 2.8,    // 1.037 ×(10000/690)
+  'minimax-m3': 6.2,    // 2.30 ×(10000/690)
+  'qwen3.5-397b-a17b': 9.33,    // 3.46 ×(10000/690)
 };
 
 // 模型供应商映射
@@ -92,7 +92,12 @@ async function request(path: string, options: RequestInit = {}) {
 }
 
 // ── 用户档案:把 new-api self 映射成旧前端期望的 profile 形状 ──
+// ponytail: cache profile per page load to avoid 429 on /token/:id/key
+let _profileCache: any = null;
 async function buildProfile() {
+  return _profileCache ?? (_profileCache = _doBuildProfile());
+}
+async function _doBuildProfile() {
   const self = await request('/user/self');
   // 取一把可用 key 作为"主 key"显示(优先名为 legacy 的;否则第一把)
   let apiKey = '';
@@ -244,6 +249,7 @@ export const api = {
 
   // ── 课程订阅 ──
   purchaseCourse: async () => request('/proxy/course', { method: 'POST', body: '{}' }),
+  getCourseCodes: async () => request("/proxy/course-codes"),
 
   // ── 代理订阅（管理端）──
   adminListProxySubs: async () => request('/proxy/admin/subscriptions'),
@@ -254,6 +260,20 @@ export const api = {
     request('/proxy/admin/plans', { method: 'POST', body: JSON.stringify(data) }),
   adminUpdateProxyPlan: async (id: number, data: {name: string; days: number; price: number; is_active: boolean}) =>
     request(`/proxy/admin/plans/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+
+  // ── T粒兑换码管理 ──
+  listCodes: async (batchId?: string) => request(`/proxy/admin/redeem/list${batchId ? '?batch_id=' + batchId : ''}`),
+  codeStats: async () => request('/proxy/admin/redeem/stats'),
+  listBatches: async () => request('/proxy/admin/redeem/batches'),
+  generateCodes: async (data: {amount: number; count: number; remark?: string}) =>
+    request('/proxy/admin/redeem/generate', { method: 'POST', body: JSON.stringify(data) }),
+
+  // ── 课程邀请码管理 ──
+  listCourseCodes: async (batchId?: string) => request(`/proxy/admin/course-codes/list${batchId ? '?batch_id=' + batchId : ''}`),
+  courseCodeStats: async () => request('/proxy/admin/course-codes/stats'),
+  listCourseBatches: async () => request('/proxy/admin/course-codes/batches'),
+  generateCourseCodes: async (data: {amount: number; count: number}) =>
+    request('/proxy/admin/course-codes/generate', { method: 'POST', body: JSON.stringify(data) }),
 
   // ── Alipay T粒充值 ──
   getTliPackages: async () => request('/alipay/packages'),

@@ -23,7 +23,7 @@ export default function CodexGuideMacLinux() {
     </div>
   )
 
-  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://ai.aiotedu.cc'
+  const apiBase = 'https://api.wiselink.cc'
 
   const moonbridgeConfig = `# yaml-language-server: $schema=./config.schema.json
 mode: "Transform"
@@ -139,7 +139,7 @@ models:
 
 providers:
   default:
-    base_url: "${origin}"
+    base_url: "${apiBase}"
     api_key: "sk-你的APIKey"
     version: "2023-06-01"
     user_agent: "moonbridge/1.0"
@@ -636,7 +636,7 @@ nohup ./moonbridge -config config.yml > /dev/null 2>&1 &`} />
       </main>
 
       <footer className="border-t border-gray-800 py-8 text-center text-sm text-gray-600">
-        T粒加油站 · ai.aiotedu.cc · <a href="/guide" className="hover:text-gray-400 transition-colors">使用说明</a>
+        T粒加油站 · wiselink.cc · <a href="/guide" className="hover:text-gray-400 transition-colors">使用说明</a>
       </footer>
     </div>
   )

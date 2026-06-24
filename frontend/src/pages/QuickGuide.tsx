@@ -121,7 +121,7 @@ export default function QuickGuide() {
       </main>
 
       <footer className="border-t border-gray-800 py-8 text-center text-sm text-gray-600">
-        T粒加油站 · ai.aiotedu.cc
+        T粒加油站 · wiselink.cc
       </footer>
     </div>
   )

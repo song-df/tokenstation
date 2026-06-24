@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import ThemeToggle from './ThemeToggle'
 import { setToken } from '../lib/api'
-import { LayoutDashboard, Radio, Cpu, Users, FileText, LogOut, Ticket, Zap, BookOpen, Mail } from 'lucide-react'
+import { LayoutDashboard, Radio, Cpu, Users, FileText, LogOut, Ticket, Zap, BookOpen, Mail, GraduationCap } from 'lucide-react'
 
 const nav = [
   { to: '/', icon: LayoutDashboard, label: '仪表盘' },
@@ -13,6 +13,7 @@ const nav = [
   { to: '/autogen', icon: Zap, label: '自动生成' },
   { to: '/guide-edit', icon: BookOpen, label: '使用指南' },
   { to: '/redeem', icon: Ticket, label: '兑换码' },
+  { to: '/redeem', icon: GraduationCap, label: '课程邀请码' },
 ]
 
 export default function Layout({ user, children }: { user: any; children: React.ReactNode }) {
@@ -51,7 +52,8 @@ export default function Layout({ user, children }: { user: any; children: React.
           </button>
         </div>
       </aside>
-      <main className="flex-1 overflow-auto p-6">{children}</main>
+      <main className="flex-1 overflow-auto p-6">{children}  <footer className="border-t border-gray-800/60 mt-12 pt-4 pb-6 text-center text-xs text-gray-600"><a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" className="hover:text-gray-400 transition-colors">浙ICP备2026039790号-1</a></footer>
+    </main>
     </div>
   )
 }

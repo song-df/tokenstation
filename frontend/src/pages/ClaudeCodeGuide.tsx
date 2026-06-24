@@ -23,7 +23,7 @@ export default function ClaudeCodeGuide() {
     </div>
   )
 
-  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://ai.aiotedu.cc'
+  const apiBase = 'https://api.wiselink.cc'
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100">
@@ -57,7 +57,7 @@ export default function ClaudeCodeGuide() {
           </h2>
           <p className="text-gray-400">
             注册账号后在「概览」页面或「Key 管理」页面查看 API Key。Anthropic 原生接口地址：
-            <code className="px-2 py-0.5 rounded bg-gray-800 text-blue-400 font-mono text-sm">{origin}</code>
+            <code className="px-2 py-0.5 rounded bg-gray-800 text-blue-400 font-mono text-sm">{apiBase}</code>
           </p>
         </section>
 
@@ -123,13 +123,13 @@ claude --version`} />
           <h3 className="text-base font-semibold text-white mt-4">方式 A · 环境变量（临时生效，推荐快速测试）</h3>
 
           <p className="text-gray-400 text-sm font-medium mt-4">🪟 Windows（PowerShell）：</p>
-          <CodeBlock id="cc-env-win" lang="PowerShell" code={`$env:ANTHROPIC_BASE_URL="${origin}"
+          <CodeBlock id="cc-env-win" lang="PowerShell" code={`$env:ANTHROPIC_BASE_URL="${apiBase}"
 $env:ANTHROPIC_AUTH_TOKEN="sk-你的APIKey"
 $env:ANTHROPIC_MODEL="claude-opus-4-8"
 $env:ANTHROPIC_SMALL_FAST_MODEL="claude-haiku-4-5"`} />
 
           <p className="text-gray-400 text-sm font-medium mt-4">🍎 macOS / 🐧 Linux（终端）：</p>
-          <CodeBlock id="cc-env-unix" lang="终端 (macOS / Linux)" code={`export ANTHROPIC_BASE_URL=${origin}
+          <CodeBlock id="cc-env-unix" lang="终端 (macOS / Linux)" code={`export ANTHROPIC_BASE_URL=${apiBase}
 export ANTHROPIC_AUTH_TOKEN=sk-你的APIKey
 export ANTHROPIC_MODEL=claude-opus-4-8
 export ANTHROPIC_SMALL_FAST_MODEL=claude-haiku-4-5`} />
@@ -145,7 +145,7 @@ mkdir "$env:USERPROFILE\\.claude" -Force
 @'
 {
   "env": {
-    "ANTHROPIC_BASE_URL": "${origin}",
+    "ANTHROPIC_BASE_URL": "${apiBase}",
     "ANTHROPIC_AUTH_TOKEN": "sk-你的APIKey",
     "ANTHROPIC_MODEL": "claude-opus-4-8",
     "ANTHROPIC_SMALL_FAST_MODEL": "claude-haiku-4-5"
@@ -158,7 +158,7 @@ mkdir "$env:USERPROFILE\\.claude" -Force
 cat > ~/.claude/settings.json << 'EOF'
 {
   "env": {
-    "ANTHROPIC_BASE_URL": "${origin}",
+    "ANTHROPIC_BASE_URL": "${apiBase}",
     "ANTHROPIC_AUTH_TOKEN": "sk-你的APIKey",
     "ANTHROPIC_MODEL": "claude-opus-4-8",
     "ANTHROPIC_SMALL_FAST_MODEL": "claude-haiku-4-5"
@@ -198,7 +198,7 @@ EOF`} />
       </main>
 
       <footer className="border-t border-gray-800 py-8 text-center text-sm text-gray-600">
-        T粒加油站 · ai.aiotedu.cc · <a href="/guide" className="hover:text-gray-400 transition-colors">使用说明</a>
+        T粒加油站 · wiselink.cc · <a href="/guide" className="hover:text-gray-400 transition-colors">使用说明</a>
       </footer>
     </div>
   )

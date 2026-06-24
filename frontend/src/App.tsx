@@ -15,6 +15,8 @@ import OpenAIGuide from './pages/OpenAIGuide'
 import ModelsPage from './pages/ModelsPage'
 import ModelPricing from './pages/ModelPricing'
 import CourseSubscription from './pages/CourseSubscription'
+import RedeemCodes from './pages/RedeemCodes'
+import CourseCodes from './pages/CourseCodes'
 import LandingPage from './pages/LandingPage'
 import StudentDashboard from './pages/StudentDashboard'
 import StudentProfile from './pages/StudentProfile'
@@ -79,6 +81,8 @@ function AppInner({ user, loading, setUser }: { user: any; loading: boolean; set
         <Route path="/purchase" element={<TliPurchase />} />
         <Route path="/alipay-result" element={<AlipayResult />} />
         <Route path="/course" element={<CourseSubscription />} />
+        <Route path="/redeem" element={<RedeemCodes />} />
+        <Route path="/admin/course-codes" element={<CourseCodes />} />
         <Route path="/guide" element={<QuickGuide />} />
         <Route path="/guide/codex" element={<CodexGuide />} />
       <Route path="/guide/codex-mac-linux" element={<CodexGuideMacLinux />} />

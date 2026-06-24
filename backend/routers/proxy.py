@@ -15,7 +15,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import get_db
-from models import ProxyPlan, ProxySubscription, ProxyTopUp
+from models import ProxyPlan, ProxySubscription, ProxyTopUp, RedeemCode, CourseInviteCode
 from services.proxy import (
     subscribe_user,
     cancel_subscription,
@@ -285,11 +285,12 @@ class CoursePurchaseBody(BaseModel):
 async def purchase_course(
     _data: CoursePurchaseBody,
     proxy_user: dict = Depends(get_proxy_user),
+    db: AsyncSession = Depends(get_db),
 ):
     """Purchase a course invite code for 1000 T粒."""
-    from services.proxy import deduct_tli, get_tli_balance, NEWAPI_DB_PATH
+    from services.proxy import deduct_tli, get_tli_balance
     from config import settings
-    import httpx
+    
 
     user_id = proxy_user["user_id"]
 
@@ -305,43 +306,82 @@ async def purchase_course(
     except ValueError as e:
         raise HTTPException(400, str(e))
 
-    # Call external API for invite code
-    api_url = str(getattr(settings, "course_invite_api_url", ""))
-    secret = str(getattr(settings, "course_invite_secret", ""))
+    # Allocate one available RedeemCode from local pool
+    r = await db.execute(
+        select(CourseInviteCode)
+        .where(
+            CourseInviteCode.amount == price,
+            CourseInviteCode.is_used == False,
+            CourseInviteCode.is_shipped == False,
+        )
+        .order_by(CourseInviteCode.created_at)
+        .limit(1)
+    )
+    code_row = r.scalar_one_or_none()
+    if not code_row:
+        # Refund: no codes available
+        conn = sqlite3.connect(f"file:{NEWAPI_DB_PATH}?mode=rw", uri=True)
+        conn.execute(
+            "UPDATE users SET quota = quota + ?, used_quota = used_quota - ? WHERE id = ?",
+            (price * 690, price * 690, user_id),
+        )
+        conn.commit(); conn.close()
+        raise HTTPException(502, "获取邀请码失败，T粒已退回（无可用码）")
 
-    try:
-        async with httpx.AsyncClient(timeout=15) as client:
-            resp = await client.post(api_url, json={"system_secret": secret, "limit": 1})
-            if resp.status_code != 200:
-                # Refund on failure
-                import sqlite3
-                conn = sqlite3.connect(f"file:{NEWAPI_DB_PATH}?mode=rw", uri=True)
-                conn.execute(
-                    "UPDATE users SET quota = quota + ?, used_quota = used_quota - ? WHERE id = ?",
-                    (price * 690, price * 690, user_id),
-                )
-                conn.commit(); conn.close()
-                raise HTTPException(502, f"获取邀请码失败，T粒已退回 (API返回 {resp.status_code})")
-
-            data = resp.json()
-            codes = data.get("codes", [])
-            if not codes or not codes[0].get("code"):
-                raise HTTPException(502, "获取邀请码失败，T粒已退回（无可用码）")
-
-            code = codes[0]["code"]
-    except httpx.HTTPError as e:
-        raise HTTPException(502, f"获取邀请码失败，T粒已退回: {e}")
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(500, f"系统错误: {e}")
+    code_row.is_shipped = True
+    code_row.purchased_by = user_id
+    code_row.purchased_at = datetime.now()
+    code_row.shipped_at = datetime.now()
+    await db.commit()
 
     return {
         "message": "购买成功",
-        "code": code,
+        "code": code_row.code,
         "tli_spent": price,
         "tli_balance": get_tli_balance(user_id),
     }
+
+
+
+
+# ── GET /api/proxy/course-codes ────────────────────────────────────────────
+
+@router.get("/course-codes")
+async def list_course_codes(
+    proxy_user: dict = Depends(get_proxy_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """List course invite codes purchased by the current student, with state."""
+    user_id = proxy_user["user_id"]
+
+    r = await db.execute(
+        select(CourseInviteCode)
+        .where(CourseInviteCode.purchased_by == user_id)
+        .order_by(CourseInviteCode.purchased_at.desc())
+        .limit(50)
+    )
+    codes = r.scalars().all()
+
+    def _state(c: RedeemCode) -> str:
+        """Human-readable state of the code."""
+        if c.is_used:
+            return "used"       # consumed by course platform
+        if c.is_shipped:
+            return "shipped"    # purchased, not yet used
+        return "unknown"
+
+    return [
+        {
+            "id": c.id,
+            "code": c.code,
+            "amount": c.amount,
+            "state": _state(c),
+            "purchased_at": c.purchased_at.isoformat() if c.purchased_at else None,
+            "used_at": c.used_at.isoformat() if c.used_at else None,
+        }
+        for c in codes
+    ]
+
 
 
 # ── Admin auth dependency ───────────────────────────────────────────────────
@@ -568,3 +608,201 @@ async def get_consumption_stats(
     }
 
     return result
+
+
+
+# ── Admin: T粒兑换券管理 ───────────────────────────────────────────────
+
+@router.get("/admin/redeem/list")
+async def admin_redeem_list(
+    batch_id: str = "",
+    db: AsyncSession = Depends(get_db),
+    proxy_admin: dict = Depends(get_proxy_admin),
+):
+    """List T粒 redeem codes (admin only)."""
+    from sqlalchemy import desc
+    q = select(RedeemCode)
+    if batch_id:
+        q = q.where(RedeemCode.batch_id == batch_id)
+    q = q.order_by(desc(RedeemCode.created_at)).limit(200)
+    r = await db.execute(q)
+    return r.scalars().all()
+
+
+@router.get("/admin/redeem/stats")
+async def admin_redeem_stats(
+    db: AsyncSession = Depends(get_db),
+    proxy_admin: dict = Depends(get_proxy_admin),
+):
+    """T粒 redeem code statistics (admin only)."""
+    from sqlalchemy import func
+    r1 = await db.execute(select(func.count()).select_from(RedeemCode))
+    total_val = r1.scalar() or 0
+    r2 = await db.execute(select(func.count()).select_from(RedeemCode).where(RedeemCode.is_used == True))
+    used_val = r2.scalar() or 0
+    r3 = await db.execute(select(func.sum(RedeemCode.amount)).select_from(RedeemCode).where(RedeemCode.is_used == True))
+    total_redeemed = r3.scalar() or 0
+    return {
+        "total": total_val,
+        "used": used_val,
+        "unused": total_val - used_val,
+        "total_redeemed": total_redeemed,
+    }
+
+
+@router.get("/admin/redeem/batches")
+async def admin_redeem_batches(
+    db: AsyncSession = Depends(get_db),
+    proxy_admin: dict = Depends(get_proxy_admin),
+):
+    """T粒 redeem code batch summaries (admin only)."""
+    from sqlalchemy import func, desc, Integer as SAInt
+    r = await db.execute(
+        select(
+            RedeemCode.batch_id,
+            func.min(RedeemCode.created_at).label("created_at"),
+            func.count().label("total"),
+            func.sum(RedeemCode.amount).label("amount"),
+            func.sum(RedeemCode.is_used.cast(SAInt)).label("used_count"),
+        )
+        .group_by(RedeemCode.batch_id)
+        .order_by(desc("created_at"))
+    )
+    batches = []
+    for row in r:
+        batches.append({
+            "batch_id": row.batch_id,
+            "created_at": row.created_at.isoformat() if row.created_at else None,
+            "total": row.total,
+            "used_count": row.used_count or 0,
+            "amount_per_code": (row.amount or 0) // (row.total or 1),
+        })
+    return batches
+
+
+class AdminRedeemGenerateBody(BaseModel):
+    amount: int
+    count: int
+    remark: str = ""
+
+
+@router.post("/admin/redeem/generate")
+async def admin_redeem_generate(
+    data: AdminRedeemGenerateBody,
+    db: AsyncSession = Depends(get_db),
+    proxy_admin: dict = Depends(get_proxy_admin),
+):
+    """Generate T粒 redeem codes (admin only)."""
+    import secrets, uuid
+
+    batch_id = uuid.uuid4().hex[:8]
+    codes = []
+    for _ in range(data.count):
+        for _ in range(100):
+            code_val = secrets.token_hex(8).upper()
+            r = await db.execute(select(RedeemCode).where(RedeemCode.code == code_val))
+            if not r.scalar_one_or_none():
+                break
+        c = RedeemCode(code=code_val, amount=data.amount, created_by=proxy_admin["user_id"], batch_id=batch_id)
+        db.add(c)
+        codes.append({"code": c.code, "amount": c.amount})
+    await db.commit()
+    return {"batch_id": batch_id, "count": len(codes), "codes": codes}
+
+
+# ── Admin: course invite codes ───────────────────
+
+@router.get("/admin/course-codes/list")
+async def admin_course_list(
+    batch_id: str = "",
+    db: AsyncSession = Depends(get_db),
+    proxy_admin: dict = Depends(get_proxy_admin),
+):
+    """List redeem codes (admin only)."""
+    from sqlalchemy import desc
+    q = select(CourseInviteCode)
+    if batch_id:
+        q = q.where(CourseInviteCode.batch_id == batch_id)
+    q = q.order_by(desc(CourseInviteCode.created_at)).limit(200)
+    r = await db.execute(q)
+    return r.scalars().all()
+
+
+@router.get("/admin/course-codes/stats")
+async def admin_course_stats(
+    db: AsyncSession = Depends(get_db),
+    proxy_admin: dict = Depends(get_proxy_admin),
+):
+    """Redeem code statistics (admin only)."""
+    from sqlalchemy import func
+    r1 = await db.execute(select(func.count()).select_from(CourseInviteCode))
+    total_val = r1.scalar() or 0
+    r2 = await db.execute(select(func.count()).select_from(CourseInviteCode).where(CourseInviteCode.is_used == True))
+    used_val = r2.scalar() or 0
+    r3 = await db.execute(select(func.sum(CourseInviteCode.amount)).select_from(CourseInviteCode).where(CourseInviteCode.is_used == True))
+    total_redeemed = r3.scalar() or 0
+    return {
+        "total": total_val,
+        "used": used_val,
+        "unused": total_val - used_val,
+        "total_redeemed": total_redeemed,
+    }
+
+
+@router.get("/admin/course-codes/batches")
+async def admin_course_batches(
+    db: AsyncSession = Depends(get_db),
+    proxy_admin: dict = Depends(get_proxy_admin),
+):
+    """List redeem code batch summaries (admin only)."""
+    from sqlalchemy import func, desc, Integer as SAInt
+    r = await db.execute(
+        select(
+            CourseInviteCode.batch_id,
+            func.min(CourseInviteCode.created_at).label("created_at"),
+            func.count().label("total"),
+            func.sum(CourseInviteCode.amount).label("amount"),
+            func.sum(CourseInviteCode.is_used.cast(SAInt)).label("used_count"),
+        )
+        .group_by(CourseInviteCode.batch_id)
+        .order_by(desc("created_at"))
+    )
+    batches = []
+    for row in r:
+        batches.append({
+            "batch_id": row.batch_id,
+            "created_at": row.created_at.isoformat() if row.created_at else None,
+            "total": row.total,
+            "used_count": row.used_count or 0,
+            "amount_per_code": (row.amount or 0) // (row.total or 1),
+        })
+    return batches
+
+
+class AdminCourseGenerateBody(BaseModel):
+    amount: int
+    count: int
+
+
+@router.post("/admin/course-codes/generate")
+async def admin_course_generate(
+    data: AdminCourseGenerateBody,
+    db: AsyncSession = Depends(get_db),
+    proxy_admin: dict = Depends(get_proxy_admin),
+):
+    """Generate redeem codes (admin only)."""
+    import secrets, uuid
+
+    batch_id = uuid.uuid4().hex[:8]
+    codes = []
+    for _ in range(data.count):
+        for _ in range(100):
+            code_val = secrets.token_hex(8).upper()
+            r = await db.execute(select(CourseInviteCode).where(CourseInviteCode.code == code_val))
+            if not r.scalar_one_or_none():
+                break
+        c = CourseInviteCode(code=code_val, amount=data.amount, created_by=proxy_admin["user_id"], batch_id=batch_id)
+        db.add(c)
+        codes.append({"code": c.code, "amount": c.amount})
+    await db.commit()
+    return {"batch_id": batch_id, "count": len(codes), "codes": codes}

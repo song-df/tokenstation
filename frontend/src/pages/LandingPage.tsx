@@ -35,17 +35,18 @@ const steps = [
 
 
 const pricingTiers = [
-  { amount: '1,000', price: '10', popular: false },
-  { amount: '5,000', price: '50', popular: true },
-  { amount: '10,000', price: '100', popular: false },
-  { amount: '50,000', price: '500', popular: false },
+  { amount: '100', price: '1', popular: false },
+  { amount: '500', price: '5', popular: false },
+  { amount: '1,000', price: '9.9', popular: true },
+  { amount: '5,000', price: '45', popular: false },
+  { amount: '10,000', price: '80', popular: false },
 ]
 
 export default function LandingPage() {
   const [copiedSnippet, setCopiedSnippet] = useState(false)
-  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://ai.aiotedu.cc'
+  const apiBase = 'https://api.wiselink.cc'
 
-  const installSnippet = `export ANTHROPIC_BASE_URL=${origin}/api
+  const installSnippet = `export ANTHROPIC_BASE_URL=${apiBase}/api
 export ANTHROPIC_AUTH_TOKEN=sk-你的APIKey
 export ANTHROPIC_MODEL=claude-opus-4-8
 export ANTHROPIC_SMALL_FAST_MODEL=claude-haiku-4-5`
@@ -227,9 +228,9 @@ export ANTHROPIC_SMALL_FAST_MODEL=claude-haiku-4-5`
           <div className="max-w-lg mx-auto p-5 rounded-xl bg-gray-900 border border-gray-800">
             <p className="text-xs text-gray-500 mb-3">参考消耗（以编程任务为例）：</p>
             <div className="space-y-2 text-sm">
-              <div className="flex justify-between"><span className="text-gray-400">Claude Sonnet 4.6 · 一次对话</span><span className="text-gray-300 font-mono">~0.1 T粒</span></div>
-              <div className="flex justify-between"><span className="text-gray-400">DeepSeek V4 Flash · 一次对话</span><span className="text-gray-300 font-mono">~0.01 T粒</span></div>
-              <div className="flex justify-between"><span className="text-gray-400">10元 = 1000 T粒</span><span className="text-gray-500">≈ 1万次对话</span></div>
+              <div className="flex justify-between"><span className="text-gray-400">Claude Opus 4.8 · 1k 输出 token</span><span className="text-gray-300 font-mono">~78 T粒</span></div>
+              <div className="flex justify-between"><span className="text-gray-400">DeepSeek V4 Flash · 1k 输出 token</span><span className="text-gray-300 font-mono">~0.1 T粒</span></div>
+              <div className="flex justify-between"><span className="text-gray-400">9.9元 = 1000 T粒</span><span className="text-gray-500">≈ 12,800 输出 token（Opus 4.8）</span></div>
             </div>
           </div>
         </div>
@@ -252,7 +253,8 @@ export ANTHROPIC_SMALL_FAST_MODEL=claude-haiku-4-5`
         <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-600">
           <div className="flex items-center gap-2">
             <Zap size={14} className="text-gray-700" />
-            <span>T粒加油站 · ai.aiotedu.cc</span>
+            <span>T粒加油站 · wiselink.cc</span>
+            <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" class="hover:text-gray-400 transition-colors">浙ICP备2026039790号-1</a>
           </div>
           <div className="flex items-center gap-6">
             <a href="/guide" className="hover:text-gray-400 transition-colors">接入指南</a>

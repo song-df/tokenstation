@@ -1,12 +1,13 @@
 import { useNavigate, Link, useLocation } from 'react-router-dom'
 import ThemeToggle from './ThemeToggle'
 import { setToken } from '../lib/api'
-import { LogOut, LayoutDashboard, Key, BookOpen, User, Coins, Ticket, Cpu, Clock, Wallet, Settings, Wifi, Share2, ShieldCheck, ShoppingCart } from 'lucide-react'
+import { LogOut, LayoutDashboard, Key, BookOpen, User, Coins, Ticket, Cpu, Clock, Wallet, Settings, Wifi, Share2, ShieldCheck, ShoppingCart, GraduationCap } from 'lucide-react'
 
 // 路由级 Tab
 const TABS = [
   { to: '/', label: '概览', icon: LayoutDashboard },
   { to: '/keys', label: 'Key 管理', icon: Key },
+  { to: '/purchase', label: '在线充值', icon: Coins },
   { to: '/proxy', label: '代理订阅', icon: Wifi },
   { to: '/referral', label: '推荐有礼', icon: Share2 },
   { to: '/course', label: '课程订阅', icon: ShoppingCart },
@@ -69,6 +70,14 @@ export default function UserLayout({ user, children }: { user: any; children: Re
           {user?.role === 'admin' && (
             <div className="pt-4 mt-3 border-t border-amber-500/30">
               <p className="px-3 pb-1 text-xs text-amber-500/70 uppercase tracking-wide">管理</p>
+              <Link to="/redeem"
+                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${loc.pathname === '/redeem' ? 'bg-amber-600/20 text-amber-300 font-medium' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200'}`}>
+                <Ticket size={16} /> T粒兑换码管理
+              </Link>
+              <Link to="/admin/course-codes"
+                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${loc.pathname === '/admin/course-codes' ? 'bg-amber-600/20 text-amber-300 font-medium' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200'}`}>
+                <GraduationCap size={16} /> 课程邀请码
+              </Link>
               <Link to="/admin/proxy"
                 className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${loc.pathname === '/admin/proxy' ? 'bg-amber-600/20 text-amber-300 font-medium' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200'}`}>
                 <ShieldCheck size={16} /> 代理管理
@@ -93,6 +102,7 @@ export default function UserLayout({ user, children }: { user: any; children: Re
       {/* 主内容 */}
       <main className="flex-1 min-w-0 px-6 py-8">
         <div className="max-w-5xl mx-auto">{children}</div>
+        <footer className="border-t border-gray-800/60 mt-12 pt-4 pb-6 text-center text-xs text-gray-600"><a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" className="hover:text-gray-400 transition-colors">浙ICP备2026039790号-1</a></footer>
       </main>
     </div>
   )

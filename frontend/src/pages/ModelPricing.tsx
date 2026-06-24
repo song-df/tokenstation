@@ -35,7 +35,7 @@ export default function ModelPricing() {
 
   if (loading) return <div className="text-center text-gray-500 py-12">加载中...</div>
 
-  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://ai.aiotedu.cc'
+  const apiBase = 'https://api.wiselink.cc'
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100">
@@ -114,13 +114,13 @@ export default function ModelPricing() {
           <ul className="list-disc list-inside ml-2 space-y-0.5">
             <li><span className="px-1.5 py-0.5 rounded bg-green-500/15 text-green-400 text-xs">低价</span> &lt; 3 · <span className="px-1.5 py-0.5 rounded bg-yellow-500/15 text-yellow-400 text-xs">中等</span> 3~10 · <span className="px-1.5 py-0.5 rounded bg-orange-500/15 text-orange-400 text-xs">贵</span> 10~30 · <span className="px-1.5 py-0.5 rounded bg-red-500/15 text-red-400 text-xs">非常贵</span> ≥ 30</li>
             <li>输入 token 价格约为输出的 1/3~1/5（含缓存命中优惠）</li>
-            <li>API 接口：<code className="px-1 rounded bg-gray-800 text-blue-400 font-mono text-xs">{origin}/v1</code></li>
+            <li>API 接口：<code className="px-1 rounded bg-gray-800 text-blue-400 font-mono text-xs">{apiBase}/v1</code></li>
           </ul>
         </div>
       </main>
 
       <footer className="border-t border-gray-800 py-8 text-center text-sm text-gray-600">
-        T粒加油站 · ai.aiotedu.cc · <a href="/guide" className="hover:text-gray-400 transition-colors">使用说明</a>
+        T粒加油站 · wiselink.cc · <a href="/guide" className="hover:text-gray-400 transition-colors">使用说明</a>
       </footer>
     </div>
   )
