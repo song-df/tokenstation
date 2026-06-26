@@ -20,7 +20,9 @@ def hash_password(password: str) -> str:
 
 
 def verify_password(plain: str, hashed: str) -> bool:
-    return pwd_context.verify(plain, hashed)
+    # Normalize $2b$ to $2a$ for passlib compat
+    hashed_fixed = hashed.replace("$2b$", "$2a$")
+    return pwd_context.verify(plain, hashed_fixed)
 
 
 def generate_api_key() -> str:
