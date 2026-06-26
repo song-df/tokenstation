@@ -23,7 +23,7 @@ export default function OpenAIGuide() {
     </div>
   )
 
-  const apiBase = 'https://t.wiselink.cc'
+  const apiBase = 'https://api.wiselink.cc'
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100">

@@ -35,7 +35,7 @@ export default function ModelPricing() {
 
   if (loading) return <div className="text-center text-gray-500 py-12">加载中...</div>
 
-  const apiBase = 'https://t.wiselink.cc'
+  const apiBase = 'https://api.wiselink.cc'
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100">

@@ -44,7 +44,7 @@ const pricingTiers = [
 
 export default function LandingPage() {
   const [copiedSnippet, setCopiedSnippet] = useState(false)
-  const apiBase = 'https://t.wiselink.cc'
+  const apiBase = 'https://api.wiselink.cc'
 
   const installSnippet = `export ANTHROPIC_BASE_URL=${apiBase}/api
 export ANTHROPIC_AUTH_TOKEN=sk-你的APIKey
