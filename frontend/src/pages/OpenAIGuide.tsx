@@ -23,7 +23,7 @@ export default function OpenAIGuide() {
     </div>
   )
 
-  const apiBase = 'https://api.wiselink.cc'
+  const apiBase = 'https://t.wiselink.cc'
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100">
@@ -249,7 +249,7 @@ OPENAI_API_KEY=sk-你的APIKey`} />
       </main>
 
       <footer className="border-t border-gray-800 py-8 text-center text-sm text-gray-600">
-        T粒加油站 · wiselink.cc · <a href="/guide" className="hover:text-gray-400 transition-colors">使用说明</a>
+        T粒加油站 · t.wiselink.cc · <a href="/guide" className="hover:text-gray-400 transition-colors">使用说明</a>
       </footer>
     </div>
   )

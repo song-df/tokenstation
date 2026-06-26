@@ -44,7 +44,7 @@ const pricingTiers = [
 
 export default function LandingPage() {
   const [copiedSnippet, setCopiedSnippet] = useState(false)
-  const apiBase = 'https://api.wiselink.cc'
+  const apiBase = 'https://t.wiselink.cc'
 
   const installSnippet = `export ANTHROPIC_BASE_URL=${apiBase}/api
 export ANTHROPIC_AUTH_TOKEN=sk-你的APIKey
@@ -253,7 +253,7 @@ export ANTHROPIC_SMALL_FAST_MODEL=claude-haiku-4-5`
         <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-600">
           <div className="flex items-center gap-2">
             <Zap size={14} className="text-gray-700" />
-            <span>T粒加油站 · wiselink.cc</span>
+            <span>T粒加油站 · t.wiselink.cc</span>
             <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" class="hover:text-gray-400 transition-colors">浙ICP备2026039790号-1</a>
           </div>
           <div className="flex items-center gap-6">

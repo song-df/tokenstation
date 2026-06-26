@@ -29,7 +29,7 @@
 **接入 Claude Code，三行命令：**
 
 ```bash
-export ANTHROPIC_BASE_URL=https://www.wiselink.cc
+export ANTHROPIC_BASE_URL=https://t.wiselink.cc
 export ANTHROPIC_AUTH_TOKEN=sk-你的APIKey
 export ANTHROPIC_MODEL=claude-opus-4-8
 export ANTHROPIC_SMALL_FAST_MODEL=claude-haiku-4-5
@@ -73,7 +73,7 @@ export ANTHROPIC_SMALL_FAST_MODEL=claude-haiku-4-5
 ```json
 {
   "env": {
-    "ANTHROPIC_BASE_URL": "https://www.wiselink.cc",
+    "ANTHROPIC_BASE_URL": "https://t.wiselink.cc",
     "ANTHROPIC_AUTH_TOKEN": "sk-你的APIKey",
     "ANTHROPIC_MODEL": "claude-opus-4-8",
     "ANTHROPIC_SMALL_FAST_MODEL": "claude-haiku-4-5"
@@ -98,7 +98,7 @@ env_key = "AIOTEDU_API_KEY"
 
 ## 📌 发布时评论区第一条（粘贴此内容）
 
-注册地址：https://www.wiselink.cc/
+注册地址：https://t.wiselink.cc/
 
 🎁 白嫖攻略（注册即送 + 完成任务）：
 · 注册即送免费额度
