@@ -7,12 +7,12 @@ from __future__ import annotations
 import html, json, secrets, time
 from fastapi import APIRouter, Depends, HTTPException, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
+from config import settings
+from auth import verify_password, create_access_token, get_current_user
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from config import settings
 from database import get_db
 from models import User
-from auth import verify_password, create_access_token, get_current_user
 from services.proxy import get_tli_balance
 
 router = APIRouter(prefix="/oauth", tags=["oauth"])
@@ -113,7 +113,6 @@ async def authorize_post(
     state: str = Form(""),
     username: str = Form(...),
     password: str = Form(...),
-    db: AsyncSession = Depends(get_db),
 ):
     client = _find_client(client_id)
     if not client:
@@ -121,18 +120,29 @@ async def authorize_post(
     if redirect_uri not in client.get("redirect_uris", []):
         raise HTTPException(400, "redirect_uri not registered")
 
-    r = await db.execute(select(User).where(User.username == username))
-    user = r.scalar_one_or_none()
-    if not user or not verify_password(password, user.hashed_password):
+    # Authenticate against new-api database (single source of truth)
+    import sqlite3
+    from services.proxy import NEWAPI_DB_PATH
+    newapi = sqlite3.connect(f"file:{NEWAPI_DB_PATH}?mode=ro", uri=True)
+    newapi.row_factory = sqlite3.Row
+    row = newapi.execute(
+        "SELECT id, username, password, status, role FROM users WHERE username = ? AND deleted_at IS NULL",
+        (username,),
+    ).fetchone()
+    newapi.close()
+
+    if not row or not verify_password(password, row["password"]):
         html = _render_login(client_id, redirect_uri, state, '<p class="err">用户名或密码错误</p>')
         return HTMLResponse(html, status_code=401)
-    if not user.is_active:
+    if int(row["status"]) != 1:
         html = _render_login(client_id, redirect_uri, state, '<p class="err">账号已被禁用</p>')
         return HTMLResponse(html, status_code=403)
 
+    user_id = int(row["id"])
+
     # Check T粒 balance (new-api) — course platform requires ≥2000 T粒
     try:
-        balance = get_tli_balance(user.id)
+        balance = get_tli_balance(user_id)
         if balance < 2000:
             html = _render_login(client_id, redirect_uri, state,
                 f'<p class="err">T粒余额不足（当前 {balance:.0f} T粒，需要至少 2000 T粒）。<br>请到 T粒加油站 充值后再试。</p>')
@@ -145,7 +155,7 @@ async def authorize_post(
     _clean_expired_codes()
     code = secrets.token_urlsafe(32)
     _codes[code] = {
-        "user_id": user.id,
+        "user_id": user_id,
         "client_id": client_id,
         "redirect_uri": redirect_uri,
         "expires_at": time.time() + _CODE_TTL,
