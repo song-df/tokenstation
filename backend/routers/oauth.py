@@ -13,6 +13,7 @@ from config import settings
 from database import get_db
 from models import User
 from auth import verify_password, create_access_token, get_current_user
+from services.proxy import get_tli_balance
 
 router = APIRouter(prefix="/oauth", tags=["oauth"])
 
@@ -128,6 +129,18 @@ async def authorize_post(
     if not user.is_active:
         html = _render_login(client_id, redirect_uri, state, '<p class="err">账号已被禁用</p>')
         return HTMLResponse(html, status_code=403)
+
+    # Check T粒 balance (new-api) — course platform requires ≥2000 T粒
+    try:
+        balance = get_tli_balance(user.id)
+        if balance < 2000:
+            html = _render_login(client_id, redirect_uri, state,
+                f'<p class="err">T粒余额不足（当前 {balance:.0f} T粒，需要至少 2000 T粒）。<br>请到 T粒加油站 充值后再试。</p>')
+            return HTMLResponse(html, status_code=402)
+    except Exception:
+        html = _render_login(client_id, redirect_uri, state,
+            '<p class="err">无法查询余额，请稍后重试</p>')
+        return HTMLResponse(html, status_code=500)
 
     _clean_expired_codes()
     code = secrets.token_urlsafe(32)
