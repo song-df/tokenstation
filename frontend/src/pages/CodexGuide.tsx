@@ -23,7 +23,7 @@ export default function CodexGuide() {
     </div>
   )
 
-  const apiBase = 'https://t.wiselink.cc'
+  const apiBase = 'https://api.wiselink.cc'
 
   const moonbridgeConfig = `# yaml-language-server: $schema=./config.schema.json
 mode: "Transform"
