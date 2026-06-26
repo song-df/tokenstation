@@ -47,16 +47,16 @@ LOGIN_HTML = """<!DOCTYPE html>
 <title>T粒加油站 - 登录</title>
 <style>
 *{{margin:0;padding:0;box-sizing:border-box}}
-body{{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f0f2f5;display:flex;align-items:center;justify-content:center;min-height:100vh}}
-.card{{background:#fff;border-radius:8px;padding:32px 28px;width:100%;max-width:380px;box-shadow:0 2px 8px rgba(0,0,0,.08)}}
-h1{{font-size:20px;margin-bottom:4px;color:#1a1a2e}}
-.sub{{font-size:13px;color:#888;margin-bottom:24px}}
-label{{display:block;font-size:13px;color:#333;margin-bottom:6px}}
-input{{width:100%;padding:10px 12px;border:1px solid #d9d9d9;border-radius:6px;font-size:14px;margin-bottom:16px;outline:none}}
-input:focus{{border-color:#1677ff;box-shadow:0 0 0 2px rgba(22,119,255,.15)}}
-button{{width:100%;padding:10px;background:#1677ff;color:#fff;border:none;border-radius:6px;font-size:14px;cursor:pointer}}
-button:hover{{background:#4096ff}}
-.err{{color:#ff4d4f;font-size:13px;margin-bottom:12px}}
+body{{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#0f172a;display:flex;align-items:center;justify-content:center;min-height:100vh}}
+.card{{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:32px 28px;width:100%;max-width:380px;box-shadow:0 8px 30px rgba(0,0,0,.5)}}
+h1{{font-size:20px;margin-bottom:4px;color:#f1f5f9}}
+.sub{{font-size:13px;color:#94a3b8;margin-bottom:24px}}
+label{{display:block;font-size:13px;color:#cbd5e1;margin-bottom:6px}}
+input{{width:100%;padding:10px 12px;border:1px solid #334155;border-radius:8px;background:#334155;color:#f1f5f9;font-size:14px;margin-bottom:16px;outline:none}}
+input:focus{{border-color:#4f46e5;box-shadow:0 0 0 2px rgba(79,70,229,.2)}}
+button{{width:100%;padding:10px;background:#4f46e5;color:#fff;border:none;border-radius:6px;font-size:15px;font-weight:600;cursor:pointer}}
+button:hover{{background:#6366f1}}
+.err{{background:#7f1d1d;color:#fca5a5;padding:8px 12px;border-radius:6px;font-size:13px;margin-bottom:12px}}
 </style>
 </head>
 <body>
