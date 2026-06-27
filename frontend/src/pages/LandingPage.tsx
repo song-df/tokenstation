@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Zap, Terminal, Globe, Shield, ChevronRight, ArrowRight, Copy, Check, Star, Rocket } from 'lucide-react'
 
 const models = [
