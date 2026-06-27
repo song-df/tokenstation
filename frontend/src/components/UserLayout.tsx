@@ -1,7 +1,7 @@
 import { useNavigate, Link, useLocation } from 'react-router-dom'
 import ThemeToggle from './ThemeToggle'
 import { setToken } from '../lib/api'
-import { LogOut, LayoutDashboard, Key, BookOpen, User, Coins, Ticket, Cpu, Clock, Wallet, Settings, Wifi, Share2, ShieldCheck, ShoppingCart, GraduationCap } from 'lucide-react'
+import { LogOut, LayoutDashboard, Key, BookOpen, User, Coins, Ticket, Cpu, Clock, Wallet, Settings, Wifi, Share2, ShieldCheck, GraduationCap } from 'lucide-react'
 
 // 路由级 Tab
 const TABS = [
@@ -10,7 +10,6 @@ const TABS = [
   { to: '/purchase', label: '在线充值', icon: Coins },
   { to: '/proxy', label: '代理订阅', icon: Wifi },
   { to: '/referral', label: '推荐有礼', icon: Share2 },
-  { to: '/course', label: '课程订阅', icon: ShoppingCart },
   { to: '/guide', label: '使用说明', icon: BookOpen },
   { to: '/profile', label: '个人资料', icon: User },
 ]
