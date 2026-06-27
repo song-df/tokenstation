@@ -82,6 +82,15 @@ def main():
         db.execute("UPDATE options SET value=? WHERE key='ModelRatio'", (json.dumps(ratio, ensure_ascii=False),))
         db.execute("UPDATE options SET value=? WHERE key='CompletionRatio'", (json.dumps(comp, ensure_ascii=False),))
 
+        # ModelMapping for OpenRouter channel
+        ch_row = db.execute("SELECT model_mapping FROM channels WHERE id=?", (ch[0],)).fetchone()
+        mapping = json.loads(ch_row[0]) if ch_row and ch_row[0] else {}
+        for m in all_models:
+            if m["id"] not in mapping:
+                mapping[m["id"]] = m["id"]
+        db.execute("UPDATE channels SET model_mapping=? WHERE id=?", (json.dumps(mapping, ensure_ascii=False), ch[0]))
+
+
         db.commit(); db.close()
         print(f"  Done: {len(all_models)} models")
     except Exception as e:
