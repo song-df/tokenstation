@@ -24,6 +24,7 @@ export default function TliPurchase() {
   const [orders, setOrders] = useState<OrderItem[]>([])
   const [showHistory, setShowHistory] = useState(false)
   const [ordersTotal, setOrdersTotal] = useState(0)
+  const [agreed, setAgreed] = useState(false)
 
   const load = async () => {
     try {
@@ -135,12 +136,16 @@ export default function TliPurchase() {
             </div>
             <button
               onClick={doPurchase}
-              disabled={ordering || !selectedPkg}
+              disabled={ordering || !selectedPkg || !agreed}
               className="px-6 py-2.5 rounded-lg text-white text-sm disabled:opacity-50 transition-colors flex items-center gap-2 bg-orange-600 hover:bg-orange-500"
             >
               <ShoppingCart size={16} />
               {ordering ? '创建订单中...' : '支付宝支付'}
             </button>
+            <label className="flex items-start gap-2 mt-3 cursor-pointer">
+              <input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)} className="mt-0.5 shrink-0" />
+              <span className="text-xs text-gray-500">我同意 <a href="/terms" target="_blank" className="text-blue-400 hover:text-blue-300 underline">用户服务协议</a>，已知晓 T粒 购买后不支持退款</span>
+            </label>
           </div>
         )}
 
