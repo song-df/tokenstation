@@ -2,12 +2,12 @@ import { useEffect, useState } from 'react'
 import { Cpu } from 'lucide-react'
 import { api } from '../lib/api'
 
-function priceTierLabel(outputPrice: number) {
-  if (outputPrice >= 30) return { label: '非常贵', cls: 'bg-red-500/15 text-red-400' }
-  if (outputPrice >= 10) return { label: '贵', cls: 'bg-orange-500/15 text-orange-400' }
-  if (outputPrice >= 3)  return { label: '中等', cls: 'bg-yellow-500/15 text-yellow-400' }
-  if (outputPrice > 0)   return { label: '低价', cls: 'bg-green-500/15 text-green-400' }
-  return { label: '免费', cls: 'bg-emerald-500/15 text-emerald-400' }
+function priceTierLabel(ratio: number) {
+  if (ratio === 0)       return { label: '免费', cls: 'bg-emerald-500/15 text-emerald-400' }
+  if (ratio >= 30)       return { label: '非常贵', cls: 'bg-red-500/15 text-red-400' }
+  if (ratio >= 10)       return { label: '贵', cls: 'bg-orange-500/15 text-orange-400' }
+  if (ratio >= 3)        return { label: '中等', cls: 'bg-yellow-500/15 text-yellow-400' }
+  return { label: '低价', cls: 'bg-green-500/15 text-green-400' }
 }
 
 export default function ModelsPage() {
