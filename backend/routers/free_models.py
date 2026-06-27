@@ -8,9 +8,7 @@ router = APIRouter(tags=["free-models"])
 
 # 平台已知模型的 T粒/1K 输出价格（已含 1.38× 溢价）
 PLATFORM_PRICES: dict[str, float] = {
-    'deepseek-v4-pro': 0.83,
-    'deepseek-v4-flash': 0.28,
-    'claude-opus-4-8': 77.68,
+    'deepseek-v4-pro': 0.83,    'claude-opus-4-8': 77.68,
     'claude-sonnet-4-6': 46.61,
     'claude-haiku-4-5': 15.54,
     'claude-fable-5': 233.03,
