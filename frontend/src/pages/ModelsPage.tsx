@@ -65,7 +65,6 @@ export default function ModelsPage() {
         <section className="text-center space-y-3">
           <h1 className="text-3xl font-bold text-white">可用模型</h1>
           <p className="text-gray-400">{loading ? '加载中...' : `共 ${models.length} 款模型，5 款免费`}</p>
-          <p className="text-sm text-gray-500">价格单位：T粒 / 千 tokens（输出），已含平台 1.38× 溢价</p>
         </section>
 
         <div className="rounded-xl bg-gray-900 border border-gray-800 overflow-hidden">
