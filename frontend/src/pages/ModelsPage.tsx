@@ -15,11 +15,20 @@ export default function ModelsPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    api.getStudentModels().then(data => {
-      const sorted = (data || []).sort((a: any, b: any) => a.output_price - b.output_price)
-      setModels(sorted)
-      setLoading(false)
-    }).catch(() => setLoading(false))
+    fetch("/api/public/model-prices")
+      .then(r => r.json())
+      .then(data => {
+        const list = Object.entries(data).map(([model_name, price]: [string, any]) => ({
+          model_name,
+          output_price: typeof price === "number" ? price : 0,
+          provider: "",
+          max_tokens: 0,
+        }))
+        list.sort((a: any, b: any) => a.output_price - b.output_price)
+        setModels(list)
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
   }, [])
 
   return (
