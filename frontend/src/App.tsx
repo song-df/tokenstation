@@ -25,6 +25,7 @@ import ProxySubscription from './pages/ProxySubscription'
 import AdminProxy from './pages/AdminProxy'
 import ReferralPage from './pages/ReferralPage'
 import TliPurchase from './pages/TliPurchase'
+import TermsPage from './pages/TermsPage'
 import AlipayResult from './pages/AlipayResult'
 
 export default function App() {
@@ -80,6 +81,7 @@ function AppInner({ user, loading, setUser }: { user: any; loading: boolean; set
         <Route path="/referral" element={<ReferralPage />} />
         <Route path="/purchase" element={<TliPurchase />} />
         <Route path="/alipay-result" element={<AlipayResult />} />
+        <Route path="/terms" element={<TermsPage />} />
         <Route path="/course" element={<CourseSubscription />} />
         <Route path="/redeem" element={<RedeemCodes />} />
         <Route path="/admin/course-codes" element={<CourseCodes />} />
