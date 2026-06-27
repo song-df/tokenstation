@@ -14,22 +14,10 @@ const TABS = [
   { to: '/guide', label: '使用说明', icon: BookOpen },
   { to: '/profile', label: '个人资料', icon: User },
 ]
-
-// 概览页（/）内部锚点
-const ANCHORS = [
-  { id: 'overview', label: '账户概览', icon: Coins },
-  { id: 'redeem', label: '兑换 / 充值', icon: Ticket },
-  { id: 'models', label: '可用模型', icon: Cpu },
-  { id: 'api-config', label: 'API 配置', icon: Settings },
-  { id: 'logs', label: '使用记录', icon: Clock },
-  { id: 'topups', label: '充值记录', icon: Wallet },
-]
-
 export default function UserLayout({ user, children }: { user: any; children: React.ReactNode }) {
   const n = useNavigate()
   const loc = useLocation()
   const logout = () => { setToken(null); n('/login'); window.location.reload() }
-  const onOverview = loc.pathname === '/'
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 md:flex">
@@ -51,21 +39,6 @@ export default function UserLayout({ user, children }: { user: any; children: Re
               </Link>
             )
           })}
-
-          {onOverview && (
-            <div className="pt-4 mt-3 border-t border-gray-800">
-              <p className="px-3 pb-1 text-xs text-gray-600 uppercase tracking-wide">本页导航</p>
-              {ANCHORS.map(a => {
-                const Icon = a.icon
-                return (
-                  <a key={a.id} href={`#${a.id}`}
-                    className="flex items-center gap-3 px-3 py-1.5 rounded-lg text-sm text-gray-500 hover:bg-gray-800 hover:text-gray-300 transition-colors">
-                    <Icon size={14} /> {a.label}
-                  </a>
-                )
-              })}
-            </div>
-          )}
 
           {user?.role === 'admin' && (
             <div className="pt-4 mt-3 border-t border-amber-500/30">
