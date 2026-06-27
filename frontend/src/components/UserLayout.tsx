@@ -74,7 +74,7 @@ export default function UserLayout({ user, children }: { user: any; children: Re
       {/* 主内容 */}
       <main className="flex-1 min-w-0 px-6 py-8">
         <div className="max-w-5xl mx-auto">{children}</div>
-        <footer className="border-t border-gray-800/60 mt-12 pt-4 pb-6 text-center text-xs text-gray-600"><a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" className="hover:text-gray-400 transition-colors">浙ICP备2026039790号-1</a></footer>
+        <footer className="border-t border-gray-800/60 mt-12 pt-4 pb-6 text-center text-xs text-gray-600"><a href="/terms" className="hover:text-gray-400 transition-colors">用户协议</a> · 反馈: <a href="mailto:songdf@petalmail.com" className="hover:text-gray-400 transition-colors">songdf@petalmail.com</a> · <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" className="hover:text-gray-400 transition-colors">浙ICP备2026039790号-1</a></footer>
       </main>
     </div>
   )
