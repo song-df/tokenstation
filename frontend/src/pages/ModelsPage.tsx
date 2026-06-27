@@ -21,8 +21,7 @@ export default function ModelsPage() {
         const list = Object.entries(data).map(([model_name, price]: [string, any]) => ({
           model_name,
           output_price: typeof price === "number" ? price : 0,
-          provider: "",
-          max_tokens: 0,
+          provider: ""
         }))
         list.sort((a: any, b: any) => a.output_price - b.output_price)
         setModels(list)
@@ -64,8 +63,7 @@ export default function ModelsPage() {
                 <tr className="border-b border-gray-800 text-gray-400 text-left">
                   <th className="p-3 font-medium">模型名称</th>
                   <th className="p-3 font-medium">价格档位</th>
-                                    <th className="p-3 font-medium">最大 Token</th>
-                </tr>
+                                                    </tr>
               </thead>
               <tbody>
                 {models.map((m: any) => {
@@ -82,8 +80,7 @@ export default function ModelsPage() {
                           <span className="ml-1.5 text-gray-500 text-xs">{m.output_price.toFixed(2)} T粒/k</span>
                         )}
                       </td>
-                                            <td className="p-3 text-gray-400 font-mono text-xs">{(m.max_tokens || 0).toLocaleString()}</td>
-                    </tr>
+                                                                </tr>
                   )
                 })}
               </tbody>
