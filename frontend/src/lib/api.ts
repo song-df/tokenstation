@@ -161,10 +161,16 @@ export const api = {
 
   // ── 可用模型(旧前端期望 [{model_name, provider, output_price, max_tokens, display_name}]) ──
   getStudentModels: async () => {
-    const list: string[] = await request('/user/models');
-    return (list || []).map((name) => ({
+    const [list, rawPrices] = await Promise.all([
+      request('/user/models'),
+      fetch('/api/public/model-prices').then(r => r.json()).catch(() => ({})),
+    ]);
+    const prices: Record<string, number> = rawPrices;
+    return (list || []).map((name: string) => ({
       model_name: name, display_name: '', provider: MODEL_PROVIDER[name] || '',
-      input_price: 0, output_price: MODEL_OUTPUT_PRICE[name] ?? 0, max_tokens: 0,
+      input_price: 0,
+      output_price: prices[name] != null ? prices[name] : (MODEL_OUTPUT_PRICE[name] ?? 0),
+      max_tokens: 0,
     }));
   },
 
