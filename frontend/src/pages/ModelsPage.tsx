@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { Cpu } from 'lucide-react'
-import { api } from '../lib/api'
 
 function priceTierLabel(ratio: number) {
   if (ratio === 0)       return { label: '免费', cls: 'bg-emerald-500/15 text-emerald-400' }
@@ -10,24 +9,30 @@ function priceTierLabel(ratio: number) {
   return { label: '低价', cls: 'bg-green-500/15 text-green-400' }
 }
 
+function fmtCtx(n: number): string {
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + 'M'
+  if (n >= 1_000) return (n / 1_000).toFixed(0) + 'K'
+  return String(n)
+}
+
 export default function ModelsPage() {
   const [models, setModels] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch("/api/public/model-prices")
-      .then(r => r.json())
-      .then(data => {
-        const list = Object.entries(data).map(([model_name, price]: [string, any]) => ({
-          model_name,
-          output_price: typeof price === "number" ? price : 0,
-          provider: ""
-        }))
-        list.sort((a: any, b: any) => a.output_price - b.output_price)
-        setModels(list)
-        setLoading(false)
-      })
-      .catch(() => setLoading(false))
+    Promise.all([
+      fetch("/api/public/model-prices").then(r => r.json()),
+      fetch("/api/public/model-context").then(r => r.json()),
+    ]).then(([prices, ctx]) => {
+      const list = Object.entries(prices).map(([model_name, price]: [string, any]) => ({
+        model_name,
+        output_price: typeof price === "number" ? price : 0,
+        max_tokens: typeof ctx[model_name] === "number" ? ctx[model_name] : 0,
+      }))
+      list.sort((a: any, b: any) => a.output_price - b.output_price)
+      setModels(list)
+      setLoading(false)
+    }).catch(() => setLoading(false))
   }, [])
 
   return (
@@ -49,9 +54,8 @@ export default function ModelsPage() {
         <section className="text-center space-y-3">
           <h1 className="text-3xl font-bold text-white">可用模型</h1>
           <p className="text-gray-400">
-            {loading ? '加载中...' : `共 ${models.length} 款模型，国内直连，无需翻墙`}
+            {loading ? '加载中...' : `共 ${models.length} 款模型，国内直连，5 款免费`}
           </p>
-          <p className="text-sm text-gray-500">💡 价格单位：T粒 / 千 tokens（输出），含 OpenRouter 免费模型</p>
         </section>
 
         <div className="rounded-xl bg-gray-900 border border-gray-800 overflow-hidden">
@@ -63,7 +67,8 @@ export default function ModelsPage() {
                 <tr className="border-b border-gray-800 text-gray-400 text-left">
                   <th className="p-3 font-medium">模型名称</th>
                   <th className="p-3 font-medium">价格档位</th>
-                                                    </tr>
+                  <th className="p-3 font-medium">上下文</th>
+                </tr>
               </thead>
               <tbody>
                 {models.map((m: any) => {
@@ -71,16 +76,18 @@ export default function ModelsPage() {
                   return (
                     <tr key={m.model_name} className="border-b border-gray-800/50 hover:bg-gray-800/50">
                       <td className="p-3">
-                        <span className="text-gray-100 font-mono text-xs">{m.model_name}</span>
-                        {m.display_name && <span className="ml-2 text-gray-500 text-xs">{m.display_name}</span>}
+                        <code className="text-gray-200 font-mono text-xs">{m.model_name}</code>
                       </td>
                       <td className="p-3">
                         <span className={`px-2 py-0.5 rounded text-xs font-medium ${t.cls}`}>{t.label}</span>
-                        {m.output_price === 0 ? null : (
-                          <span className="ml-1.5 text-gray-500 text-xs">{m.output_price.toFixed(2)} T粒/k</span>
+                        {m.output_price > 0 && (
+                          <span className="ml-1.5 text-gray-500 text-xs">x{m.output_price.toFixed(2)}</span>
                         )}
                       </td>
-                                                                </tr>
+                      <td className="p-3 text-gray-400 font-mono text-xs">
+                        {m.max_tokens > 0 ? fmtCtx(m.max_tokens) : '—'}
+                      </td>
+                    </tr>
                   )
                 })}
               </tbody>
