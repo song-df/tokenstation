@@ -2,26 +2,6 @@ import { useEffect, useState } from 'react'
 import { Cpu } from 'lucide-react'
 
 // 输出价格：T粒 / 千 tokens（已含 1.38× 平台溢价）
-const MODEL_PRICE: Record<string, number> = {
-  'deepseek-v4-pro': 0.83,
-  'deepseek-v4-flash': 0.28,
-  'claude-opus-4-8': 77.68,
-  'claude-sonnet-4-6': 46.61,
-  'claude-haiku-4-5': 15.54,
-  'claude-fable-5': 233.03,
-  'gpt-5.5': 93.21,
-  'gpt-5.5-pro': 466.07,
-  'gpt-5.3-codex': 43.51,
-  'gemini-3.5-flash': 27.97,
-  'gemini-3.1-pro': 37.27,
-  'step-3.7-flash': 3.57,
-  'qwen3.7-max': 11.65,
-  'glm-5.1': 12.43,
-  'kimi-k2.6': 10.6,
-  'minimax-m2.5': 2.8,
-  'minimax-m3': 6.2,
-  'qwen3.5-397b-a17b': 9.33,
-}
 
 function label(price: number) {
   if (price === 0)       return { t: '免费', c: 'bg-emerald-500/15 text-emerald-400' }
@@ -47,7 +27,7 @@ export default function ModelsPage() {
       fetch("/api/public/model-context").then(r => r.json()).catch(() => ({})),
     ]).then(([ratios, ctx]) => {
       const list = Object.keys(ratios).map(name => {
-        const price = MODEL_PRICE[name] ?? 0  // 0 if not in price map
+        const price = typeof ratios[name] === 'number' ? ratios[name] : 0
         return {
           model_name: name,
           price,
