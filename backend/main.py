@@ -9,7 +9,7 @@ from database import engine, Base, get_db, async_session
 from models import User, UserRole, ProxyPlan, TliPackage
 from auth import verify_password, create_access_token, hash_password, generate_api_key, get_current_user
 from routers import admin, api, student, auth_public, redeem, autogen, keys, proxy, alipay, wechat
-from routers import oauth
+from routers import oauth, free_models
 
 
 @asynccontextmanager
@@ -180,4 +180,5 @@ app.include_router(proxy.router, prefix="/api")
 app.include_router(alipay.router, prefix="/api")
 app.include_router(wechat.router, prefix="/api")
 
-app.include_router(oauth.router)  # OAuth2 at root level, no /api prefix
+app.include_router(oauth.router)
+app.include_router(free_models.router)  # OAuth2 at root level, no /api prefix

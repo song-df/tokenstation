@@ -42,6 +42,39 @@ const pricingTiers = [
   { amount: '10,000', price: '80', popular: false },
 ]
 
+
+function FreeModels() {
+  const [models, setModels] = useState<any[]>([])
+
+  useEffect(() => {
+    fetch("/api/public/free-models")
+      .then(r => r.json())
+      .then(setModels)
+      .catch(() => {})
+  }, [])
+
+  if (!models.length) return null
+
+  return (
+    <section className="py-12 md:py-16 bg-gradient-to-b from-green-950/20 to-transparent border-y border-green-500/10">
+      <div className="max-w-5xl mx-auto px-6">
+        <div className="flex items-center gap-3 mb-6">
+          <span className="px-3 py-1 rounded-full bg-green-500/15 text-green-400 text-xs font-medium border border-green-500/30">FREE</span>
+          <h2 className="text-xl font-bold text-white">本周免费模型</h2>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+          {models.map(m => (
+            <div key={m.id} className="p-4 rounded-xl bg-gray-900/80 border border-green-500/10 hover:border-green-500/30 transition-colors">
+              <code className="text-sm font-mono text-green-400">{m.name}</code>
+              <p className="text-xs text-gray-500 mt-1 line-clamp-2">{m.description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
 export default function LandingPage() {
   const [copiedSnippet, setCopiedSnippet] = useState(false)
   const apiBase = 'https://api.wiselink.cc'
@@ -161,6 +194,9 @@ export ANTHROPIC_SMALL_FAST_MODEL=claude-haiku-4-5`
           </a>
         </div>
       </section>
+
+      {/* ── Free Models ── */}
+      <FreeModels />
 
       {/* ── Models ── */}
       <section className="py-20 md:py-28">
