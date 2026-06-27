@@ -14,6 +14,13 @@ export default function FlClashGuide() {
         >
           <Download size={18} /> 下载 FlClash v0.8.93 (Windows)
         </a>
+        <p className="text-xs text-gray-500 mt-2">
+          更多平台（macOS / Linux / Android）及最新版本请前往{" "}
+          <a href="https://github.com/chen08209/FlClash/releases" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 underline">
+            GitHub Releases
+          </a>{" "}
+          下载
+        </p>
       ),
     },
     {
