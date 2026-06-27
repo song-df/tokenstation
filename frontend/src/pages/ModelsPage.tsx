@@ -1,12 +1,34 @@
 import { useEffect, useState } from 'react'
 import { Cpu } from 'lucide-react'
 
-function priceTierLabel(ratio: number) {
-  if (ratio === 0)       return { label: '免费', cls: 'bg-emerald-500/15 text-emerald-400' }
-  if (ratio >= 30)       return { label: '非常贵', cls: 'bg-red-500/15 text-red-400' }
-  if (ratio >= 10)       return { label: '贵', cls: 'bg-orange-500/15 text-orange-400' }
-  if (ratio >= 3)        return { label: '中等', cls: 'bg-yellow-500/15 text-yellow-400' }
-  return { label: '低价', cls: 'bg-green-500/15 text-green-400' }
+// 输出价格：T粒 / 千 tokens（已含 1.38× 平台溢价）
+const MODEL_PRICE: Record<string, number> = {
+  'deepseek-v4-pro': 0.83,
+  'deepseek-v4-flash': 0.28,
+  'claude-opus-4-8': 77.68,
+  'claude-sonnet-4-6': 46.61,
+  'claude-haiku-4-5': 15.54,
+  'claude-fable-5': 233.03,
+  'gpt-5.5': 93.21,
+  'gpt-5.5-pro': 466.07,
+  'gpt-5.3-codex': 43.51,
+  'gemini-3.5-flash': 27.97,
+  'gemini-3.1-pro': 37.27,
+  'step-3.7-flash': 3.57,
+  'qwen3.7-max': 11.65,
+  'glm-5.1': 12.43,
+  'kimi-k2.6': 10.6,
+  'minimax-m2.5': 2.8,
+  'minimax-m3': 6.2,
+  'qwen3.5-397b-a17b': 9.33,
+}
+
+function label(price: number) {
+  if (price === 0)       return { t: '免费', c: 'bg-emerald-500/15 text-emerald-400' }
+  if (price <= 1)        return { t: '低价', c: 'bg-green-500/15 text-green-400' }
+  if (price <= 10)       return { t: '中等', c: 'bg-yellow-500/15 text-yellow-400' }
+  if (price <= 50)       return { t: '贵', c: 'bg-orange-500/15 text-orange-400' }
+  return { t: '非常贵', c: 'bg-red-500/15 text-red-400' }
 }
 
 function fmtCtx(n: number): string {
@@ -21,18 +43,27 @@ export default function ModelsPage() {
 
   useEffect(() => {
     Promise.all([
-      fetch("/api/public/model-prices").then(r => r.json()),
-      fetch("/api/public/model-context").then(r => r.json()),
-    ]).then(([prices, ctx]) => {
-      const list = Object.entries(prices).map(([model_name, price]: [string, any]) => ({
-        model_name,
-        output_price: typeof price === "number" ? price : 0,
-        max_tokens: typeof ctx[model_name] === "number" ? ctx[model_name] : 0,
-      }))
-      list.sort((a: any, b: any) => a.output_price - b.output_price)
+      fetch("/api/public/model-prices").then(r => r.json()).catch(() => ({})),
+      fetch("/api/public/model-context").then(r => r.json()).catch(() => ({})),
+    ]).then(([ratios, ctx]) => {
+      const list = Object.keys(ratios).map(name => {
+        const price = MODEL_PRICE[name] ?? 0  // 0 if not in price map
+        return {
+          model_name: name,
+          price,
+          is_free: ratios[name] === 0,
+          max_tokens: typeof ctx[name] === 'number' ? ctx[name] : 0,
+        }
+      })
+      // Sort: free first, then by price ascending
+      list.sort((a, b) => {
+        if (a.is_free && !b.is_free) return -1
+        if (!a.is_free && b.is_free) return 1
+        return a.price - b.price
+      })
       setModels(list)
       setLoading(false)
-    }).catch(() => setLoading(false))
+    })
   }, [])
 
   return (
@@ -53,9 +84,8 @@ export default function ModelsPage() {
       <main className="max-w-5xl mx-auto px-6 py-12 space-y-8">
         <section className="text-center space-y-3">
           <h1 className="text-3xl font-bold text-white">可用模型</h1>
-          <p className="text-gray-400">
-            {loading ? '加载中...' : `共 ${models.length} 款模型，国内直连，5 款免费`}
-          </p>
+          <p className="text-gray-400">{loading ? '加载中...' : `共 ${models.length} 款模型，5 款免费`}</p>
+          <p className="text-sm text-gray-500">价格单位：T粒 / 千 tokens（输出），已含平台 1.38× 溢价</p>
         </section>
 
         <div className="rounded-xl bg-gray-900 border border-gray-800 overflow-hidden">
@@ -66,27 +96,21 @@ export default function ModelsPage() {
               <thead>
                 <tr className="border-b border-gray-800 text-gray-400 text-left">
                   <th className="p-3 font-medium">模型名称</th>
-                  <th className="p-3 font-medium">价格档位</th>
+                  <th className="p-3 font-medium">价格</th>
                   <th className="p-3 font-medium">上下文</th>
                 </tr>
               </thead>
               <tbody>
-                {models.map((m: any) => {
-                  const t = priceTierLabel(m.output_price)
+                {models.map(m => {
+                  const l = m.is_free ? { t: '免费', c: 'bg-emerald-500/15 text-emerald-400' } : m.price > 0 ? label(m.price) : { t: '待标价', c: 'bg-gray-600/20 text-gray-500' }
                   return (
                     <tr key={m.model_name} className="border-b border-gray-800/50 hover:bg-gray-800/50">
+                      <td className="p-3"><code className="text-gray-200 font-mono text-xs">{m.model_name}</code></td>
                       <td className="p-3">
-                        <code className="text-gray-200 font-mono text-xs">{m.model_name}</code>
+                        <span className={`px-2 py-0.5 rounded text-xs font-medium ${l.c}`}>{l.t}</span>
+                        {m.price > 0 && <span className="ml-1.5 text-gray-500 text-xs">{m.price.toFixed(2)} T粒/k</span>}
                       </td>
-                      <td className="p-3">
-                        <span className={`px-2 py-0.5 rounded text-xs font-medium ${t.cls}`}>{t.label}</span>
-                        {m.output_price > 0 && (
-                          <span className="ml-1.5 text-gray-500 text-xs">x{m.output_price.toFixed(2)}</span>
-                        )}
-                      </td>
-                      <td className="p-3 text-gray-400 font-mono text-xs">
-                        {m.max_tokens > 0 ? fmtCtx(m.max_tokens) : '—'}
-                      </td>
+                      <td className="p-3 text-gray-400 font-mono text-xs">{m.max_tokens > 0 ? fmtCtx(m.max_tokens) : '—'}</td>
                     </tr>
                   )
                 })}
