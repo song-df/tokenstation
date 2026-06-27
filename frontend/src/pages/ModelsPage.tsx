@@ -64,8 +64,7 @@ export default function ModelsPage() {
                 <tr className="border-b border-gray-800 text-gray-400 text-left">
                   <th className="p-3 font-medium">模型名称</th>
                   <th className="p-3 font-medium">价格档位</th>
-                  <th className="p-3 font-medium">供应商</th>
-                  <th className="p-3 font-medium">最大 Token</th>
+                                    <th className="p-3 font-medium">最大 Token</th>
                 </tr>
               </thead>
               <tbody>
@@ -83,8 +82,7 @@ export default function ModelsPage() {
                           <span className="ml-1.5 text-gray-500 text-xs">{m.output_price.toFixed(2)} T粒/k</span>
                         )}
                       </td>
-                      <td className="p-3"><span className="px-2 py-0.5 rounded bg-gray-800 text-gray-300 text-xs">{m.provider}</span></td>
-                      <td className="p-3 text-gray-400 font-mono text-xs">{(m.max_tokens || 0).toLocaleString()}</td>
+                                            <td className="p-3 text-gray-400 font-mono text-xs">{(m.max_tokens || 0).toLocaleString()}</td>
                     </tr>
                   )
                 })}
