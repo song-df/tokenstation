@@ -133,7 +133,7 @@ export default function QuickGuide() {
       </main>
 
       <footer className="border-t border-gray-800 py-8 text-center text-sm text-gray-600">
-        T粒加油站 · t.wiselink.cc
+        T粒加油站 · t.wiselink.cc · <a href="/terms" class="hover:text-gray-400 transition-colors">用户协议</a> · 反馈: <a href="mailto:songdf@petalmail.com" class="hover:text-gray-400 transition-colors">songdf@petalmail.com</a>
       </footer>
     </div>
   )

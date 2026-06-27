@@ -289,7 +289,7 @@ export ANTHROPIC_SMALL_FAST_MODEL=claude-haiku-4-5`
         <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-600">
           <div className="flex items-center gap-2">
             <Zap size={14} className="text-gray-700" />
-            <span>T粒加油站 · t.wiselink.cc</span>
+            <span>T粒加油站 · t.wiselink.cc · <a href="/terms" class="hover:text-gray-400 transition-colors">用户协议</a> · 反馈: <a href="mailto:songdf@petalmail.com" class="hover:text-gray-400 transition-colors">songdf@petalmail.com</a></span>
             <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" class="hover:text-gray-400 transition-colors">浙ICP备2026039790号-1</a>
           </div>
           <div className="flex items-center gap-6">

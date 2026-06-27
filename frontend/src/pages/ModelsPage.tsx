@@ -99,7 +99,7 @@ export default function ModelsPage() {
         </div>
       </main>
       <footer className="border-t border-gray-800 py-8 text-center text-sm text-gray-600">
-        T粒加油站 · t.wiselink.cc · <a href="/guide" className="hover:text-gray-400 transition-colors">使用说明</a>
+        T粒加油站 · t.wiselink.cc · <a href="/terms" class="hover:text-gray-400 transition-colors">用户协议</a> · 反馈: <a href="mailto:songdf@petalmail.com" class="hover:text-gray-400 transition-colors">songdf@petalmail.com</a> · <a href="/guide" className="hover:text-gray-400 transition-colors">使用说明</a>
       </footer>
     </div>
   )
