@@ -29,6 +29,17 @@ async def free_models():
     conn.close()
     return [{"id": r["model_name"], "name": r["model_name"].split("/")[-1], "description": r["description"]} for r in rows]
 
+@router.get("/api/public/model-context")
+async def model_context():
+    """Return context_length (max tokens) for all active models."""
+    import sqlite3
+    conn = sqlite3.connect(f"file:{NEWAPI_DB_PATH}?mode=ro", uri=True)
+    conn.row_factory = sqlite3.Row
+    row = conn.execute("SELECT value FROM options WHERE key='ModelContextLength'").fetchone()
+    conn.close()
+    return json.loads(row[0]) if row else {}
+
+
 
 @router.get("/api/public/model-prices")
 async def model_prices():

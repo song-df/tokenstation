@@ -103,6 +103,20 @@ def main():
         db.execute("UPDATE options SET value=? WHERE key='ModelRatio'", (json.dumps(ratio, ensure_ascii=False),))
         db.execute("UPDATE options SET value=? WHERE key='CompletionRatio'", (json.dumps(comp, ensure_ascii=False),))
 
+        # ModelContextLength: store context_length per model
+        ctx_row = db.execute("SELECT value FROM options WHERE key='ModelContextLength'").fetchone()
+        ctx = json.loads(ctx_row[0]) if ctx_row and ctx_row[0] else {}
+        for m in selected:
+            ctx[m["id"]] = m["ctx"]
+        # Merge existing (don't lose data for models not in this sync)
+        if ctx_row:
+            existing_ctx = json.loads(ctx_row[0])
+            for k, v in existing_ctx.items():
+                if k not in ctx:
+                    ctx[k] = v
+        db.execute("UPDATE options SET value=? WHERE key='ModelContextLength'", (json.dumps(ctx, ensure_ascii=False),))
+
+
         db.commit(); db.close()
         print(f"  Done: {len(selected)} models synced")
     except Exception as e:
