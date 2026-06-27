@@ -99,6 +99,18 @@ export default function QuickGuide() {
               <ArrowRight size={16} className="text-gray-700 group-hover:text-green-400 shrink-0 mt-1 transition-colors" />
             </div>
           </a>
+          <a href="/" className="group p-5 rounded-xl bg-gray-900 border border-gray-800 hover:border-green-500/40 transition-colors">
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Zap size={20} className="text-green-400" />
+                  <h3 className="text-base font-semibold text-white">本周免费模型</h3>
+                </div>
+                <p className="text-sm text-gray-500">OpenRouter 精选 Top 5 免费模型，每周自动更新，零成本畅用。</p>
+              </div>
+              <ArrowRight size={16} className="text-gray-700 group-hover:text-green-400 shrink-0 mt-1 transition-colors" />
+            </div>
+          </a>
           <a href="/models" className="group p-5 rounded-xl bg-gray-900 border border-gray-800 hover:border-purple-500/40 transition-colors">
             <div className="flex items-start justify-between">
               <div>
