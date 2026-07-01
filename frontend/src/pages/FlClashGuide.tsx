@@ -7,6 +7,7 @@ export default function FlClashGuide() {
       desc: '点击下方按钮下载 Windows 安装包，双击安装。',
       img: null,
       extra: (
+        <>
         <a
           href="https://github.com/chen08209/FlClash/releases/download/v0.8.93/FlClash-0.8.93-windows-amd64-setup.exe"
           target="_blank" rel="noopener noreferrer"
@@ -21,6 +22,7 @@ export default function FlClashGuide() {
           </a>{" "}
           下载
         </p>
+        </>
       ),
     },
     {

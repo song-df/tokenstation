@@ -73,7 +73,7 @@ export default function OpenAIGuide() {
                 <p><code className="font-mono text-blue-400">deepseek-v4-pro</code> — 主力模型</p>
                 <p><code className="font-mono text-blue-400">deepseek-v4-flash</code> — 快速实惠</p>
                 <p><code className="font-mono text-blue-400">claude-opus-4-8</code> — 最强推理</p>
-                <p className="text-gray-500">... 共 17 款模型可选</p>
+                <p className="text-gray-500">... 共 22 款模型可选</p>
               </div>
             </div>
           </div>

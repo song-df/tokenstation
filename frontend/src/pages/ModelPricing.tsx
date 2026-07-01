@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { api } from '../lib/api'
+import { api, MODEL_OUTPUT_PRICE, MODEL_PROVIDER } from '../lib/api'
 import { Copy, Check, Cpu, Zap } from 'lucide-react'
 
 interface ModelInfo {
@@ -24,7 +24,16 @@ export default function ModelPricing() {
   const [copiedModel, setCopiedModel] = useState<string | null>(null)
 
   useEffect(() => {
-    api.getStudentModels().then(m => { setModels(m); setLoading(false) })
+    api.getStudentModels()
+      .then(m => { if (m.length) setModels(m) })
+      .catch(() => {
+        // Fallback for unauthenticated users — use hardcoded price list
+        setModels(Object.keys(MODEL_OUTPUT_PRICE).map(name => ({
+          model_name: name, display_name: '', provider: MODEL_PROVIDER[name] || '',
+          input_price: 0, output_price: MODEL_OUTPUT_PRICE[name] ?? 0, max_tokens: 0,
+        })))
+      })
+      .finally(() => setLoading(false))
   }, [])
 
   const copyModelName = (name: string) => {
