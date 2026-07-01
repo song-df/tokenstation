@@ -12,47 +12,45 @@ const QUOTA_PER_TLI = 690; // 1 T粒 = 690 quota (1 T粒 ≈ ¥0.01)
 // 模型输出价格 (T粒/1k tokens) 基于 new-api ModelRatio × CompletionRatio
 // 计算公式中 new-api 原始 quota 不变，仅前端显示用 QUOTA_PER_TLI=690 换算
 // 原值 ×(10000/690) 等比缩放，保持 T粒 定价与 ¥0.01/T粒 一致
-const MODEL_OUTPUT_PRICE: Record<string, number> = {
-  'deepseek-v4-pro': 0.63,    // 0.232 ×(10000/690)
-  'deepseek-v4-flash': 0.1,    // 0.036 ×(10000/690)
-  'claude-opus-4-8': 77.68,    // 28.8 ×(10000/690)
-  'claude-sonnet-4-6': 46.61,    // 17.28 ×(10000/690)
-  'claude-haiku-4-5': 15.54,    // 5.76 ×(10000/690)
-  'claude-fable-5': 233.03,    // 86.4 ×(10000/690)
-  'gpt-5.5': 93.21,    // 34.56 ×(10000/690)
-  'gpt-5.5-pro': 466.07,    // 172.8 ×(10000/690)
-  'gpt-5.3-codex': 43.51,    // 16.13 ×(10000/690)
-  'gemini-3.5-flash': 27.97,   // 10.37 ×(10000/690)
-  'gemini-3.1-pro': 37.27,    // 13.82 ×(10000/690)
-  'step-3.7-flash': 3.57,    // 1.324 ×(10000/690)
-  'qwen3.7-max': 11.65,    // 4.32 ×(10000/690)
-  'glm-5.1': 12.43,    // 4.61 ×(10000/690)
-  'kimi-k2.6': 10.6,    // 3.93 ×(10000/690)
-  'minimax-m2.5': 2.8,    // 1.037 ×(10000/690)
-  'minimax-m3': 6.2,    // 2.30 ×(10000/690)
-  'qwen3.5-397b-a17b': 9.33,    // 3.46 ×(10000/690)
+export const MODEL_OUTPUT_PRICE: Record<string, number> = {
+  'deepseek-v4-pro': 0.63,
+  'deepseek-v4-flash': 0.1,
+  'claude-opus-4-8': 77.68,
+  'claude-opus-4-6': 43.49,    // 估→MR(anthropic/claude-opus-4.6)=2 CR≈5
+  'claude-sonnet-4-6': 46.61,
+  'claude-haiku-4-5': 15.54,
+  'gpt-5.5': 93.21,
+  'gpt-5.5-pro': 466.07,
+  'gemini-3.5-flash': 27.97,
+  'gemini-3.1-pro': 37.27,
+  'step-3.7-flash': 3.57,
+  'qwen3.7-max': 11.65,
+  'qwen-max': 11.65,           // 估→无独立MR,同qwen3.7-max档
+  'qwen/qwen3-coder': 5.0,     // 估→coder模型偏低定价
+  'glm-5.2': 12.43,           // 估→MR=9 CR≈4 同glm-5.1
+  'kimi-k2.6': 10.6,
+  'minimax-m3': 6.2,
 };
 
 // 模型供应商映射
-const MODEL_PROVIDER: Record<string, string> = {
+export const MODEL_PROVIDER: Record<string, string> = {
   'deepseek-v4-pro':      'DeepSeek',
   'deepseek-v4-flash':    'DeepSeek',
   'claude-opus-4-8':      'Anthropic',
+  'claude-opus-4-6':      'Anthropic',
   'claude-sonnet-4-6':    'Anthropic',
   'claude-haiku-4-5':     'Anthropic',
-  'claude-fable-5':       'Anthropic',
   'gpt-5.5':              'OpenAI',
   'gpt-5.5-pro':          'OpenAI',
-  'gpt-5.3-codex':        'OpenAI',
   'gemini-3.5-flash':     'Google',
   'gemini-3.1-pro':       'Google',
   'step-3.7-flash':       'StepFun',
   'qwen3.7-max':          'Qwen',
-  'glm-5.1':              'Zhipu',
+  'qwen-max':             'Qwen',
+  'qwen/qwen3-coder':     'Qwen',
+  'glm-5.2':              'Zhipu',
   'kimi-k2.6':            'Moonshot',
-  'minimax-m2.5':         'MiniMax',
   'minimax-m3':           'MiniMax',
-  'qwen3.5-397b-a17b':    'Qwen',
 };
 
 // 兼容旧调用:仍把登录态存 localStorage,但存的是用户 id(用于 New-Api-User 头),

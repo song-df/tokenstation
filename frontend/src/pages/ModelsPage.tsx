@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Cpu } from 'lucide-react'
-
-// 输出价格：T粒 / 千 tokens（已含 1.38× 平台溢价）
+import { MODEL_OUTPUT_PRICE } from '../lib/api'
 
 function label(price: number) {
   if (price === 0)       return { t: '免费', c: 'bg-emerald-500/15 text-emerald-400' }
@@ -22,28 +21,15 @@ export default function ModelsPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    Promise.all([
-      fetch("/api/public/model-prices").then(r => r.json()).catch(() => ({})),
-      fetch("/api/public/model-context").then(r => r.json()).catch(() => ({})),
-    ]).then(([ratios, ctx]) => {
-      const list = Object.keys(ratios).map(name => {
-        const price = typeof ratios[name] === 'number' ? ratios[name] : 0
-        return {
-          model_name: name,
-          price,
-          is_free: ratios[name] === 0,
-          max_tokens: typeof ctx[name] === 'number' ? ctx[name] : 0,
-        }
-      })
-      // Sort: free first, then by price ascending
-      list.sort((a, b) => {
-        if (a.is_free && !b.is_free) return -1
-        if (!a.is_free && b.is_free) return 1
-        return a.price - b.price
-      })
-      setModels(list)
-      setLoading(false)
-    })
+    const list = Object.keys(MODEL_OUTPUT_PRICE).map(name => ({
+      model_name: name,
+      price: MODEL_OUTPUT_PRICE[name] ?? 0,
+      is_free: (MODEL_OUTPUT_PRICE[name] ?? 0) === 0,
+      max_tokens: 0,
+    }))
+    list.sort((a, b) => a.price - b.price)
+    setModels(list)
+    setLoading(false)
   }, [])
 
   return (
