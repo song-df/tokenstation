@@ -109,6 +109,10 @@ async def code_stats(
     }
 
 
+@router.post("/use")
+async def use_code(
+    data: UseCodeBody,
+    user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     r = await db.execute(select(RedeemCode).where(RedeemCode.code == data.code.upper()))

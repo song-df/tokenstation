@@ -84,6 +84,30 @@ async def find_channel(db: AsyncSession, model_name: str) -> Channel | None:
     return result.scalar_one_or_none()
 
 
+# ── Mapped lookups (try _MODEL_MAP fallback when direct match fails) ──
+
+async def find_model_config_mapped(db: AsyncSession, model_name: str) -> ModelConfig | None:
+    """find_model_config with _MODEL_MAP fallback."""
+    mc = await find_model_config(db, model_name)
+    if mc:
+        return mc
+    mapped = _map_model(model_name)
+    if mapped != model_name:
+        return await find_model_config(db, mapped)
+    return None
+
+
+async def find_channel_mapped(db: AsyncSession, model_name: str) -> Channel | None:
+    """find_channel with _MODEL_MAP fallback."""
+    ch = await find_channel(db, model_name)
+    if ch:
+        return ch
+    mapped = _map_model(model_name)
+    if mapped != model_name:
+        return await find_channel(db, mapped)
+    return None
+
+
 async def find_model_config(db: AsyncSession, model_name: str) -> ModelConfig | None:
     result = await db.execute(
         select(ModelConfig)

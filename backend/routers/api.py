@@ -8,7 +8,7 @@ from models import User, ModelConfig, RequestLog
 from auth import get_current_user
 from database import get_db
 from services.relay import (
-    find_channel, find_model_config, normalize_model_name,
+    find_channel_mapped, find_model_config_mapped, normalize_model_name,
     relay_chat_completion, relay_chat_completion_stream,
     relay_anthropic_passthrough, relay_anthropic_passthrough_stream,
     relay_anthropic_via_openai, relay_anthropic_via_openai_stream,
@@ -54,11 +54,11 @@ async def chat_completions(
     if not model_name:
         raise HTTPException(400, "model is required")
 
-    model_config = await find_model_config(db, model_name)
+    model_config = await find_model_config_mapped(db, model_name)
     if not model_config:
         raise HTTPException(400, f"Model {model_name} is not available")
 
-    channel = await find_channel(db, model_name)
+    channel = await find_channel_mapped(db, model_name)
     if not channel:
         raise HTTPException(500, f"No active channel for model {model_name}")
 
@@ -120,11 +120,11 @@ async def anthropic_messages(
     if not model_name:
         raise HTTPException(400, "model is required")
 
-    model_config = await find_model_config(db, model_name)
+    model_config = await find_model_config_mapped(db, model_name)
     if not model_config:
         raise HTTPException(400, f"Model {model_name} is not available")
 
-    channel = await find_channel(db, model_name)
+    channel = await find_channel_mapped(db, model_name)
     if not channel:
         raise HTTPException(500, f"No active channel for model {model_name}")
 
@@ -209,11 +209,11 @@ async def list_models_anthropic(
         .order_by(ModelConfig.model_name)
     )
     models = result.scalars().all()
-    # Only return anthropic-provider models for Claude Code
+    # Return anthropic + openrouter models (all Claude-compatible)
     return {
         "data": [
             {"id": m.model_name, "display_name": m.display_name or m.model_name}
-            for m in models if m.provider == "anthropic"
+            for m in models if m.provider in ("anthropic", "openrouter")
         ]
     }
 
