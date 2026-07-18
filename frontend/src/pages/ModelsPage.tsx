@@ -32,6 +32,12 @@ function modalityLabel(value: string): string {
   return MODALITY_LABELS[value] || value.charAt(0).toUpperCase() + value.slice(1)
 }
 
+function fetchPublicJson(name: string) {
+  return fetch(`/api/public/${name}`)
+    .then(response => response.ok ? response.json() : Promise.reject())
+    .catch(() => fetch(`/${name}.json`).then(response => response.ok ? response.json() : {}))
+}
+
 export default function ModelsPage() {
   const [models, setModels] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -43,11 +49,9 @@ export default function ModelsPage() {
   useEffect(() => {
     // 从 nginx 静态文件取价格，文件每次从数据库重新生成
     Promise.all([
-      fetch('/api/public/model-prices').then(r => r.json()).catch(() => ({})),
-      fetch('/api/public/model-context').then(r => r.json()).catch(() => ({})),
-      fetch('/api/public/model-modalities').then(r => r.ok ? r.json() : Promise.reject()).catch(() =>
-        fetch('/model-modalities.json').then(r => r.ok ? r.json() : {}).catch(() => ({}))
-      ),
+      fetchPublicJson('model-prices'),
+      fetchPublicJson('model-context'),
+      fetchPublicJson('model-modalities'),
     ]).then(([prices, context, modalities]) => {
       const list = Object.keys(prices)
         .map(name => ({

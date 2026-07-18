@@ -5,7 +5,7 @@ from collections import defaultdict
 from datetime import datetime
 
 NEWAPI_DB = "/opt/newapi/data/data.db"
-OR_URL = "https://openrouter.ai/api/v1/models"
+OR_URL = "https://openrouter.ai/api/v1/models?output_modalities=all"
 TOP_FREE = 5
 TOP_PER_PROVIDER = 3
 
@@ -61,6 +61,7 @@ def parse(data):
     return free[:TOP_FREE], paid_top
 
 PRICES_OUTPUT = "/www/wwwroot/ai-new/model-prices.json"
+CONTEXT_OUTPUT = "/www/wwwroot/ai-new/model-context.json"
 MODALITIES_OUTPUT = "/www/wwwroot/ai-new/model-modalities.json"
 
 
@@ -193,6 +194,8 @@ def main():
                 if k not in ctx:
                     ctx[k] = v
         db.execute("UPDATE options SET value=? WHERE key='ModelContextLength'", (json.dumps(ctx, ensure_ascii=False),))
+        with open(CONTEXT_OUTPUT, "w") as f:
+            json.dump(ctx, f, ensure_ascii=False, separators=(',', ':'))
 
         _generate_model_modalities(db, modalities)
 
