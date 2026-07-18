@@ -37,6 +37,7 @@ deploy.sh
 # Sensitive / credentials
 admin-proxy.yaml
 *.pem
+clash-tokyo.yaml
 
 # Server-side runtime data — never overwrite
 course_data.json
