@@ -125,14 +125,14 @@ claude --version`} />
           <p className="text-gray-400 text-sm font-medium mt-4">🪟 Windows（PowerShell）：</p>
           <CodeBlock id="cc-env-win" lang="PowerShell" code={`$env:ANTHROPIC_BASE_URL="${apiBase}"
 $env:ANTHROPIC_AUTH_TOKEN="sk-你的APIKey"
-$env:ANTHROPIC_MODEL="claude-opus-4-8"
-$env:ANTHROPIC_SMALL_FAST_MODEL="claude-haiku-4-5"`} />
+$env:ANTHROPIC_MODEL="anthropic/claude-opus-4.8"
+$env:ANTHROPIC_SMALL_FAST_MODEL="~anthropic/claude-haiku-latest"`} />
 
           <p className="text-gray-400 text-sm font-medium mt-4">🍎 macOS / 🐧 Linux（终端）：</p>
           <CodeBlock id="cc-env-unix" lang="终端 (macOS / Linux)" code={`export ANTHROPIC_BASE_URL=${apiBase}
 export ANTHROPIC_AUTH_TOKEN=sk-你的APIKey
-export ANTHROPIC_MODEL=claude-opus-4-8
-export ANTHROPIC_SMALL_FAST_MODEL=claude-haiku-4-5`} />
+export ANTHROPIC_MODEL=anthropic/claude-opus-4.8
+export ANTHROPIC_SMALL_FAST_MODEL=~anthropic/claude-haiku-latest`} />
 
           <h3 className="text-base font-semibold text-white mt-8">方式 B · 永久配置（一次配置，始终生效）</h3>
           <p className="text-gray-400 text-sm">写入 <code className="px-1.5 py-0.5 rounded bg-gray-800 text-gray-300 font-mono text-xs">~/.claude/settings.json</code>（所有平台通用）：</p>
@@ -147,8 +147,8 @@ mkdir "$env:USERPROFILE\\.claude" -Force
   "env": {
     "ANTHROPIC_BASE_URL": "${apiBase}",
     "ANTHROPIC_AUTH_TOKEN": "sk-你的APIKey",
-    "ANTHROPIC_MODEL": "claude-opus-4-8",
-    "ANTHROPIC_SMALL_FAST_MODEL": "claude-haiku-4-5"
+    "ANTHROPIC_MODEL": "anthropic/claude-opus-4.8",
+    "ANTHROPIC_SMALL_FAST_MODEL": "~anthropic/claude-haiku-latest"
   }
 }
 '@ | Out-File -FilePath "$env:USERPROFILE\\.claude\\settings.json" -Encoding utf8`} />
@@ -160,8 +160,8 @@ cat > ~/.claude/settings.json << 'EOF'
   "env": {
     "ANTHROPIC_BASE_URL": "${apiBase}",
     "ANTHROPIC_AUTH_TOKEN": "sk-你的APIKey",
-    "ANTHROPIC_MODEL": "claude-opus-4-8",
-    "ANTHROPIC_SMALL_FAST_MODEL": "claude-haiku-4-5"
+    "ANTHROPIC_MODEL": "anthropic/claude-opus-4.8",
+    "ANTHROPIC_SMALL_FAST_MODEL": "~anthropic/claude-haiku-latest"
   }
 }
 EOF`} />
@@ -182,11 +182,12 @@ EOF`} />
           <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-sm text-amber-200/90 space-y-1.5">
             <p>⚠️ <b>必须设置 <code className="font-mono">ANTHROPIC_MODEL</code></b>：本站不使用 Claude 官方默认模型名，不设会报"模型不存在"。可选：</p>
             <ul className="list-disc list-inside ml-2 space-y-0.5">
-              <li><code className="font-mono">claude-opus-4-8</code> — 最强模型</li>
-              <li><code className="font-mono">claude-sonnet-4-6</code> — 性价比之选</li>
-              <li><code className="font-mono">claude-haiku-4-5</code> — 快速便宜</li>
+              <li><code className="font-mono">anthropic/claude-opus-4.8</code> — 最强模型</li>
+              <li><code className="font-mono">anthropic/claude-sonnet-5</code> — 性价比之选</li>
+              <li><code className="font-mono">~anthropic/claude-haiku-latest</code> — 快速便宜</li>
+              <li><code className="font-mono">anthropic/claude-fable-5</code> — 深度思考</li>
             </ul>
-            <p className="mt-2">💡 <code className="font-mono">ANTHROPIC_SMALL_FAST_MODEL</code> 是后台小任务用的便宜模型，设为 <code className="font-mono">claude-haiku-4-5</code> 更省 T粒。</p>
+            <p className="mt-2">💡 <code className="font-mono">ANTHROPIC_SMALL_FAST_MODEL</code> 是后台小任务用的便宜模型，设为 <code className="font-mono">~anthropic/claude-haiku-latest</code> 更省 T粒。</p>
           </div>
         </section>
 

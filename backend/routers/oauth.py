@@ -22,7 +22,18 @@ _CODE_TTL = 300  # 5 minutes
 
 
 def _get_clients() -> list[dict]:
-    return json.loads(settings.oauth_clients_json)
+    clients = json.loads(settings.oauth_clients_json)
+    # WorBuddy is both an OAuth client and a first-party surface. Register it
+    # from environment-only settings so its secret never appears in source.
+    if settings.workbuddy_oauth_client_secret and not any(
+        client.get("client_id") == settings.workbuddy_oauth_client_id for client in clients
+    ):
+        clients.append({
+            "client_id": settings.workbuddy_oauth_client_id,
+            "client_secret": settings.workbuddy_oauth_client_secret,
+            "redirect_uris": [settings.workbuddy_oauth_redirect_uri],
+        })
+    return clients
 
 
 def _find_client(client_id: str) -> dict | None:

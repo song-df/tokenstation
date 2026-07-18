@@ -1,13 +1,8 @@
+import PublicLayout from '../components/PublicLayout'
+
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-100">
-      <header className="border-b border-gray-800 bg-gray-900/80 backdrop-blur sticky top-0 z-50">
-        <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
-          <span className="text-lg font-semibold text-white">T粒加油站</span>
-          <a href="/" className="text-sm text-gray-400 hover:text-gray-200 transition-colors">← 返回首页</a>
-        </div>
-      </header>
-
+    <PublicLayout>
       <main className="max-w-3xl mx-auto px-6 py-12 space-y-8 text-sm leading-relaxed text-gray-300">
         <h1 className="text-2xl font-bold text-white">用户服务协议</h1>
         <p className="text-gray-500">最后更新：2026年6月27日</p>
@@ -94,10 +89,7 @@ export default function TermsPage() {
           <p>本协议适用中华人民共和国法律。因本协议引起的争议，双方应友好协商解决；协商不成的，任何一方可向本平台所在地有管辖权的人民法院提起诉讼。</p>
         </section>
 
-        <div className="pt-8 text-center text-gray-600 text-xs">
-          T粒加油站 · t.wiselink.cc · <a href="/terms" class="hover:text-gray-400 transition-colors">用户协议</a> · 反馈: <a href="mailto:songdf@petalmail.com" class="hover:text-gray-400 transition-colors">songdf@petalmail.com</a>
-        </div>
       </main>
-    </div>
+    </PublicLayout>
   )
 }

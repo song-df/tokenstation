@@ -23,6 +23,7 @@ import StudentProfile from './pages/StudentProfile'
 import ApiKeysPage from './pages/ApiKeysPage'
 import ProxySubscription from './pages/ProxySubscription'
 import AdminProxy from './pages/AdminProxy'
+import RechargeStats from './pages/RechargeStats'
 import ReferralPage from './pages/ReferralPage'
 import TliPurchase from './pages/TliPurchase'
 import TermsPage from './pages/TermsPage'
@@ -63,6 +64,7 @@ function AppInner({ user, loading, setUser }: { user: any; loading: boolean; set
       <Route path="/guide/openai" element={<OpenAIGuide />} />
       <Route path="/guide/models" element={<ModelPricing />} />
       <Route path="/models" element={<ModelsPage />} />
+      <Route path="/terms" element={<TermsPage />} />
       <Route path="/register" element={<Register />} />
       <Route path="/login" element={<Login onLogin={setUser} />} />
       <Route path="*" element={<Navigate to="/" replace />} />
@@ -85,7 +87,7 @@ function AppInner({ user, loading, setUser }: { user: any; loading: boolean; set
         <Route path="/course" element={<CourseSubscription />} />
         <Route path="/redeem" element={<RedeemCodes />} />
         <Route path="/admin/course-codes" element={<CourseCodes />} />
-        <Route path="/guide" element={<QuickGuide />} />
+        <Route path="/guide" element={<QuickGuide embedded />} />
         <Route path="/guide/codex" element={<CodexGuide />} />
       <Route path="/guide/codex-mac-linux" element={<CodexGuideMacLinux />} />
     <Route path="/guide/claude-code" element={<ClaudeCodeGuide />} />
@@ -95,6 +97,7 @@ function AppInner({ user, loading, setUser }: { user: any; loading: boolean; set
         <Route path="/guide/models" element={<ModelPricing />} />
         <Route path="/models" element={<ModelsPage />} />
         <Route path="/admin/proxy" element={<AdminProxy />} />
+        <Route path="/admin/stats" element={<RechargeStats />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </UserLayout>

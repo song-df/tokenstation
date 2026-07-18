@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="我伙伴 —— 帮助大家更好地使用 WorBuddy：一键生成客户端配置、管理 API Key、充值积分、在线体验模型。" />
+    <title>我伙伴 · 帮你用好 WorBuddy</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="/" aria-label="我伙伴首页">
+        <span class="brand-mark" aria-hidden="true">伙</span>
+        <span class="brand-name">我伙伴<span>›</span></span>
+      </a>
+      <nav class="main-nav" aria-label="主导航">
+        <a href="#docs">文档</a>
+        <a href="#pricing">定价</a>
+      </nav>
+      <div class="user-menu" id="user-menu" hidden>
+        <button class="user-menu-trigger" id="user-menu-trigger" type="button" aria-haspopup="true" aria-expanded="false"></button>
+        <div class="user-menu-dropdown" role="menu">
+          <div class="user-menu-name" id="user-menu-name"></div>
+          <a href="/account.html" role="menuitem">个人中心</a>
+          <button type="button" data-user-action="contact" role="menuitem">联系我们</button>
+          <div class="user-menu-divider"></div>
+          <button class="logout-action" type="button" data-user-action="logout" role="menuitem">退出登录</button>
+        </div>
+      </div>
+      <a class="login-button" id="oauth-login" href="/workbuddy-auth/login">登录</a>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="eyebrow">我伙伴</p>
+          <h1 id="hero-title">给你的WorkBuddy加油助力</h1>
+          <p class="hero-sub">一键生成配置文件 · 管理 API Key · 充值积分 · 在线体验模型</p>
+          <div class="mode-switch" role="group" aria-label="使用场景">
+            <button class="mode active" type="button" data-mode="daily">♨&nbsp; 日常办公</button>
+            <button class="mode" type="button" data-mode="code">⌁&nbsp; 代码开发</button>
+          </div>
+        </div>
+
+        <div class="workbench" aria-label="我伙伴工作台预览">
+          <div class="quick-actions">
+            <button type="button" data-task="帮我制作一份清晰的汇报幻灯片">▱&nbsp; 幻灯片</button>
+            <button type="button" data-task="帮我生成一个简洁的视频脚本">▣&nbsp; 视频生成</button>
+            <button type="button" data-task="帮我围绕当前主题做深度研究">⌕&nbsp; 深度研究</button>
+            <button type="button" data-task="">更多</button>
+          </div>
+          <div class="assistant-orb" aria-hidden="true"><span>✦</span></div>
+          <div class="chat-log" id="chat-log" hidden aria-live="polite"></div>
+          <form class="prompt-box" id="prompt-form">
+            <label class="sr-only" for="prompt">向我伙伴提问</label>
+            <textarea id="prompt" rows="3" placeholder="今天帮你做些什么？  @ 引用对话文件，/ 调用技能与指令"></textarea>
+            <div class="prompt-footer">
+              <button class="add-button" type="button" aria-label="添加附件">＋</button>
+              <div class="prompt-actions">
+                <select id="model-select" class="model-select" aria-label="选择模型"></select>
+                <button class="send-button" type="submit" aria-label="发送">▲</button>
+              </div>
+            </div>
+          </form>
+          <p class="workbench-note">登录后，可生成 WorBuddy 客户端配置。</p>
+        </div>
+      </section>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="/app.js?v=2"></script>
+  </body>
+

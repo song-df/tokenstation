@@ -16,18 +16,22 @@ export const MODEL_OUTPUT_PRICE: Record<string, number> = {
   'deepseek-v4-pro': 0.63,
   'deepseek-v4-flash': 0.1,
   'claude-opus-4-8': 77.68,
-  'claude-opus-4-6': 43.49,    // 估→MR(anthropic/claude-opus-4.6)=2 CR≈5
+  'claude-opus-4-6': 43.49,
   'claude-sonnet-4-6': 46.61,
   'claude-haiku-4-5': 15.54,
+  'anthropic/claude-opus-4.8': 23.55,
+  'anthropic/claude-sonnet-5': 9.42,
+  '~anthropic/claude-haiku-latest': 4.71,
+  'anthropic/claude-fable-5': 47.10,
   'gpt-5.5': 93.21,
   'gpt-5.5-pro': 466.07,
   'gemini-3.5-flash': 27.97,
   'gemini-3.1-pro': 37.27,
   'step-3.7-flash': 3.57,
   'qwen3.7-max': 11.65,
-  'qwen-max': 11.65,           // 估→无独立MR,同qwen3.7-max档
-  'qwen/qwen3-coder': 5.0,     // 估→coder模型偏低定价
-  'glm-5.2': 12.43,           // 估→MR=9 CR≈4 同glm-5.1
+  'qwen-max': 11.65,
+  'qwen/qwen3-coder': 5.0,
+  'glm-5.2': 12.43,
   'kimi-k2.6': 10.6,
   'minimax-m3': 6.2,
 };
@@ -40,6 +44,10 @@ export const MODEL_PROVIDER: Record<string, string> = {
   'claude-opus-4-6':      'Anthropic',
   'claude-sonnet-4-6':    'Anthropic',
   'claude-haiku-4-5':     'Anthropic',
+  'anthropic/claude-opus-4.8':  'Anthropic',
+  'anthropic/claude-sonnet-5':  'Anthropic',
+  '~anthropic/claude-haiku-latest': 'Anthropic',
+  'anthropic/claude-fable-5': 'Anthropic',
   'gpt-5.5':              'OpenAI',
   'gpt-5.5-pro':          'OpenAI',
   'gemini-3.5-flash':     'Google',

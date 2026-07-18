@@ -1,6 +1,13 @@
-import { useEffect, useState } from 'react'
-import { Cpu, Copy, Check } from 'lucide-react'
-import { api, MODEL_OUTPUT_PRICE, MODEL_PROVIDER } from '../lib/api'
+import { useEffect, useState, useMemo } from 'react'
+import { Copy, Check } from 'lucide-react'
+import { MODEL_PROVIDER } from '../lib/api'
+import PublicLayout from '../components/PublicLayout'
+
+// 从模型 ID 提取公司名（如 anthropic/claude-sonnet-5 → anthropic）
+function modelCompany(name: string): string {
+  const idx = name.indexOf('/')
+  return idx > 0 ? name.slice(0, idx) : '其他'
+}
 
 function label(price: number) {
   if (price === 0)       return { t: '免费', c: 'bg-emerald-500/15 text-emerald-400' }
@@ -20,18 +27,44 @@ export default function ModelsPage() {
   const [models, setModels] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [copiedModel, setCopiedModel] = useState<string | null>(null)
+  const [company, setCompany] = useState<string | null>(null)
 
   useEffect(() => {
-    api.getStudentModels()
-      .then((list: any[]) => { if (list.length) setModels(list) })
-      .catch(() => {
-        setModels(Object.keys(MODEL_OUTPUT_PRICE).map(name => ({
-          model_name: name, display_name: '', provider: MODEL_PROVIDER[name] || '',
-          input_price: 0, output_price: MODEL_OUTPUT_PRICE[name] ?? 0, max_tokens: 0,
-        })).sort((a, b) => a.output_price - b.output_price))
-      })
-      .finally(() => setLoading(false))
+    // 从 nginx 静态文件取价格，文件每次从数据库重新生成
+    Promise.all([
+      fetch('/api/public/model-prices').then(r => r.json()).catch(() => ({})),
+      fetch('/api/public/model-context').then(r => r.json()).catch(() => ({})),
+    ]).then(([prices, context]) => {
+      const list = Object.keys(prices)
+        .filter(name => prices[name] > 0) // 过滤掉价格为0的（已下架/图像模型）
+        .map(name => ({
+          model_name: name,
+          display_name: '',
+          provider: MODEL_PROVIDER[name] || '',
+          input_price: 0,
+          output_price: prices[name] ?? 0,
+          max_tokens: context[name] ?? 0,
+        }))
+        .sort((a, b) => a.output_price - b.output_price)
+      setModels(list)
+    }).catch(() => {
+      setModels([])
+    }).finally(() => setLoading(false))
   }, [])
+
+  // 按公司聚合，按模型数量降序
+  const companies = useMemo(() => {
+    const map = new Map<string, number>()
+    models.forEach(m => {
+      const c = modelCompany(m.model_name)
+      map.set(c, (map.get(c) || 0) + 1)
+    })
+    return Array.from(map.entries()).sort((a, b) => b[1] - a[1])
+  }, [models])
+
+  const filtered = company
+    ? models.filter(m => modelCompany(m.model_name) === company)
+    : models
 
   const copyModelName = (name: string) => {
     navigator.clipboard.writeText(name)
@@ -40,27 +73,38 @@ export default function ModelsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-100">
-      <header className="border-b border-gray-800 bg-gray-900/80 backdrop-blur sticky top-0 z-50">
-        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Cpu size={24} className="text-purple-400" />
-            <span className="text-lg font-semibold">T粒加油站</span>
-          </div>
-          <div className="flex items-center gap-4 text-sm">
-            <a href="/guide" className="text-gray-400 hover:text-gray-200 transition-colors">← 使用说明</a>
-            <a href="/register" className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white transition-colors">注册使用</a>
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-5xl mx-auto px-6 py-12 space-y-8">
+    <PublicLayout>
+      <main className="mx-auto max-w-6xl space-y-8 px-6 py-14">
         <section className="text-center space-y-3">
-          <h1 className="text-3xl font-bold text-white">可用模型</h1>
-          <p className="text-gray-400">{loading ? '加载中...' : `共 ${models.length} 款模型`}</p>
+          <p className="text-sm font-semibold text-blue-400">实时数据</p>
+          <h1 className="text-3xl font-bold text-white">模型价格</h1>
+          <p className="text-gray-400">{loading ? '加载中...' : `当前展示 ${filtered.length} 款可用模型`}</p>
         </section>
 
-        <div className="rounded-xl bg-gray-900 border border-gray-800 overflow-hidden">
+        {/* 公司筛选 */}
+        <div className="flex flex-wrap gap-2 justify-center">
+          <button
+            onClick={() => setCompany(null)}
+            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+              !company ? 'bg-purple-600 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-gray-200'
+            }`}
+          >
+            全部
+          </button>
+          {companies.map(([c, count]) => (
+            <button
+              key={c}
+              onClick={() => setCompany(company === c ? null : c)}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                company === c ? 'bg-purple-600 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-gray-200'
+              }`}
+            >
+              {c} <span className="opacity-60">({count})</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="overflow-x-auto rounded-2xl border border-slate-700 bg-slate-900/80">
           {loading ? (
             <div className="text-center text-gray-500 py-12">加载中...</div>
           ) : (
@@ -71,11 +115,10 @@ export default function ModelsPage() {
                   <th className="p-3 font-medium">价格</th>
                   <th className="p-3 font-medium">供应商</th>
                   <th className="p-3 font-medium">上下文</th>
-                  <th className="p-3 font-medium w-16">复制</th>
                 </tr>
               </thead>
               <tbody>
-                {models.map(m => {
+                {filtered.map(m => {
                   const price = m.output_price ?? m.price ?? 0
                   const l = price === 0 ? { t: '免费', c: 'bg-emerald-500/15 text-emerald-400' } : label(price)
                   return (
@@ -83,6 +126,13 @@ export default function ModelsPage() {
                       <td className="p-3">
                         <code className="text-gray-200 font-mono text-xs">{m.model_name}</code>
                         {m.display_name && <span className="ml-2 text-gray-500 text-xs">{m.display_name}</span>}
+                        <button
+                          onClick={() => copyModelName(m.model_name)}
+                          className="ml-2 p-0.5 rounded hover:bg-gray-700 text-gray-500 hover:text-gray-300 transition-colors inline-flex align-middle"
+                          title="复制模型名"
+                        >
+                          {copiedModel === m.model_name ? <Check size={12} className="text-green-400" /> : <Copy size={12} />}
+                        </button>
                       </td>
                       <td className="p-3">
                         <span className={`px-2 py-0.5 rounded text-xs font-medium ${l.c}`}>{l.t}</span>
@@ -92,20 +142,11 @@ export default function ModelsPage() {
                         <span className="px-2 py-0.5 rounded bg-gray-800 text-gray-300 text-xs">{m.provider || '—'}</span>
                       </td>
                       <td className="p-3 text-gray-400 font-mono text-xs">{m.max_tokens > 0 ? fmtCtx(m.max_tokens) : '—'}</td>
-                      <td className="p-3">
-                        <button
-                          onClick={() => copyModelName(m.model_name)}
-                          className="p-1 rounded hover:bg-gray-700 text-gray-500 hover:text-gray-300 transition-colors"
-                          title="复制模型名"
-                        >
-                          {copiedModel === m.model_name ? <Check size={14} className="text-green-400" /> : <Copy size={14} />}
-                        </button>
-                      </td>
                     </tr>
                   )
                 })}
-                {models.length === 0 && (
-                  <tr><td colSpan={5} className="p-6 text-center text-gray-500">暂无可用的模型</td></tr>
+                {filtered.length === 0 && (
+                  <tr><td colSpan={4} className="p-6 text-center text-gray-500">暂无可用的模型</td></tr>
                 )}
               </tbody>
             </table>
@@ -121,9 +162,6 @@ export default function ModelsPage() {
           </ul>
         </div>
       </main>
-      <footer className="border-t border-gray-800 py-8 text-center text-sm text-gray-600">
-        T粒加油站 · t.wiselink.cc · <a href="/terms" className="hover:text-gray-400 transition-colors">用户协议</a> · 反馈: <a href="mailto:songdf@petalmail.com" className="hover:text-gray-400 transition-colors">songdf@petalmail.com</a> · <a href="/guide" className="hover:text-gray-400 transition-colors">使用说明</a>
-      </footer>
-    </div>
+    </PublicLayout>
   )
 }

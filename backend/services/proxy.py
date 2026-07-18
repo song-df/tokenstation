@@ -102,30 +102,47 @@ async def get_active_users(db) -> list[dict]:
     return [{"port": s.hy2_port, "password": s.hy2_password} for s in result.scalars().all()]
 
 
+def _existing_hy2_ports() -> set[int]:
+    """Scan sing-box config for already-configured Hysteria2 ports (e.g. manual admin inbound)."""
+    try:
+        with open(SINGBOX_CONFIG_PATH, "r") as f:
+            config = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return set()
+    return {
+        ib["listen_port"]
+        for ib in config.get("inbounds", [])
+        if ib.get("type") == "hysteria2"
+    }
+
+
 async def get_next_port(db) -> int:
-    """Return the next available Hysteria2 port."""
+    """Return the next available Hysteria2 port, avoiding DB and config-file collisions."""
     from sqlalchemy import select, func
     from models import ProxySubscription
 
     result = await db.execute(select(func.max(ProxySubscription.hy2_port)))
-    max_port = result.scalar() or 8442
-    return max_port + 1
+    db_max = result.scalar() or 8442
+    config_ports = _existing_hy2_ports()
+    all_ports = config_ports | {db_max}
+    return max(all_ports) + 1
 
 
 def write_singbox_config(users: list[dict]) -> bool:
-    """Rebuild sing-box config with per-user Hysteria2 inbounds and reload."""
+    """Rebuild sing-box config with per-user Hysteria2 inbounds. Reload only on change."""
     with open(SINGBOX_CONFIG_PATH, "r") as f:
-        config = json.load(f)
+        old_config = json.load(f)
 
-    # Keep only non-hysteria2 inbounds
-    config["inbounds"] = [
-        ib for ib in config.get("inbounds", [])
-        if ib.get("type") != "hysteria2"
+    # Preserve hysteria2 inbounds not managed by us (e.g. manual admin inbound),
+    # rebuild only the ones that correspond to DB-managed users.
+    managed_ports = {u["port"] for u in users}
+    new_inbounds = [
+        ib for ib in old_config.get("inbounds", [])
+        if ib.get("type") != "hysteria2" or ib.get("listen_port") not in managed_ports
     ]
 
-    # Add per-user Hysteria2 inbounds
     for u in users:
-        config["inbounds"].append({
+        new_inbounds.append({
             "type": "hysteria2",
             "tag": f"hysteria2-u{u['port']}",
             "listen": "0.0.0.0",
@@ -139,15 +156,31 @@ def write_singbox_config(users: list[dict]) -> bool:
             },
         })
 
-    # Atomic write
+    # Skip write+reload if unchanged (ponytail: avoid unnecessary sing-box restart)
+    if json.dumps(new_inbounds, sort_keys=True) == json.dumps(old_config.get("inbounds", []), sort_keys=True):
+        return True
+
+    old_config["inbounds"] = new_inbounds
     tmp_path = SINGBOX_CONFIG_PATH + ".tmp"
     with open(tmp_path, "w") as f:
-        json.dump(config, f, indent=2)
+        json.dump(old_config, f, indent=2)
     os.rename(tmp_path, SINGBOX_CONFIG_PATH)
 
     subprocess.run(SYSTEMCTL_RELOAD, check=False, capture_output=True)
     logger.info(f"sing-box synced: {len(users)} active user(s)")
     return True
+
+
+def is_port_listening(port: int) -> bool:
+    """Check whether a Hysteria2 (UDP) port is actually listening on sing-box."""
+    try:
+        out = subprocess.run(
+            ["/usr/sbin/ss", "-uln", "sport", "=", str(port)],
+            capture_output=True, text=True, timeout=3,
+        )
+        return f":{port}" in out.stdout
+    except Exception:
+        return False
 
 
 async def sync_singbox(db) -> bool:
@@ -266,6 +299,8 @@ async def subscribe_user(db, user_id: int, plan, days: int) -> dict:
         "expires_at": subscription.expires_at,
         "days_remaining": (subscription.expires_at - now).days + 1,
         "tli_balance": new_balance,
+        "port": subscription.hy2_port,
+        "status": "已激活" if is_port_listening(subscription.hy2_port) else "激活中",
     }
 
 
@@ -661,7 +696,7 @@ async def check_multi_ip(db) -> int:
 
     # Get UDP connections per port
     try:
-        out = sp.run(["ss", "-uln", "sport", ">=", "8443"], capture_output=True, text=True, timeout=5)
+        out = sp.run(["/usr/sbin/ss", "-uln", "sport", ">=", "8443"], capture_output=True, text=True, timeout=5)
         lines = out.stdout.strip().split("\n")
     except Exception:
         return 0

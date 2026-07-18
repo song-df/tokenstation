@@ -43,6 +43,13 @@ class Settings(BaseSettings):
     # OAuth2 client registry (JSON). Format: [{"client_id":"...","client_secret":"...","redirect_uris":["..."]}]
     oauth_clients_json: str = "[]"
 
+    # WorBuddy OAuth client. Keep the secret only in the deployment environment.
+    workbuddy_oauth_client_id: str = "workbuddy-web"
+    workbuddy_oauth_client_secret: str = ""
+    workbuddy_oauth_redirect_uri: str = "https://worbuddy.cn/workbuddy-auth/callback"
+    workbuddy_oauth_base_url: str = "https://t.wiselink.cc"
+    workbuddy_session_cookie: str = "workbuddy_session"
+
     class Config:
         env_file = ".env"
 

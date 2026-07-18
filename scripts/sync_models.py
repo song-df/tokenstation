@@ -21,11 +21,15 @@ def parse(data):
         pp = float(p.get("prompt", 0))
         cp = float(p.get("completion", 0))
         price_1m = (pp + cp) / 2 * 1_000_000
+        comp_ratio = max(1, round(cp / pp, 1)) if pp > 0 else 1
         entry = {
             "id": m["id"], "name": m.get("name", m["id"]),
             "ctx": int(m.get("context_length", 0)),
             "desc": m.get("description", ""),
             "price_1m": price_1m,
+            "pp": pp,
+            "cp": cp,
+            "comp_ratio": comp_ratio,
         }
         if pp == 0 and cp == 0:
             free.append(entry)
@@ -44,6 +48,39 @@ def parse(data):
         paid_top.extend(prov_entries[:TOP_PER_PROVIDER])
 
     return free[:TOP_FREE], paid_top
+
+PRICES_OUTPUT = "/www/wwwroot/ai-new/model-prices.json"
+
+
+def _generate_model_prices(db):
+    """Write model-prices.json for the frontend /models page.
+    Frontend expects flat {model_name: price} dict — see ModelsPage.tsx."""
+    rows = db.execute(
+        """SELECT DISTINCT a.model, a.channel_id, c.name
+           FROM abilities a JOIN channels c ON a.channel_id = c.id
+           WHERE a.enabled = 1 AND a."group" = 'default'"""
+    ).fetchall()
+
+    if not rows:
+        return
+
+    mr = json.loads(db.execute("SELECT value FROM options WHERE key='ModelRatio'").fetchone()[0])
+    cr = json.loads(db.execute("SELECT value FROM options WHERE key='CompletionRatio'").fetchone()[0])
+
+    prices = {}
+    for model_name, channel_id, channel_name in rows:
+        if model_name in prices:
+            continue
+        ratio = mr.get(model_name, 0)
+        comp = cr.get(model_name, 1)
+        # price formula: ModelRatio x CompletionRatio / 10 x 10000 / 690
+        price = round(ratio * comp / 10 * 10000 / 690, 2) if ratio > 0 else 0
+        prices[model_name] = price
+
+    with open(PRICES_OUTPUT, "w") as f:
+        json.dump(prices, f, separators=(',', ':'))
+    print(f"  model-prices.json: {len(prices)} models written")
+
 
 def main():
     print(f"[sync_models] {datetime.now().isoformat()}")
@@ -98,8 +135,12 @@ def main():
             ratio[m["id"]] = 0
             comp[m["id"]] = 1
         for m in paid:
-            ratio[m["id"]] = max(0.01, round(m["price_1m"] / 1.4, 4))
-            comp[m["id"]] = 1
+            # MR = pp * 1.5x markup * 10 / 0.02 * 1000
+            # Converts OR $/token to ModelRatio at 1.5× markup.
+            # ModelRatio/10 = T粒/1k tokens, 1000 T粒 = $20, 1 T粒 = $0.02
+            pp = max(m["pp"], 1e-10)
+            ratio[m["id"]] = round(pp * 1.5 * 10 / 0.02 * 1000, 6)
+            comp[m["id"]] = m.get("comp_ratio", 1)
         db.execute("UPDATE options SET value=? WHERE key='ModelRatio'", (json.dumps(ratio, ensure_ascii=False),))
         db.execute("UPDATE options SET value=? WHERE key='CompletionRatio'", (json.dumps(comp, ensure_ascii=False),))
 
@@ -116,6 +157,16 @@ def main():
                     ctx[k] = v
         db.execute("UPDATE options SET value=? WHERE key='ModelContextLength'", (json.dumps(ctx, ensure_ascii=False),))
 
+        # Abilities — make synced models visible in /v1/models
+        if ch:
+            for m in selected:
+                db.execute(
+                    "INSERT OR IGNORE INTO abilities (\"group\", model, channel_id, enabled) VALUES (?, ?, ?, 1)",
+                    ("default", m["id"], ch[0]),
+                )
+
+        # Generate model-prices.json for frontend /models page
+        _generate_model_prices(db)
 
         db.commit(); db.close()
         print(f"  Done: {len(selected)} models synced")

@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from config import settings
 from database import get_db
-from models import User, ApiKey
+from models import User, UserRole, ApiKey
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer(auto_error=False)
@@ -48,12 +48,52 @@ async def get_current_user(
     credentials: HTTPAuthorizationCredentials | None = Depends(security),
     db: AsyncSession = Depends(get_db),
 ) -> User:
-    # Try Authorization: Bearer first
+    # ── Try New-Api-User header first (web console via new-api proxy) ──
+    newapi_user_id = request.headers.get("New-Api-User") or request.headers.get("new-api-user")
+    if newapi_user_id:
+        try:
+            import sqlite3
+            conn = sqlite3.connect(f"file:{settings.newapi_db_path}?mode=ro", uri=True)
+            row = conn.execute(
+                "SELECT id, username, role FROM users WHERE id=? AND deleted_at IS NULL",
+                (int(newapi_user_id),),
+            ).fetchone()
+            conn.close()
+            if row:
+                username = row[1]
+                role = row[2]
+                result = await db.execute(select(User).where(User.username == username))
+                user = result.scalar_one_or_none()
+                if user:
+                    if role >= 100 and user.role != UserRole.admin:
+                        user.role = UserRole.admin
+                        await db.commit()
+                    if user.is_active:
+                        return user
+                # Create shadow record if first access
+                admin_role = UserRole.admin if role >= 100 else UserRole.student
+                new_user = User(
+                    username=username,
+                    display_name=username,
+                    hashed_password="",
+                    role=admin_role,
+                    quota=0,
+                    api_key="newapi-shadow-" + str(int(newapi_user_id)),
+                    is_active=True,
+                )
+                db.add(new_user)
+                await db.commit()
+                await db.refresh(new_user)
+                return new_user
+        except Exception:
+            pass
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid New-Api-User")
+
+    # ── Standard auth: Bearer / x-api-key / JWT / legacy keys ──
     token = None
     if credentials:
         token = credentials.credentials
 
-    # Also try x-api-key header (Claude Code convention)
     if not token:
         token = request.headers.get("x-api-key")
 

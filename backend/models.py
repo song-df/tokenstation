@@ -47,6 +47,37 @@ class Channel(Base):
     created_at = Column(DateTime, default=datetime.now)
 
 
+# Default channels seeded on startup
+def get_default_channels():
+    """Return default channel configurations."""
+    return [
+        {
+            "name": "deepseek",
+            "provider": "openai",
+            "base_url": "https://api.deepseek.com",
+            "api_key": "sk-placeholder-deepseek",
+            "models": "deepseek-v4-flash",
+            "priority": 1,
+        },
+        {
+            "name": "硅基流动",
+            "provider": "openai",
+            "base_url": "https://api.siliconflow.cn/v1",
+            "api_key": "sk-placeholder-siliconflow",
+            "models": "deepseek-ai/DeepSeek-V4-Pro,Pro/zai-org/GLM-5.1",
+            "priority": 1,
+        },
+        {
+            "name": "OpenRouter",
+            "provider": "openai",
+            "base_url": "https://openrouter.ai/api/v1",
+            "api_key": "sk-placeholder-openrouter",
+            "models": "anthropic/claude-sonnet-4.6,claude-sonnet-4-20250514,anthropic/claude-opus-4.7,claude-opus-4-20250514,anthropic/claude-haiku-4.5,claude-haiku-4-20250514,anthropic/claude-opus-4-8,inclusionai/ling-2.6-flash",
+            "priority": 1,
+        },
+    ]
+
+
 class ModelConfig(Base):
     __tablename__ = "model_configs"
 

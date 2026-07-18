@@ -72,8 +72,9 @@ export default function OpenAIGuide() {
               <div className="text-xs text-gray-300 space-y-0.5 mt-1">
                 <p><code className="font-mono text-blue-400">deepseek-v4-pro</code> — 主力模型</p>
                 <p><code className="font-mono text-blue-400">deepseek-v4-flash</code> — 快速实惠</p>
-                <p><code className="font-mono text-blue-400">claude-opus-4-8</code> — 最强推理</p>
-                <p className="text-gray-500">... 共 22 款模型可选</p>
+                <p><code className="font-mono text-blue-400">anthropic/claude-opus-4.8</code> — 最强推理</p>
+                <p><code className="font-mono text-blue-400">anthropic/claude-sonnet-5</code> — 性价比之选</p>
+                <p className="text-gray-500">... 共 20+ 款模型可选</p>
               </div>
             </div>
           </div>
@@ -98,7 +99,7 @@ export default function OpenAIGuide() {
               <h4 className="text-sm font-semibold text-white mb-2">添加模型</h4>
               <p className="text-xs text-gray-400">在 Models 页面逐个添加模型名，例如：</p>
               <div className="flex flex-wrap gap-2 mt-2">
-                {['deepseek-v4-pro', 'deepseek-v4-flash', 'claude-opus-4-8', 'claude-sonnet-4-6', 'gpt-5.5', 'qwen3.7-max'].map(m => (
+                {['deepseek-v4-pro', 'deepseek-v4-flash', 'anthropic/claude-opus-4.8', 'anthropic/claude-sonnet-5', 'gpt-5.5', 'qwen3.7-max'].map(m => (
                   <code key={m} className="px-2 py-1 rounded bg-gray-800 text-blue-400 font-mono text-xs">{m}</code>
                 ))}
               </div>

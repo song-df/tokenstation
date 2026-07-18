@@ -22,6 +22,7 @@ from services.proxy import (
     expire_check,
     generate_flclash_yaml,
     get_tli_balance,
+    is_port_listening,
     NEWAPI_DB_PATH,
 )
 import sqlite3
@@ -120,6 +121,8 @@ async def get_proxy_status(
                 "total_days": sub.total_days,
                 "tli_spent": sub.tli_spent,
                 "days_remaining": days_remaining,
+                "port": sub.hy2_port,
+                "status": "已激活" if is_port_listening(sub.hy2_port) else "激活中",
             }
 
     # Purchase history
@@ -217,7 +220,7 @@ async def download_config(
 
     return Response(
         content=yaml_content,
-        media_type="application/x-yaml",
+        media_type="application/x-yaml; charset=utf-8",
         headers={
             "Content-Disposition": f"attachment; filename=clash-{username}.yaml"
         },
@@ -806,3 +809,206 @@ async def admin_course_generate(
         codes.append({"code": c.code, "amount": c.amount})
     await db.commit()
     return {"batch_id": batch_id, "count": len(codes), "codes": codes}
+
+
+# ── Recharge statistics (admin only) ──────────────────────────────────────────
+
+from datetime import datetime as dt, timedelta
+
+
+async def _get_recent_topups(db: AsyncSession, days: int) -> list[dict]:
+    """Fetch successful Alipay/WeChat orders from this service's database."""
+    from models import AlipayOrder, WechatOrder, User
+
+    since = dt.now() - timedelta(days=days)
+    records: list[dict] = []
+
+    alipay_result = await db.execute(
+        select(AlipayOrder)
+        .where(
+            AlipayOrder.trade_status.in_(("TRADE_SUCCESS", "TRADE_FINISHED")),
+            AlipayOrder.paid_at >= since,
+        )
+        .order_by(AlipayOrder.paid_at.desc())
+        .limit(100)
+    )
+    for order in alipay_result.scalars().all():
+        records.append({
+            "user_id": order.user_id,
+            "amount": order.tli_amount,
+            "money": round(order.total_amount or 0, 2),
+            "method": "支付宝",
+            "time": order.paid_at.isoformat() if order.paid_at else "",
+        })
+
+    wechat_result = await db.execute(
+        select(WechatOrder)
+        .where(
+            WechatOrder.trade_status == "SUCCESS",
+            WechatOrder.paid_at >= since,
+        )
+        .order_by(WechatOrder.paid_at.desc())
+        .limit(100)
+    )
+    for order in wechat_result.scalars().all():
+        records.append({
+            "user_id": order.user_id,
+            "amount": order.tli_amount,
+            "money": round(order.total_amount or 0, 2),
+            "method": "微信支付",
+            "time": order.paid_at.isoformat() if order.paid_at else "",
+        })
+
+    user_ids = {record["user_id"] for record in records}
+    usernames: dict[int, str] = {}
+    if user_ids:
+        # Orders store new-api user IDs, so new-api is used only for display names.
+        try:
+            placeholders = ",".join("?" for _ in user_ids)
+            with _newapi_readonly() as napi:
+                rows = napi.execute(
+                    f"SELECT id, username FROM users WHERE id IN ({placeholders}) AND deleted_at IS NULL",
+                    tuple(user_ids),
+                ).fetchall()
+            usernames.update({row["id"]: row["username"] for row in rows})
+        except Exception:
+            logger.warning("补充充值记录用户名失败", exc_info=True)
+
+        missing_ids = user_ids - usernames.keys()
+        if missing_ids:
+            local_users = await db.execute(select(User.id, User.username).where(User.id.in_(missing_ids)))
+            usernames.update({user_id: username for user_id, username in local_users.all()})
+
+    for record in records:
+        record["username"] = usernames.get(record["user_id"], f"用户 {record['user_id']}")
+
+    records.sort(key=lambda record: record["time"], reverse=True)
+    return records[:100]
+
+
+@router.get("/admin/recharge-stats")
+async def admin_recharge_stats(
+    db: AsyncSession = Depends(get_db),
+    proxy_admin: dict = Depends(get_proxy_admin),
+    days: int = 30,
+):
+    """Aggregate recharge & revenue stats (admin only)."""
+    from sqlalchemy import func
+    from models import TopUp, AlipayOrder, WechatOrder, RedeemCode
+
+    since = dt.now() - timedelta(days=days)
+
+    # ── Old-backend top_ups ──
+    r = await db.execute(
+        select(func.sum(TopUp.amount), func.count())
+        .where(TopUp.created_at >= since)
+    )
+    topup_total, topup_count = r.one()
+    topup_total = topup_total or 0
+
+    # ── Alipay (successful) ──
+    r = await db.execute(
+        select(func.sum(AlipayOrder.tli_amount), func.count())
+        .where(AlipayOrder.trade_status == "TRADE_SUCCESS", AlipayOrder.paid_at >= since)
+    )
+    ali_tli, ali_count = r.one()
+    ali_tli = ali_tli or 0
+    r = await db.execute(
+        select(func.sum(AlipayOrder.total_amount))
+        .where(AlipayOrder.trade_status == "TRADE_SUCCESS", AlipayOrder.paid_at >= since)
+    )
+    ali_yuan = r.scalar() or 0
+
+    # ── WeChat (successful) ──
+    r = await db.execute(
+        select(func.sum(WechatOrder.tli_amount), func.count())
+        .where(WechatOrder.trade_status == "SUCCESS", WechatOrder.paid_at >= since)
+    )
+    wx_tli, wx_count = r.one()
+    wx_tli = wx_tli or 0
+    r = await db.execute(
+        select(func.sum(WechatOrder.total_amount))
+        .where(WechatOrder.trade_status == "SUCCESS", WechatOrder.paid_at >= since)
+    )
+    wx_yuan = r.scalar() or 0
+
+    # ── Redeem codes ──
+    r = await db.execute(
+        select(func.sum(RedeemCode.amount), func.count())
+        .where(RedeemCode.is_used == True, RedeemCode.used_at >= since)
+    )
+    redeem_tli, redeem_count = r.one()
+    redeem_tli = redeem_tli or 0
+
+    # ── new-api consumption ──
+    try:
+        with _newapi_readonly() as napi:
+            since_unix = int(since.timestamp())
+            r = napi.execute(
+                "SELECT COALESCE(SUM(quota),0), COUNT(*) FROM logs WHERE type=2 AND created_at>=?",
+                (since_unix,),
+            ).fetchone()
+            consumed_quota = r[0] or 0
+            r = napi.execute(
+                "SELECT COUNT(DISTINCT user_id) FROM logs WHERE type=2 AND created_at>=?",
+                (since_unix,),
+            ).fetchone()
+            active_users = r[0] or 0
+    except Exception:
+        consumed_quota = 0
+        active_users = 0
+
+    # ── Per-user Alipay ──
+    r = await db.execute(
+        select(AlipayOrder.user_id, func.sum(AlipayOrder.tli_amount), func.sum(AlipayOrder.total_amount), func.count())
+        .where(AlipayOrder.trade_status == "TRADE_SUCCESS", AlipayOrder.paid_at >= since)
+        .group_by(AlipayOrder.user_id)
+        .order_by(func.sum(AlipayOrder.total_amount).desc())
+    )
+    ali_users = [
+        {"user_id": uid, "tli": round(tli, 2), "yuan": round(yuan, 2), "count": cnt}
+        for uid, tli, yuan, cnt in r.fetchall()
+    ]
+
+    # ── Per-user WeChat ──
+    r = await db.execute(
+        select(WechatOrder.user_id, func.sum(WechatOrder.tli_amount), func.sum(WechatOrder.total_amount), func.count())
+        .where(WechatOrder.trade_status == "SUCCESS", WechatOrder.paid_at >= since)
+        .group_by(WechatOrder.user_id)
+        .order_by(func.sum(WechatOrder.total_amount).desc())
+    )
+    wx_users = [
+        {"user_id": uid, "tli": round(tli, 2), "yuan": round(yuan, 2), "count": cnt}
+        for uid, tli, yuan, cnt in r.fetchall()
+    ]
+
+    total_tli_in = topup_total + ali_tli + wx_tli + redeem_tli
+    total_yuan = ali_yuan + wx_yuan
+    total_orders = ali_count + wx_count
+
+    return {
+        "period_days": days,
+        "since": since.isoformat(),
+        "summary": {
+            "tli_in": round(total_tli_in, 2),
+            "yuan_in": round(total_yuan, 2),
+            "order_count": total_orders,
+            "redeem_count": redeem_count,
+            "active_users": active_users,
+        },
+        "breakdown": {
+            "topup_admin": {"tli": round(topup_total, 2), "count": topup_count},
+            "alipay": {"tli": round(ali_tli, 2), "yuan": round(ali_yuan, 2), "count": ali_count},
+            "wechat": {"tli": round(wx_tli, 2), "yuan": round(wx_yuan, 2), "count": wx_count},
+            "redeem": {"tli": round(redeem_tli, 2), "count": redeem_count},
+        },
+        "per_user": {
+            "alipay": ali_users,
+            "wechat": wx_users,
+        },
+        "newapi": {
+            "quota_consumed": consumed_quota,
+            "tli_consumed": round(consumed_quota / 690, 2),
+        },
+        "recent_topups": await _get_recent_topups(db, days),
+    }

@@ -38,7 +38,7 @@ export default function TliPurchase() {
       if (pkgs?.length > 0 && !selectedPkg) setSelectedPkg(pkgs[0].id)
 
       const merged = (alipayOrds.items || []).map((o: OrderItem) => ({ ...o, _method: 'alipay' }))
-        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        .sort((a: OrderItem, b: OrderItem) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
       setOrders(merged.slice(0, 20))
       setOrdersTotal(alipayOrds.total || 0)
     } catch (e: any) {

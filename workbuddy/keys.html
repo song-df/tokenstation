@@ -1,0 +1,7 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>API 管理 · 我伙伴</title><link rel="stylesheet" href="/account.css"></head>
+<body><header class="account-header"><a class="brand" href="/"><span class="brand-mark">⌁</span><span class="brand-name">我伙伴<span>·</span></span></a><div class="avatar">⌁</div></header>
+<div class="account-layout"><aside class="account-sidebar"><div class="account-user" id="account-user">加载中</div><span class="account-tag">个人版</span><nav><a href="/account.html">▦　积分用量</a><a class="active" href="/keys.html">◉　API 管理</a><a href="/settings.html">⚙　账号设置</a></nav></aside>
+<main class="account-main keys-main"><div class="keys-heading"><div></div><button id="create-key" class="topup-button" type="button">创建 API Key</button></div>
+<section class="key-tip">请妥善保管 API Key。完整 Key 仅在你主动查看或新建后显示，请不要分享给他人。</section><div id="new-key" class="new-key" hidden></div><section id="key-list" class="key-list" aria-live="polite"><p class="loading">正在加载 API Key…</p></section></main></div>
+<dialog id="key-dialog"><form method="dialog" id="key-form"><h2>创建 API Key</h2><p>为这个 Key 设置一个便于识别的名称。</p><input id="key-name" maxlength="50" placeholder="例如：Codex、Cursor、团队项目" autofocus><div class="dialog-actions"><button value="cancel" type="button" id="cancel-key">取消</button><button class="topup-button" value="default" type="submit">创建</button></div></form></dialog><script src="/keys.js"></script></body></html>

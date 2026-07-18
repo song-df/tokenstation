@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人中心 · 我伙伴</title>
+    <link rel="stylesheet" href="/account.css">
+  </head>
+  <body>
+    <header class="account-header">
+      <a class="brand" href="/" aria-label="返回我伙伴首页"><span class="brand-mark">⌁</span><span class="brand-name">我伙伴<span>·</span></span></a>
+      <div class="avatar" aria-hidden="true">⌁</div>
+    </header>
+    <div class="account-layout">
+      <aside class="account-sidebar">
+        <div class="account-user" id="account-user">加载中</div><span class="account-tag">个人版</span>
+        <nav>
+          <a class="active" href="/account.html">▦　积分用量</a><a href="/keys.html">◉　API 管理</a><a href="/settings.html">⚙　账号设置</a>
+        </nav>
+      </aside>
+      <main class="account-main">
+        
+        <section class="notice">我伙伴会实时同步您的积分余额和使用情况。</section>
+        <h2>积分账户用量</h2>
+        <section class="usage-card" aria-live="polite">
+          <div class="usage-card-top"><div><h3>当前账户</h3><p>积分余额与使用情况实时更新</p></div><a class="topup-button" href="/purchase.html">充值积分</a></div>
+          <div class="usage-stats"><div><span>可用积分</span><strong id="balance">--</strong><em>积分</em></div><div><span>累计已用</span><strong id="used">--</strong><em>积分</em></div><div><span>累计请求</span><strong id="requests">--</strong><em>次</em></div></div>
+          <div class="usage-foot"><span>积分数据实时更新</span><span id="updated-at">正在获取…</span></div>
+        </section>
+        <h2>加量包</h2><section class="addition-card">如需更多模型额度，可购买积分包；支付成功后会自动到账。<a href="/purchase.html">去充值 →</a></section>
+        <h2>充值记录</h2><section class="addition-card" id="recharge-records" style="text-align: left; color: #75757a; font-size: 14px; line-height: 1.8;">正在加载…</section>
+      </main>
+    </div>
+    <script src="/account.js?v=1"></script>
+  </body>
+</html>

@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>账号设置 · 我伙伴</title>
+    <link rel="stylesheet" href="/account.css">
+    <style>
+      .config-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 16px; }
+      .config-row select { padding: 10px 14px; border: 1px solid #d8d8e0; border-radius: 10px; font-size: 14px; min-width: 260px; background: #fff; }
+      .config-preview { margin-top: 16px; background: #14141c; color: #d5e0d5; border-radius: 12px; padding: 16px; font-size: 12px; line-height: 1.6; overflow-x: auto; white-space: pre; }
+      .config-hint { margin-top: 12px; font-size: 13px; color: #7a7a85; }
+      .config-step { margin-top: 20px; font-size: 15px; font-weight: 650; }
+      .config-desc { font-size: 13px; color: #5a5a60; }
+    </style>
+  </head>
+  <body>
+    <header class="account-header">
+      <a class="brand" href="/" aria-label="返回我伙伴首页"><span class="brand-mark">⌁</span><span class="brand-name">我伙伴<span>·</span></span></a>
+      <div class="avatar" aria-hidden="true">⌁</div>
+    </header>
+    <div class="account-layout">
+      <aside class="account-sidebar">
+        <div class="account-user" id="account-user">加载中</div><span class="account-tag">个人版</span>
+        <nav>
+          <a href="/account.html">▦　积分用量</a><a href="/keys.html">◉　API 管理</a><a class="active" href="/settings.html">⚙　账号设置</a>
+        </nav>
+      </aside>
+      <main class="account-main">
+        
+        <h2>模型配置文件 models.json</h2>
+        <section class="usage-card">
+          <p>选择一个 API Key，即可生成已配置好的 <code>models.json</code>，下载后替换 WorBuddy 配置目录中的原文件即可使用。</p>
+          <p class="config-step">第一步：备份原配置文件</p>
+          <div class="config-row">
+            <button class="topup-button" id="pick-backup" type="button">选择原配置文件</button>
+            <input type="file" id="backup-file" accept=".json,application/json" hidden>
+            <span id="backup-name" class="config-hint" style="margin-top: 0;"></span>
+            <button class="topup-button" id="backup-config" type="button" disabled>备份</button>
+          </div>
+          <p class="config-hint">配置文件位于 <code id="config-path">~/.workbuddy/models.json</code>
+            <button type="button" id="copy-path" style="border: none; background: none; color: #4a6cf7; cursor: pointer;">复制路径</button>
+            <span id="path-tip"></span>备份将另存为 <code>models-年-月-日-时-分.json</code>。</p>
+          <p class="config-step">第二步：下载新配置文件</p>
+          <div class="config-row">
+            <select id="key-select"><option value="">正在加载 API Key…</option></select>
+            <button class="topup-button" id="download-config" type="button" disabled>下载 models.json</button>
+            <button class="topup-button" id="copy-config" type="button" disabled>复制内容</button>
+          </div>
+          <pre class="config-preview" id="config-preview" hidden></pre>
+          <p class="config-hint" id="config-hint">配置文件中会直接包含所选 Key 的完整密钥，请妥善保管。</p>
+          <p class="config-step">第三步：重启 WorBuddy</p>
+          <p class="config-hint">用新下载的 <code>models.json</code> 替换配置目录中的原文件后，退出 WorBuddy 并重新打开，新配置即生效。</p>
+        </section>
+        <h2>没有 API Key？</h2><section class="addition-card">前往 API 管理页面创建一个专用 Key。<a href="/keys.html">去创建 →</a></section>
+      </main>
+    </div>
+    <script src="/settings.js"></script>
+  </body>
+</html>

@@ -117,10 +117,10 @@ models:
     extensions:
       deepseek_v4:
         enabled: true
-  claude-sonnet-4-6:
+  anthropic/claude-sonnet-5:
     context_window: 200000
     max_output_tokens: 64000
-    display_name: "Claude Sonnet 4"
+    display_name: "Claude Sonnet 5"
     description: "Frontier model for everyday coding."
     default_reasoning_level: "medium"
     supported_reasoning_levels:
@@ -158,7 +158,7 @@ providers:
           output_price: 2
           cache_write_price: 1
           cache_read_price: 0.02
-      - model: claude-sonnet-4-6
+      - model: anthropic/claude-sonnet-5
         pricing:
           input_price: 3
           output_price: 15
@@ -306,7 +306,7 @@ cd moon-bridge`} />
             <ol className="list-decimal list-inside text-gray-400 space-y-2 ml-2">
               <li>
                 <b className="text-white">models 节</b>：复制现有模型块，修改模型名和参数。例如添加 Claude Opus：
-                <CodeBlock id="mb-add-model" lang="yaml (追加到 models: 下)" code={`  claude-opus-4-8:
+                <CodeBlock id="mb-add-model" lang="yaml (追加到 models: 下)" code={`  anthropic/claude-opus-4.8:
     context_window: 200000
     max_output_tokens: 64000
     display_name: "Claude Opus 4.8"
@@ -323,7 +323,7 @@ cd moon-bridge`} />
               </li>
               <li>
                 <b className="text-white">providers.default.offers 节</b>：为新模型添加定价条目：
-                <CodeBlock id="mb-add-offer" lang="yaml (追加到 offers: 下)" code={`      - model: claude-opus-4-8
+                <CodeBlock id="mb-add-offer" lang="yaml (追加到 offers: 下)" code={`      - model: anthropic/claude-opus-4.8
         pricing:
           input_price: 3
           output_price: 15
@@ -334,7 +334,7 @@ cd moon-bridge`} />
                 <b className="text-white">routes.moonbridge.model</b>：如果要切换默认模型，修改此行即可。例如改为 Claude Opus：
                 <CodeBlock id="mb-route" lang="yaml" code={`routes:
   moonbridge:
-    model: claude-opus-4-8
+    model: anthropic/claude-opus-4.8
     provider: default`} />
               </li>
             </ol>
@@ -507,7 +507,7 @@ go run ./cmd/moonbridge -print-codex-config "$MODEL" -codex-base-url "http://127
             <details className="p-4 rounded-xl bg-gray-900 border border-gray-800 group">
               <summary className="text-sm font-medium text-gray-200 cursor-pointer hover:text-white">Q: Codex 提示 "No available channel for model claude-sonnet-4-20250514"？</summary>
               <p className="mt-3 text-sm text-gray-400">
-                这是模型名不匹配。当前 T粒加油站使用的 Claude Sonnet 模型 ID 是 <code className="px-1 py-0.5 rounded bg-gray-800 text-orange-400 font-mono text-xs">claude-sonnet-4-6</code>，不是 <code className="font-mono">claude-sonnet-4-20250514</code>。请按上文配置文件使用正确的模型名。可用模型列表见<a href="/guide" className="text-blue-400 hover:text-blue-300 underline">使用说明</a>。
+                这是模型名不匹配。当前 T粒加油站使用的 Claude Sonnet 模型 ID 是 <code className="px-1 py-0.5 rounded bg-gray-800 text-orange-400 font-mono text-xs">anthropic/claude-sonnet-5</code>，不是 <code className="font-mono">claude-sonnet-4-20250514</code>。请按上文配置文件使用正确的模型名。可用模型列表见<a href="/guide" className="text-blue-400 hover:text-blue-300 underline">使用说明</a>。
               </p>
             </details>
 

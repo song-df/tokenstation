@@ -117,10 +117,10 @@ models:
     extensions:
       deepseek_v4:
         enabled: true
-  claude-sonnet-4-6:
+  anthropic/claude-sonnet-5:
     context_window: 200000
     max_output_tokens: 64000
-    display_name: "Claude Sonnet 4"
+    display_name: "Claude Sonnet 5"
     description: "Frontier model for everyday coding."
     default_reasoning_level: "medium"
     supported_reasoning_levels:
@@ -158,7 +158,7 @@ providers:
           output_price: 2
           cache_write_price: 1
           cache_read_price: 0.02
-      - model: claude-sonnet-4-6
+      - model: anthropic/claude-sonnet-5
         pricing:
           input_price: 3
           output_price: 15
@@ -317,7 +317,7 @@ cd moon-bridge`} />
             <ol className="list-decimal list-inside text-gray-400 space-y-2 ml-2">
               <li>
                 <b className="text-white">models 节</b>：复制现有模型块，修改模型名和参数。
-                <CodeBlock id="mb-add-model" lang="yaml (追加到 models: 下)" code={`  claude-opus-4-8:
+                <CodeBlock id="mb-add-model" lang="yaml (追加到 models: 下)" code={`  anthropic/claude-opus-4.8:
     context_window: 200000
     max_output_tokens: 64000
     display_name: "Claude Opus 4.8"
@@ -334,7 +334,7 @@ cd moon-bridge`} />
               </li>
               <li>
                 <b className="text-white">providers.default.offers 节</b>：为新模型添加定价条目：
-                <CodeBlock id="mb-add-offer" lang="yaml (追加到 offers: 下)" code={`      - model: claude-opus-4-8
+                <CodeBlock id="mb-add-offer" lang="yaml (追加到 offers: 下)" code={`      - model: anthropic/claude-opus-4.8
         pricing:
           input_price: 3
           output_price: 15
@@ -345,7 +345,7 @@ cd moon-bridge`} />
                 <b className="text-white">routes.moonbridge.model</b>：如果要切换默认模型，修改此行即可。
                 <CodeBlock id="mb-route" lang="yaml" code={`routes:
   moonbridge:
-    model: claude-opus-4-8
+    model: anthropic/claude-opus-4.8
     provider: default`} />
               </li>
             </ol>

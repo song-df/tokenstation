@@ -1,26 +1,12 @@
 import { Terminal, Zap, Globe, Cpu, ArrowRight, Monitor, Wifi, Code } from 'lucide-react'
+import PublicLayout from '../components/PublicLayout'
 
-export default function QuickGuide() {
-  return (
-    <div className="min-h-screen bg-gray-950 text-gray-100">
-      <header className="border-b border-gray-800 bg-gray-900/80 backdrop-blur sticky top-0 z-50">
-        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Zap size={24} className="text-blue-400" />
-            <span className="text-lg font-semibold">T粒加油站</span>
-          </div>
-          <div className="flex items-center gap-4 text-sm">
-            <a href="/register" className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white transition-colors">注册使用</a>
-            <a href="/login" className="text-gray-400 hover:text-gray-200 transition-colors">登录</a>
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-4xl mx-auto px-6 py-12 space-y-12">
+export default function QuickGuide({ embedded = false }: { embedded?: boolean }) {
+  const content = (
+    <main className="mx-auto max-w-5xl space-y-12 px-6 py-14">
         <section className="text-center space-y-4">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 via-cyan-400 to-emerald-400 bg-clip-text text-transparent">
-            使用说明
-          </h1>
+          <p className="text-sm font-semibold text-blue-400">按工具选择教程</p>
+          <h1 className="text-4xl font-bold text-white">使用说明</h1>
           <p className="text-lg text-gray-400 max-w-2xl mx-auto">
             选择适合你的接入方式，一分钟完成配置
           </p>
@@ -99,18 +85,6 @@ export default function QuickGuide() {
               <ArrowRight size={16} className="text-gray-700 group-hover:text-green-400 shrink-0 mt-1 transition-colors" />
             </div>
           </a>
-          <a href="/models" className="group p-5 rounded-xl bg-gray-900 border border-gray-800 hover:border-green-500/40 transition-colors">
-            <div className="flex items-start justify-between">
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <Zap size={20} className="text-green-400" />
-                  <h3 className="text-base font-semibold text-white">本周免费模型</h3>
-                </div>
-                <p className="text-sm text-gray-500">OpenRouter 精选 Top 5 免费模型，每周自动更新，零成本畅用。</p>
-              </div>
-              <ArrowRight size={16} className="text-gray-700 group-hover:text-green-400 shrink-0 mt-1 transition-colors" />
-            </div>
-          </a>
           <a href="/models" className="group p-5 rounded-xl bg-gray-900 border border-gray-800 hover:border-purple-500/40 transition-colors">
             <div className="flex items-start justify-between">
               <div>
@@ -130,11 +104,8 @@ export default function QuickGuide() {
             <Zap size={20} /> 还没有账号？立即注册
           </a>
         </div>
-      </main>
-
-      <footer className="border-t border-gray-800 py-8 text-center text-sm text-gray-600">
-        T粒加油站 · t.wiselink.cc · <a href="/terms" class="hover:text-gray-400 transition-colors">用户协议</a> · 反馈: <a href="mailto:songdf@petalmail.com" class="hover:text-gray-400 transition-colors">songdf@petalmail.com</a>
-      </footer>
-    </div>
+    </main>
   )
+
+  return embedded ? content : <PublicLayout>{content}</PublicLayout>
 }
