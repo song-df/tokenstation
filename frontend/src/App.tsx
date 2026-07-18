@@ -13,7 +13,6 @@ import FlClashGuide from './pages/FlClashGuide'
 import VSCodeGuide from './pages/VSCodeGuide'
 import OpenAIGuide from './pages/OpenAIGuide'
 import ModelsPage from './pages/ModelsPage'
-import ModelPricing from './pages/ModelPricing'
 import CourseSubscription from './pages/CourseSubscription'
 import RedeemCodes from './pages/RedeemCodes'
 import CourseCodes from './pages/CourseCodes'
@@ -62,7 +61,7 @@ function AppInner({ user, loading, setUser }: { user: any; loading: boolean; set
       <Route path="/guide/flclash" element={<FlClashGuide />} />
       <Route path="/guide/vscode" element={<VSCodeGuide />} />
       <Route path="/guide/openai" element={<OpenAIGuide />} />
-      <Route path="/guide/models" element={<ModelPricing />} />
+      <Route path="/guide/models" element={<ModelsPage />} />
       <Route path="/models" element={<ModelsPage />} />
       <Route path="/terms" element={<TermsPage />} />
       <Route path="/register" element={<Register />} />
@@ -94,7 +93,7 @@ function AppInner({ user, loading, setUser }: { user: any; loading: boolean; set
         <Route path="/guide/flclash" element={<FlClashGuide />} />
         <Route path="/guide/vscode" element={<VSCodeGuide />} />
         <Route path="/guide/openai" element={<OpenAIGuide />} />
-        <Route path="/guide/models" element={<ModelPricing />} />
+        <Route path="/guide/models" element={<ModelsPage />} />
         <Route path="/models" element={<ModelsPage />} />
         <Route path="/admin/proxy" element={<AdminProxy />} />
         <Route path="/admin/stats" element={<RechargeStats />} />
