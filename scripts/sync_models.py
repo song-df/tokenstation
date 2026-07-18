@@ -14,14 +14,19 @@ def fetch():
     with urllib.request.urlopen(req, timeout=30) as r:
         return json.loads(r.read())
 
+
+def get_output_modalities(model):
+    architecture = model.get("architecture") or {}
+    values = architecture.get("output_modalities") or []
+    if not values and architecture.get("modality"):
+        values = architecture["modality"].split("->")[-1].split("+")
+    return sorted({str(item).strip().lower() for item in values if str(item).strip()})
+
+
 def parse(data):
     free, paid = [], []
     for m in data.get("data", []):
-        architecture = m.get("architecture") or {}
-        output_modalities = architecture.get("output_modalities") or []
-        if not output_modalities and architecture.get("modality"):
-            output_modalities = architecture["modality"].split("->")[-1].split("+")
-        output_modalities = sorted({str(item).strip().lower() for item in output_modalities if str(item).strip()})
+        output_modalities = get_output_modalities(m)
         p = m.get("pricing", {})
         pp = float(p.get("prompt", 0))
         cp = float(p.get("completion", 0))
@@ -116,7 +121,7 @@ def main():
         free, paid = parse(data)
         selected = free + paid
         modalities = {
-            m["id"]: m["modalities"]
+            m["id"]: get_output_modalities(m)
             for m in data.get("data", [])
             if m.get("id")
         }
