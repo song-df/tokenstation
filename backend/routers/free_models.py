@@ -1,4 +1,4 @@
-"""Public endpoints: model pricing and context."""
+"""Public endpoints: model pricing, context, and model capabilities."""
 from __future__ import annotations
 import json
 from fastapi import APIRouter
@@ -90,3 +90,13 @@ async def model_context():
     row = conn.execute("SELECT value FROM options WHERE key='ModelContextLength'").fetchone()
     conn.close()
     return json.loads(row[0]) if row else {}
+
+
+@router.get("/api/public/model-modalities")
+async def model_modalities():
+    """Return official OpenRouter output modalities keyed by model ID."""
+    import sqlite3
+    conn = sqlite3.connect(f"file:{NEWAPI_DB_PATH}?mode=ro", uri=True)
+    row = conn.execute("SELECT value FROM options WHERE key='ModelModalities'").fetchone()
+    conn.close()
+    return json.loads(row[0]) if row and row[0] else {}

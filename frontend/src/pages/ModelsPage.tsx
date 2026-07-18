@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react'
-import { Copy, Check } from 'lucide-react'
+import { Copy, Check, Search } from 'lucide-react'
 import { MODEL_PROVIDER } from '../lib/api'
 import PublicLayout from '../components/PublicLayout'
 
@@ -23,20 +23,33 @@ function fmtCtx(n: number): string {
   return String(n)
 }
 
+const MODALITY_LABELS: Record<string, string> = {
+  text: 'Text', image: 'Image', video: 'Video', audio: 'Audio',
+  embeddings: 'Embeddings', speech: 'Speech', transcription: 'Transcription', rerank: 'Rerank',
+}
+
+function modalityLabel(value: string): string {
+  return MODALITY_LABELS[value] || value.charAt(0).toUpperCase() + value.slice(1)
+}
+
 export default function ModelsPage() {
   const [models, setModels] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [copiedModel, setCopiedModel] = useState<string | null>(null)
   const [company, setCompany] = useState<string | null>(null)
+  const [modality, setModality] = useState<string | null>(null)
+  const [query, setQuery] = useState('')
 
   useEffect(() => {
     // 从 nginx 静态文件取价格，文件每次从数据库重新生成
     Promise.all([
       fetch('/api/public/model-prices').then(r => r.json()).catch(() => ({})),
       fetch('/api/public/model-context').then(r => r.json()).catch(() => ({})),
-    ]).then(([prices, context]) => {
+      fetch('/api/public/model-modalities').then(r => r.ok ? r.json() : Promise.reject()).catch(() =>
+        fetch('/model-modalities.json').then(r => r.ok ? r.json() : {}).catch(() => ({}))
+      ),
+    ]).then(([prices, context, modalities]) => {
       const list = Object.keys(prices)
-        .filter(name => prices[name] > 0) // 过滤掉价格为0的（已下架/图像模型）
         .map(name => ({
           model_name: name,
           display_name: '',
@@ -44,6 +57,7 @@ export default function ModelsPage() {
           input_price: 0,
           output_price: prices[name] ?? 0,
           max_tokens: context[name] ?? 0,
+          modalities: modalities[name] || [],
         }))
         .sort((a, b) => a.output_price - b.output_price)
       setModels(list)
@@ -66,6 +80,26 @@ export default function ModelsPage() {
     ? models.filter(m => modelCompany(m.model_name) === company)
     : models
 
+  const visibleModels = filtered.filter(m => {
+    const normalizedQuery = query.trim().toLowerCase()
+    const matchesQuery = !normalizedQuery || `${m.model_name} ${m.display_name} ${m.provider}`.toLowerCase().includes(normalizedQuery)
+    const matchesModality = !modality || m.modalities.includes(modality)
+    return matchesQuery && matchesModality
+  })
+
+  const modalities = useMemo(() => {
+    const counts = new Map<string, number>()
+    models.forEach(m => (m.modalities || []).forEach((value: string) => counts.set(value, (counts.get(value) || 0) + 1)))
+    const preferred = ['text', 'image', 'video', 'audio', 'embeddings', 'speech', 'transcription', 'rerank']
+    return [...counts.keys()].sort((a, b) => {
+      const ai = preferred.indexOf(a), bi = preferred.indexOf(b)
+      if (ai >= 0 && bi >= 0) return ai - bi
+      if (ai >= 0) return -1
+      if (bi >= 0) return 1
+      return a.localeCompare(b)
+    }).map(value => [value, counts.get(value) || 0] as const)
+  }, [models])
+
   const copyModelName = (name: string) => {
     navigator.clipboard.writeText(name)
     setCopiedModel(name)
@@ -78,30 +112,63 @@ export default function ModelsPage() {
         <section className="text-center space-y-3">
           <p className="text-sm font-semibold text-blue-400">实时数据</p>
           <h1 className="text-3xl font-bold text-white">模型价格</h1>
-          <p className="text-gray-400">{loading ? '加载中...' : `当前展示 ${filtered.length} 款可用模型`}</p>
+          <p className="text-gray-400">{loading ? '加载中...' : `当前展示 ${visibleModels.length} 款可用模型`}</p>
         </section>
 
-        {/* 公司筛选 */}
-        <div className="flex flex-wrap gap-2 justify-center">
-          <button
-            onClick={() => setCompany(null)}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-              !company ? 'bg-purple-600 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-gray-200'
-            }`}
-          >
-            全部
-          </button>
-          {companies.map(([c, count]) => (
+        <div className="mx-auto flex max-w-3xl items-center gap-2 rounded-xl border border-gray-700 bg-gray-900/80 px-3 py-2">
+          <Search size={16} className="shrink-0 text-gray-500" />
+          <input
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            placeholder="搜索模型名称或供应商"
+            className="w-full bg-transparent text-sm text-gray-200 outline-none placeholder:text-gray-600"
+          />
+        </div>
+
+        {/* 能力与公司快捷筛选 */}
+        <div className="space-y-3">
+          <div className="flex flex-wrap gap-2 justify-center">
             <button
-              key={c}
-              onClick={() => setCompany(company === c ? null : c)}
+              onClick={() => setModality(null)}
               className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                company === c ? 'bg-purple-600 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-gray-200'
+                !modality ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-gray-200'
               }`}
             >
-              {c} <span className="opacity-60">({count})</span>
+              全部能力
             </button>
-          ))}
+            {modalities.map(([value, count]) => (
+              <button
+                key={value}
+                onClick={() => setModality(modality === value ? null : value)}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                  modality === value ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-gray-200'
+                }`}
+              >
+                {modalityLabel(value)} <span className="opacity-60">({count})</span>
+              </button>
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-2 justify-center">
+            <button
+              onClick={() => setCompany(null)}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                !company ? 'bg-purple-600 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-gray-200'
+              }`}
+            >
+              全部供应商
+            </button>
+            {companies.map(([c, count]) => (
+              <button
+                key={c}
+                onClick={() => setCompany(company === c ? null : c)}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                  company === c ? 'bg-purple-600 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-gray-200'
+                }`}
+              >
+                {c} <span className="opacity-60">({count})</span>
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="overflow-x-auto rounded-2xl border border-slate-700 bg-slate-900/80">
@@ -118,7 +185,7 @@ export default function ModelsPage() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.map(m => {
+                {visibleModels.map(m => {
                   const price = m.output_price ?? m.price ?? 0
                   const l = price === 0 ? { t: '免费', c: 'bg-emerald-500/15 text-emerald-400' } : label(price)
                   return (
@@ -126,6 +193,11 @@ export default function ModelsPage() {
                       <td className="p-3">
                         <code className="text-gray-200 font-mono text-xs">{m.model_name}</code>
                         {m.display_name && <span className="ml-2 text-gray-500 text-xs">{m.display_name}</span>}
+                        <span className="ml-2 inline-flex flex-wrap gap-1 align-middle">
+                          {(m.modalities || []).map((value: string) => (
+                            <span key={value} className="rounded bg-blue-500/15 px-1.5 py-0.5 text-[10px] text-blue-300">{modalityLabel(value)}</span>
+                          ))}
+                        </span>
                         <button
                           onClick={() => copyModelName(m.model_name)}
                           className="ml-2 p-0.5 rounded hover:bg-gray-700 text-gray-500 hover:text-gray-300 transition-colors inline-flex align-middle"
@@ -145,7 +217,7 @@ export default function ModelsPage() {
                     </tr>
                   )
                 })}
-                {filtered.length === 0 && (
+                {visibleModels.length === 0 && (
                   <tr><td colSpan={4} className="p-6 text-center text-gray-500">暂无可用的模型</td></tr>
                 )}
               </tbody>

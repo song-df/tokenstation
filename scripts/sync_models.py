@@ -17,6 +17,11 @@ def fetch():
 def parse(data):
     free, paid = [], []
     for m in data.get("data", []):
+        architecture = m.get("architecture") or {}
+        output_modalities = architecture.get("output_modalities") or []
+        if not output_modalities and architecture.get("modality"):
+            output_modalities = architecture["modality"].split("->")[-1].split("+")
+        output_modalities = sorted({str(item).strip().lower() for item in output_modalities if str(item).strip()})
         p = m.get("pricing", {})
         pp = float(p.get("prompt", 0))
         cp = float(p.get("completion", 0))
@@ -30,6 +35,7 @@ def parse(data):
             "pp": pp,
             "cp": cp,
             "comp_ratio": comp_ratio,
+            "modalities": output_modalities,
         }
         if pp == 0 and cp == 0:
             free.append(entry)
@@ -50,6 +56,15 @@ def parse(data):
     return free[:TOP_FREE], paid_top
 
 PRICES_OUTPUT = "/www/wwwroot/ai-new/model-prices.json"
+MODALITIES_OUTPUT = "/www/wwwroot/ai-new/model-modalities.json"
+
+
+def _upsert_option(db, key, value):
+    db.execute(
+        "INSERT INTO options(key, value) VALUES(?, ?) "
+        "ON CONFLICT(key) DO UPDATE SET value=excluded.value",
+        (key, value),
+    )
 
 
 def _generate_model_prices(db):
@@ -82,12 +97,29 @@ def _generate_model_prices(db):
     print(f"  model-prices.json: {len(prices)} models written")
 
 
+def _generate_model_modalities(db, modalities):
+    """Persist official OpenRouter output modalities for the public model page."""
+    row = db.execute("SELECT value FROM options WHERE key='ModelModalities'").fetchone()
+    existing = json.loads(row[0]) if row and row[0] else {}
+    existing.update(modalities)
+    payload = json.dumps(existing, ensure_ascii=False, separators=(',', ':'))
+    _upsert_option(db, "ModelModalities", payload)
+    with open(MODALITIES_OUTPUT, "w") as f:
+        f.write(payload)
+    print(f"  model-modalities.json: {len(existing)} models written")
+
+
 def main():
     print(f"[sync_models] {datetime.now().isoformat()}")
     try:
         data = fetch()
         free, paid = parse(data)
         selected = free + paid
+        modalities = {
+            m["id"]: m["modalities"]
+            for m in data.get("data", [])
+            if m.get("id")
+        }
         print(f"  Total: {len(data.get('data',[]))}, Free top {len(free)}, Paid top {len(paid)}")
         for m in free:
             print(f"    FREE {m['name']} ({m['id']})")
@@ -156,6 +188,8 @@ def main():
                 if k not in ctx:
                     ctx[k] = v
         db.execute("UPDATE options SET value=? WHERE key='ModelContextLength'", (json.dumps(ctx, ensure_ascii=False),))
+
+        _generate_model_modalities(db, modalities)
 
         # Abilities — make synced models visible in /v1/models
         if ch:
